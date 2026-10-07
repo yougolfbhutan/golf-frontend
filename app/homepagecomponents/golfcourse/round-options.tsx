@@ -23,11 +23,9 @@ interface RoundOptionsProps {
 
 export default function RoundOptions({
   players,
-  holes,
-//   cartRental,
+
   courseHoles,
   onPlayersChange,
-  onHolesChange,
 //   onCartChange,
 }: RoundOptionsProps) {
   const canPlay18 = Number(courseHoles ?? 18) >= 18;
@@ -51,18 +49,6 @@ export default function RoundOptions({
           </Select>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="holes">Round</Label>
-          <Select value={holes} onValueChange={(v) => onHolesChange(v as "9" | "18")}>
-            <SelectTrigger id="holes" className="rounded-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="9">9 holes</SelectItem>
-              {canPlay18 && <SelectItem value="18">18 holes</SelectItem>}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
 

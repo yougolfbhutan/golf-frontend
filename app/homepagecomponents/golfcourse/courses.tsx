@@ -9,47 +9,47 @@ export interface Course {
   rating: string;
   founded: string;
   green_fee: string;
-  //   category: string;
   features: string[];
   club_Facilities: string[];
   image: string[];
   stars: number;
   description: string;
+  bookingId?: string; // Optional property for booking ID
 }
 
-export const courses: Course[] = [
+export const coursesdata: Course[] = [
   {
     id: 1,
+   bookingId: "rtgc",
     name: "Royal Thimphu Golf Course",
     location: "Chhophel Lam, Thimphu",
     tagline: "Where the Himalaya meets perfection",
     holes: 9,
-    par: 35 / 70,
-    length: "7,040 yds",
-    rating: "75.5 / 145",
+    par: 35,
+    length: "3,020 yds",
+    rating: "70.5 / 125",
     founded: "1971",
-    green_fee: "$595",
-    // category: "Championship",
+    green_fee: "$45",
     features: [
-      "Ocean Views",
+      "Mountain Views",
       "Private Caddies",
-      "Cliff-side Holes",
-      "Members Only",
+      "Dzong Backdrop",
+      "Open to Public",
     ],
-    image: ["/golf-course2.jpg", "/golf-course1.jpg"],
-    stars: 5,
     club_Facilities: [
-      "Practice Facilities",
-      "Lessons",
-      "Dining",
+      "Clubhouse",
+      "Pro Shop",
+      "Driving Range",
       "Club / Shoe Rental",
     ],
-
+    image: ["/golf-course1.jpg", "/golf-course2.jpg"],
+    stars: 5,
     description:
-      "Founded in 1971, situated near Tashichho Dzong, altitude over 7,500 feet, open to the public, includes a clubhouse, pro shop, and driving range. ",
+      "Founded in 1971 and set near Tashichho Dzong at an altitude of over 7,500 feet, this is Bhutan's most iconic course. Play among pine-lined fairways with Himalayan views, then relax at the clubhouse. Open to the public, with a pro shop and driving range on site.",
   },
   {
     id: 2,
+    bookingId: "drakpoi",
     name: "Drakpoi Golf Course",
     location: "Thimphu",
     tagline: "Mountain grandeur, immaculate greens",
@@ -58,24 +58,23 @@ export const courses: Course[] = [
     length: "6,820 yds",
     rating: "73.1 / 138",
     founded: "1964",
-    green_fee: "$395",
-    // category: "Resort",
+    green_fee: "$95",
     features: [
       "Mountain Terrain",
       "Bentgrass Greens",
       "Full Spa",
       "On-site Lodging",
     ],
-    image: ["/golf-course2.jpg", "/golf-course1.jpg"],
     club_Facilities: [
       "Practice Facilities",
       "Lessons",
       "Dining",
       "Club / Shoe Rental",
     ],
-    description:
-      "Jumeirah Golf Estates, home to two world-renowned golf courses, offers an unforgettable experience at its Earth Course. Designed by legendary golfer Greg Norman, this 18-hole championship course is the centerpiece of Dubai’s premier golf community and the host of the prestigious DP World Tour Championship, the European ",
-
+    image: ["/golf-course2.jpg", "/golf-course1.jpg"],
     stars: 5,
+    description:
+      "An 18-hole championship layout winding through mountain terrain, known for immaculate bentgrass greens and sweeping valley views. Guests can extend their stay with on-site lodging and a full spa after the round.",
   },
+  
 ];

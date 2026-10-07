@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, type ComponentType, type ReactNode } from "react";
@@ -26,6 +27,8 @@ import BookingSummary, { calculateTotal } from "./booking-summary";
 import ContactFields from "./contact-field";
 import RoundOptions from "./round-options";
 import TeeTimePicker from "./tee-time";
+import { useCreateBookingMutation, type CreateBookingAttributes } from "./tanstack-function";
+import { showToast } from "nextjs-toast-notify";
 
 const BookingSuccessView = BookingSuccess as unknown as ComponentType<{
   courseName: string;
@@ -43,23 +46,48 @@ export interface BookingPayload extends BookingFormValues {
 
 interface BookingDialogProps {
   course: Course;
-  /** The element that opens the dialog (your "Reserve Tee Time" button) */
   trigger: ReactNode;
-  /** Send the booking to your API. Throw an Error to show a message in the dialog. */
   onSubmit?: (payload: BookingPayload) => Promise<void>;
 }
 
-export default function BookingDialog({ course, trigger, onSubmit }: BookingDialogProps) {
+export default function BookingDialog({
+  course,
+  trigger,
+  onSubmit,
+}: BookingDialogProps) {
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState<BookingFormValues>(initialBookingValues);
   const [errors, setErrors] = useState<BookingErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [done, setDone] = useState(false);
-
+   const { createBooking } = useCreateBookingMutation({
+    onSuccess: (data) => {
+      showToast.success(data.message, {
+        duration: 5000,
+        position: "top-right",
+        transition: "topBounce",
+        icon: "",
+        sound: true,
+      });
+      
+    },
+    onError: (error) => {
+      showToast.error(error?.data?.message, {
+        duration: 5000,
+        position: "top-right",
+        transition: "topBounce",
+        icon: "",
+        sound: true,
+      });
+    },
+  });
   const feePerRound = parseFee(course.green_fee);
 
-  function update<K extends keyof BookingFormValues>(key: K, value: BookingFormValues[K]) {
+  function update<K extends keyof BookingFormValues>(
+    key: K,
+    value: BookingFormValues[K],
+  ) {
     setValues((prev) => ({ ...prev, [key]: value }));
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }));
   }
@@ -75,35 +103,59 @@ export default function BookingDialog({ course, trigger, onSubmit }: BookingDial
     setOpen(next);
     if (!next) setTimeout(reset, 200); // wait for close animation
   }
+  function toDateString(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 
   async function handleSubmit() {
-    const found = validateBooking(values);
-    setErrors(found);
-    if (Object.keys(found).length > 0) return;
+  const found = validateBooking(values);
+  setErrors(found);
+  if (Object.keys(found).length > 0) return;
 
-    setSubmitting(true);
-    setSubmitError("");
-    try {
-      const { total } = calculateTotal({
-        feePerRound,
-        players: values.players,
-        holes: values.holes,
-        cartRental: values.cartRental,
-      });
-      const payload: BookingPayload = { ...values, courseId: course.id, total };
+  setSubmitting(true);
+  setSubmitError("");
+  try {
+    const { total } = calculateTotal({
+      feePerRound,
+      players: values.players,
+      holes: values.holes,
+      cartRental: values.cartRental,
+    });
 
-      if (onSubmit) {
-        await onSubmit(payload);
-      } else {
-        await new Promise((r) => setTimeout(r, 900)); // demo only
-      }
-      setDone(true);
-    } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "The booking didn't go through. Try again.");
-    } finally {
-      setSubmitting(false);
+    // Adjust the left-side `values.xxx` names to match your BookingFormValues
+    const payload: CreateBookingAttributes = {
+      partyName: values.fullName,
+      partyEmail: values.email,
+      partyPhone: values.phone,
+      teeTime: values.teeTime,
+      teeOffDate: toDateString(values.date!),
+      golfCourseName: course.name,
+      numberOfPlayers: values.players,
+      totalPrice: total,
+      specialRequest: values.notes ?? "",
+    };
+
+    if (onSubmit) {
+      await onSubmit({ ...values, courseId: course.id, total });
     }
+    await createBooking(payload); // now actually awaits and throws on failure
+
+    setDone(true);
+  } catch (err: any) {
+    console.error("Booking submission error:", err);
+    setSubmitError(
+      err?.response?.data?.message ?? // axios error (4xx/5xx)
+        err?.message ??               // errorResponse thrown in createBooking
+        "The booking didn't go through. Try again.",
+    );
+  } finally {
+    setSubmitting(false);
   }
+}
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -124,10 +176,15 @@ export default function BookingDialog({ course, trigger, onSubmit }: BookingDial
           <>
             {/* Header: fixed height */}
             <DialogHeader className="shrink-0 border-b border-neutral-200 px-6 pb-4 pt-6 text-left">
-              <p className="text-xs font-medium tracking-widest text-black">{course.location}</p>
-              <DialogTitle className="font-serif text-2xl font-semibold">{course.name}</DialogTitle>
+              <p className="text-xs font-medium tracking-widest text-black">
+                {course.location}
+              </p>
+              <DialogTitle className="font-serif text-2xl font-semibold">
+                {course.name}
+              </DialogTitle>
               <DialogDescription>
-                Reserve a tee time. You won&apos;t be charged until you check in.
+                Reserve a tee time. You won&apos;t be charged until you check
+                in.
               </DialogDescription>
             </DialogHeader>
 
@@ -176,13 +233,17 @@ export default function BookingDialog({ course, trigger, onSubmit }: BookingDial
                 holes={values.holes}
                 cartRental={values.cartRental}
               />
-              {submitError && <p className="text-sm text-destructive">{submitError}</p>}
+              {submitError && (
+                <p className="text-sm text-destructive">{submitError}</p>
+              )}
               <Button
                 onClick={handleSubmit}
                 disabled={submitting}
                 className="h-11 w-full rounded-sm bg-[#10B759] text-sm font-semibold tracking-widest hover:bg-[#0e9f4d]"
               >
-                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {submitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {submitting ? "Reserving…" : "Reserve tee time"}
               </Button>
             </DialogFooter>

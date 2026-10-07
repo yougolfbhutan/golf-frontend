@@ -1,6 +1,6 @@
 import CourseCard from "./course-card";
 import Header from "./course-header";
-import { courses } from "./courses";
+import { coursesdata } from "./courses";
 
 
 export default function GolfCourses() {
@@ -13,7 +13,7 @@ export default function GolfCourses() {
           className="grid gap-8"
           style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}
         >
-          {courses.map((course) => (
+          {coursesdata.map((course) => (
             <CourseCard key={course.id} course={course} />
           ))}
         </div>

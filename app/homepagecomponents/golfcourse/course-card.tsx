@@ -10,11 +10,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import BookingDialog from "./booking-dialog";
+import Link from "next/link";
 
 export default function CourseCard({ course }: CourseCardProps) {
   const [hovered, setHovered] = useState(false);
-
+  const [expanded, setExpanded] = useState(false);
   const images = Array.isArray(course.image)
     ? course.image.filter(Boolean)
     : course.image
@@ -101,9 +101,31 @@ export default function CourseCard({ course }: CourseCardProps) {
           </div>
         ))}
       </div>
-
       <div className="flex flex-col gap-4 px-6 py-5">
-        <div className="flex flex-wrap gap-2">
+        {/* description */}
+        {course.description && (
+          <div>
+            <p
+              className={`text-sm leading-relaxed text-neutral-600 ${
+                expanded ? "" : "line-clamp-3"
+              }`}
+            >
+              {course.description}
+            </p>
+            {course.description.length > 140 && (
+              <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                className="mt-1 text-xs font-semibold tracking-wide text-[#10B759] hover:underline"
+              >
+                {expanded ? "Show less" : "Read more"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-4 px-6 py-5">
+        {/* <div className="flex flex-wrap gap-2">
           {course.features.map((f) => (
             <span
               key={f}
@@ -112,12 +134,12 @@ export default function CourseCard({ course }: CourseCardProps) {
               {f}
             </span>
           ))}
-        </div>
+        </div> */}
 
         <div className="h-px bg-neutral-200" />
 
         <div className="flex items-center justify-between">
-          <div>
+          {/* <div>
             <p className="mb-0.5 text-xs tracking-widest text-neutral-500">
               Green Fee
             </p>
@@ -127,18 +149,14 @@ export default function CourseCard({ course }: CourseCardProps) {
                 / round
               </span>
             </p>
-          </div>
-          <BookingDialog
-            course={course}
-            trigger={
-              <button
-                type="button"
-                className="border border-[#10B759] bg-transparent px-6 py-3 text-sm font-semibold tracking-widest text-[#10B759] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#10B759] hover:text-white hover:shadow-md hover:shadow-[#10B759]/30 active:translate-y-0 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B759]/50 focus-visible:ring-offset-2"
-              >
-                Reserve Tee Time
-              </button>
-            }
-          />
+          </div> */}
+
+         <Link
+  href={`/reserve/${course.id}`}
+  className="border border-[#10B759] bg-transparent px-6 py-3 text-sm font-semibold tracking-widest text-[#10B759] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#10B759] hover:text-white hover:shadow-md hover:shadow-[#10B759]/30 active:translate-y-0 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B759]/50 focus-visible:ring-offset-2"
+>
+  Book Your round
+</Link>
         </div>
       </div>
     </article>
