@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import {
-  buildDates,
   COURSES,
   GOLFER_COUNTS,
   GOLFER_TYPES,
@@ -27,30 +26,22 @@ export type FieldProps = {
 
 export default function TeeTimeSearch({ className }: { className?: string }) {
   const router = useRouter();
-  const [dates, setDates] = useState<Option[]>([]);
   const [values, setValues] = useState<Record<FieldKey, string>>({
     course: COURSES[0].value,
     golferType: GOLFER_TYPES[0].value,
-    date: "",
     golfers: "2",
   });
 
   const options: Record<FieldKey, Option[]> = {
     course: COURSES,
     golferType: GOLFER_TYPES,
-    date: dates,
     golfers: GOLFER_COUNTS,
   };
 
-  useEffect(() => {
-    const list = buildDates();
-    setDates(list);
-    setValues((v) => ({ ...v, date: list[0].value }));
-  }, []);
+
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!values.date) return;
     const id = encodeTeeSearch({ ...values, golfers: Number(values.golfers) });
     router.push(`/tee-times/${id}`);
   }

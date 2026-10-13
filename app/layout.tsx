@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/providers";
 import { AuthProvider } from "./context/auth-context";
+import { BookingDraftProvider } from "./context/booking-draft-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,12 +33,15 @@ export default function RootLayout({
           content="width=device-width, initial-scale = 0.86, maximum-scale=3.0, minimum-scale=0.86"
         ></meta>
       </head>
-      <body suppressHydrationWarning
+      <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-       <Providers>{children}</Providers>
-     </AuthProvider>
+          <Providers>
+            <BookingDraftProvider>{children}</BookingDraftProvider>
+          </Providers>
+        </AuthProvider>
       </body>
     </html>
   );

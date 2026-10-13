@@ -1,4 +1,53 @@
 $kind: http-request
-url: ""
-method: GET
+url: https://golf-backend-4h1w.onrender.com/golf-set
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: Callaway
+      description: ""
+      disabled: false
+    - type: text
+      key: description
+      value: "this is it "
+      description: ""
+      disabled: false
+    - type: text
+      key: audienceId
+      value: "1"
+      description: ""
+      disabled: false
+    - type: text
+      key: handedness
+      value: left
+      description: ""
+      disabled: false
+    - type: text
+      key: tierName
+      value: Standard
+      description: ""
+      disabled: false
+    - type: text
+      key: isAvailable
+      value: "true"
+      description: ""
+      disabled: false
+    - type: text
+      key: quantity
+      value: "10"
+      description: ""
+      disabled: false
+    - type: text
+      key: price
+      value: "1200"
+      description: ""
+      disabled: false
+    - type: file
+      key: image
+      src:
+        - /D:/Golf_Business/Golf-Frontend/my-golf/public/golf-set5.jpg
+      description: ""
+      disabled: false
 order: 1000

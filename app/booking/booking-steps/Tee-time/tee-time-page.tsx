@@ -1,6 +1,7 @@
 "use client";
 
-import { format, parseISO, startOfToday } from "date-fns";
+import { useEffect } from "react";
+import { format, isBefore, parseISO, startOfToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import type { BookingState } from "../../interface/interface";
 
@@ -26,6 +27,17 @@ export default function DateTimeStep({
     (c) => (c.bookingId ?? String(c.id)) === booking.courseId,
   );
   const selectedDate = booking.date ? parseISO(booking.date) : undefined;
+
+  // a date from the home-page search may be closed or already past
+  const dateNotAllowed =
+    !!selectedDate &&
+    (isBefore(selectedDate, startOfToday()) ||
+      closedDays.includes(selectedDate.getDay()));
+
+  useEffect(() => {
+    if (dateNotAllowed) onChange({ date: null, slot: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateNotAllowed]);
 
   // no course picked yet: show a message, don't crash
   if (!booking.courseId) {
@@ -56,6 +68,8 @@ export default function DateTimeStep({
         <Calendar
           mode="single"
           selected={selectedDate}
+          // open on the month of the prefilled date, not always this month
+          defaultMonth={selectedDate}
           onSelect={(d) =>
             // changing the date clears the tee time
             onChange({ date: d ? format(d, "yyyy-MM-dd") : null, slot: null })

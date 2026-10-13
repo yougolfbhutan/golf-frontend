@@ -73,7 +73,7 @@ export default function ReviewStep({ booking, onEditStep }: Props) {
       };
 
       console.log("Submitting booking:", payload);
-      const res = await apiClient.post("http://localhost:3001/booking", payload);
+      const res = await apiClient.post("https://golf-backend-4h1w.onrender.com/booking", payload);
       console.log("Booking response:", res.data);
 
       setConfirmationId(res.data?.data?.id ?? res.data?.id ?? "created");

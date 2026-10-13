@@ -6,7 +6,7 @@ export interface Course {
   holes: number;
   par: number;
   length: string;
-  rating: string;
+  rating?: string;
   founded: string;
   green_fee: string;
   features: string[];
@@ -25,9 +25,9 @@ export const coursesdata: Course[] = [
     location: "Chhophel Lam, Thimphu",
     tagline: "Where the Himalaya meets perfection",
     holes: 9,
-    par: 35,
-    length: "3,020 yds",
-    rating: "70.5 / 125",
+    par: 36,
+    length: "5,706 yds",
+    // rating: "70.5 / 125",
     founded: "1971",
     green_fee: "$45",
     features: [
@@ -42,7 +42,7 @@ export const coursesdata: Course[] = [
       "Driving Range",
       "Club / Shoe Rental",
     ],
-    image: ["/golf-course1.jpg", "/golf-course2.jpg"],
+    image: ["/rtgc.jpeg","/rtgc1.jpeg","/rtgc3.jpeg",],
     stars: 5,
     description:
       "Founded in 1971 and set near Tashichho Dzong at an altitude of over 7,500 feet, this is Bhutan's most iconic course. Play among pine-lined fairways with Himalayan views, then relax at the clubhouse. Open to the public, with a pro shop and driving range on site.",
@@ -53,8 +53,8 @@ export const coursesdata: Course[] = [
     name: "Drakpoi Golf Course",
     location: "Thimphu",
     tagline: "Mountain grandeur, immaculate greens",
-    holes: 18,
-    par: 71,
+    holes: 9,
+    par: 72,
     length: "6,820 yds",
     rating: "73.1 / 138",
     founded: "1964",
@@ -71,7 +71,7 @@ export const coursesdata: Course[] = [
       "Dining",
       "Club / Shoe Rental",
     ],
-    image: ["/golf-course2.jpg", "/golf-course1.jpg"],
+    image: ["/drakpoi-course.jpeg", "/drakpoi-course1.jpeg","/drakpoi-course2.jpeg"],
     stars: 5,
     description:
       "An 18-hole championship layout winding through mountain terrain, known for immaculate bentgrass greens and sweeping valley views. Guests can extend their stay with on-site lodging and a full spa after the round.",
