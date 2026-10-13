@@ -1,15 +1,14 @@
 export type Option = { value: string; label: string };
 
 export const COURSES: Option[] = [
-  { value: "paro-valley-links-18", label: "Paro Valley Links · 18 holes" },
-  { value: "royal-thimphu-9", label: "Royal Thimphu · 9 holes" },
-  { value: "royal-thimphu-18", label: "Royal Thimphu · 18 holes" },
+  { value: "1", label: "Drakpoi Golf Course" },
+  { value: "2", label: "Royal Thimphu Golf Course" },
 ];
 
 export const GOLFER_TYPES: Option[] = [
-  { value: "bhutanese", label: "Bhutanese" },
-  { value: "resident", label: "Resident" },
-  { value: "tourist", label: "Tourist" },
+  { value: "1", label: "SAARC" },
+  { value: "2", label: "Bhutanese" },
+  { value: "3", label: "Non-SAARC" },
 ];
 
 export const GOLFER_COUNTS: Option[] = [1, 2, 3, 4].map((n) => ({
