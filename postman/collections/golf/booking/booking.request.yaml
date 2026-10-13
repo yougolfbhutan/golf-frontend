@@ -1,0 +1,33 @@
+$kind: http-request
+url: http://localhost:3001/booking
+method: GET
+body:
+  type: json
+  content: "{\r
+
+    \  \"customerId\": \"3b9727d4-b937-4ad9-a979-e80a6787d5ed\",\r
+
+    \  \"golfCourseId\": 1,\r
+
+    \  \"golferCategoryId\": 1,\r
+
+    \  \"teeDate\": \"2026-10-20\",\r
+
+    \  \"teeTime\": \"08:30\",\r
+
+    \  \"numberOfGolfers\": 2,\r
+
+    \  \"notes\": \"Need a caddie, first time playing in Bhutan\",\r
+
+    \  \"items\": [\r
+
+    \    { \"golfSetId\": 1, \"quantity\": 2 },\r
+
+    \    { \"ballId\": 1, \"quantity\": 1 }\r
+
+    \  ],\r
+
+    \  \"status\": \"pending\"\r
+
+    }"
+order: 1000

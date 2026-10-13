@@ -1,0 +1,90 @@
+$kind: http-request
+url: http://localhost:3001/glove
+method: POST
+queryParams:
+  - key: name
+    value: "Cabretta Leather "
+    disabled: true
+    description: ""
+  - key: audienceId
+    value: "1"
+    disabled: true
+    description: ""
+  - key: size
+    value: large
+    disabled: true
+    description: ""
+  - key: handedness
+    value: left
+    disabled: true
+    description: ""
+  - key: isAvailable
+    value: "true"
+    disabled: true
+    description: ""
+  - key: quantity
+    value: "12"
+    disabled: true
+    description: ""
+  - key: tierName
+    value: Standard
+    disabled: true
+    description: ""
+  - key: price
+    value: "800"
+    disabled: true
+    description: ""
+  - key: image
+    value: null
+    disabled: true
+    description: ""
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: Hybrid / Combination
+      description: ""
+      disabled: false
+    - type: text
+      key: audienceId
+      value: "1"
+      description: ""
+      disabled: false
+    - type: text
+      key: size
+      value: Medium
+      description: ""
+      disabled: false
+    - type: text
+      key: handedness
+      value: Right
+      description: ""
+      disabled: false
+    - type: text
+      key: isAvailable
+      value: "true"
+      description: ""
+      disabled: false
+    - type: text
+      key: quantity
+      value: "12"
+      description: ""
+      disabled: false
+    - type: text
+      key: price
+      value: "1200"
+      description: ""
+      disabled: false
+    - type: text
+      key: tierName
+      value: Premium
+      description: ""
+      disabled: false
+    - type: file
+      key: image
+      src:
+        - /D:/Golf_Business/Golf-Frontend/my-golf/public/glove4.jpg
+      description: ""
+      disabled: false
+order: 1000

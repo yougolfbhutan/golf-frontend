@@ -1,10 +1,22 @@
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  phone_no: string;
+  country_code: string;
+  is_active: boolean;
+  is_verified: boolean;
+  last_login: string | null;
+  created_at: string;
+  updated_at: string;
+  roles: { id: number; name: string; description: string }[];
+  permissions: { id: number; name: string; description: string }[];
+}
+
 export interface SignInResponseAttributes {
-  status: number;
+  success: boolean;
   message: string;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-  };
+  data: AuthUser; // the user, tokens are in cookies
 }
 
 export interface SignInAttributes {
@@ -13,12 +25,9 @@ export interface SignInAttributes {
 }
 
 export interface SignUpResponseAttributes {
-  status: number;
+  success: boolean;
   message: string;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-  };
+  data: AuthUser;
 }
 
 export interface SignUpAttributes {

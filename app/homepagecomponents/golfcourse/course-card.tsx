@@ -11,6 +11,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function CourseCard({ course }: CourseCardProps) {
   const [hovered, setHovered] = useState(false);
@@ -20,6 +22,9 @@ export default function CourseCard({ course }: CourseCardProps) {
     : course.image
       ? [course.image]
       : [];
+
+        const router = useRouter();
+  const href = `/reserve/${course.id}`;
 
   return (
     <article className="group relative overflow-hidden rounded-sm border border-neutral-200 bg-white">
@@ -138,26 +143,16 @@ export default function CourseCard({ course }: CourseCardProps) {
 
         <div className="h-px bg-neutral-200" />
 
-        <div className="flex items-center justify-between">
-          {/* <div>
-            <p className="mb-0.5 text-xs tracking-widest text-neutral-500">
-              Green Fee
-            </p>
-            <p className="font-serif text-2xl font-bold text-[#10B759]">
-              {course.green_fee}
-              <span className="ml-1 font-sans text-sm font-normal text-neutral-500">
-                / round
-              </span>
-            </p>
-          </div> */}
-
-         <Link
-  href={`/reserve/${course.id}`}
-  className="border border-[#10B759] bg-transparent px-6 py-3 text-sm font-semibold tracking-widest text-[#10B759] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#10B759] hover:text-white hover:shadow-md hover:shadow-[#10B759]/30 active:translate-y-0 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B759]/50 focus-visible:ring-offset-2"
->
-  Book Your round
-</Link>
-        </div>
+        <Button
+      type="button"
+      variant="outline"
+      onClick={() => router.push(href)}
+      onMouseEnter={() => router.prefetch(href)}
+      onFocus={() => router.prefetch(href)}
+      className="h-auto rounded-none border-[#10B759] px-6 py-3 text-sm font-semibold tracking-widest text-[#10B759] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#10B759] hover:text-white hover:shadow-md hover:shadow-[#10B759]/30 active:translate-y-0 active:shadow-none"
+    >
+      Book Your round
+    </Button>
       </div>
     </article>
   );

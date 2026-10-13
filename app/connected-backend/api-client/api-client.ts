@@ -5,8 +5,7 @@ const apiClient = axios.create({
   withCredentials: true, // sends httpOnly cookies automatically — this is your auth now
 });
 
-// Request interceptor — just handles Content-Type, no manual token attaching needed
-// (accessToken cookie is httpOnly, browser sends it automatically)
+
 apiClient.interceptors.request.use(
   (config) => {
     if (config.data instanceof FormData) {

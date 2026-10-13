@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import TeeTimeSearch from "@/app/booking/tee-time/tee-time-search/tee-options";
 
 export interface HeroSlide {
   src: string;
@@ -112,30 +113,8 @@ export default function HeroSlider({
         ))}
       </div>
       {/* Headline + CTA */}
-      <div className="absolute inset-x-0 bottom-0 z-10 mx-auto max-w-7xl px-6 pb-10 lg:px-10">
-        <h1 className="flex flex-wrap items-baseline gap-x-3 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-          <span>DISCOVER</span>
-          <span className="text-white/50">·</span>
-          <span>PLAN</span>
-          <span className="text-white/50">·</span>
-          <span className="text-amber-400">BOOK</span>
-          <span className="text-white/50">·</span>
-          <span>PLAY</span>
-        </h1>
 
-        <button
-          type="button"
-          onClick={() =>
-            document
-              .getElementById("golf-courses")
-              ?.scrollIntoView({ behavior: "smooth" })
-          }
-          className="group mt-6 inline-flex items-center gap-2 rounded-full bg-[#10B759] px-6 py-3 text-sm font-semibold tracking-wide text-white shadow-lg shadow-emerald-900/40 ring-1 ring-white/10 transition-all hover:bg-emerald-600 hover:shadow-emerald-700/50 hover:-translate-y-0.5 active:translate-y-0"
-        >
-          BOOK NOW
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </button>
-      </div>
+      <TeeTimeSearch className="absolute inset-x-0 bottom-20 z-10 mx-auto max-w-7xl px-6  lg:px-10" />
     </section>
   );
 }

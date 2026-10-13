@@ -1,0 +1,15 @@
+$kind: http-request
+url: http://localhost:3001/course
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \ \"name\":\"Drakpoi Golf Course\",\r
+
+    //  \"name\":\"Royal Thimphu Golf Course\"\r
+
+    \ \"description\":\"Founded in 1971, this is a 9-hole, par-35 course (playable as an 18-hole, 5,851-yard, par-70 layout using two sets of tees). It sits at an altitude of roughly 2,350 meters (7,709 feet) right beside the historic Tashichho Dzong and the Royal Palace. Because of the high altitude, golf balls travel up to 10% further. It is open daily to the public and features unique local hazards like traditional chortens, water ponds, stray dogs, and wandering cows.\"\r
+
+    }"
+order: 1000

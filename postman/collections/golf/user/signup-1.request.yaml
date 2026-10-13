@@ -1,0 +1,5 @@
+$kind: http-request
+name: signup
+url: ""
+method: GET
+order: 2000

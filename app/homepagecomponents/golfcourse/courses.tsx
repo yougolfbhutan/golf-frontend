@@ -20,7 +20,7 @@ export interface Course {
 export const coursesdata: Course[] = [
   {
     id: 1,
-   bookingId: "rtgc",
+   bookingId: "2",
     name: "Royal Thimphu Golf Course",
     location: "Chhophel Lam, Thimphu",
     tagline: "Where the Himalaya meets perfection",
@@ -49,7 +49,7 @@ export const coursesdata: Course[] = [
   },
   {
     id: 2,
-    bookingId: "drakpoi",
+    bookingId: "1",
     name: "Drakpoi Golf Course",
     location: "Thimphu",
     tagline: "Mountain grandeur, immaculate greens",
