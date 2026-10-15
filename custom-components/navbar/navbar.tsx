@@ -4,27 +4,27 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import { ArrowRight, ArrowUpRight, Menu, Phone, UserRound, X } from "lucide-react";
 
-const display = Fraunces({
-  subsets: ["latin"],
-  weight: ["500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
+// Fonts are installed from npm (no Google download at build time):
+//   npm i @fontsource-variable/fraunces @fontsource-variable/plus-jakarta-sans
+import "@fontsource-variable/fraunces";
+// import "@fontsource-variable/fraunces/wght-italic.css";
+import "@fontsource-variable/plus-jakarta-sans";
 
-const sans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
+const displayFont = { fontFamily: "'Fraunces Variable', Georgia, serif" };
+const sansFont = {
+  fontFamily: "'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif",
+};
 
 const NAV_LINKS = [
   { href: "/#golf-courses", label: "Courses", note: "Explore every fairway in Bhutan" },
   { href: "/about", label: "About us", note: "Our story in the Himalayas" },
   { href: "/contact", label: "Contact", note: "We usually reply within a day" },
 ];
+
+// Change this one value if your login route is different (e.g. "/login")
+const LOGIN_HREF = "/signin";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -46,12 +46,16 @@ export default function Navbar() {
   }, []);
 
   // Close the mobile menu on route change
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   // Lock body scroll + close on Escape while the mobile menu is open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
@@ -69,7 +73,8 @@ export default function Navbar() {
 
   return (
     <header
-      className={`${sans.className} fixed inset-x-0 top-0 z-50 transition-[padding] duration-500 ease-out ${
+      style={sansFont}
+      className={`fixed inset-x-0 top-0 z-50 transition-[padding] duration-500 ease-out ${
         scrolled ? "px-3 pt-3 sm:px-6" : "px-0 pt-0"
       }`}
     >
@@ -88,7 +93,7 @@ export default function Navbar() {
         >
           {/* Logo */}
           <Link
-            href="#"
+            href="/"
             className="group flex items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-4 focus-visible:ring-offset-[#0F3D2E]"
           >
             <span
@@ -102,7 +107,8 @@ export default function Navbar() {
             </span>
             <span className="flex flex-col">
               <span
-                className={`${display.className} font-semibold leading-none tracking-tight text-[#F7F1E3] transition-all duration-500 ${
+                style={displayFont}
+                className={`font-semibold leading-none tracking-tight text-[#F7F1E3] transition-all duration-500 ${
                   scrolled ? "text-[22px]" : "text-[26px]"
                 }`}
               >
@@ -153,7 +159,7 @@ export default function Navbar() {
           {/* Desktop actions */}
           <div className="hidden items-center gap-2 md:flex">
             <Link
-              href="/signin"
+              href={LOGIN_HREF}
               className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-[#F7F1E3] transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
             >
               <span className="grid h-7 w-7 place-items-center rounded-full bg-white/10">
@@ -244,7 +250,8 @@ export default function Navbar() {
                         </span>
                         <span className="flex flex-col">
                           <span
-                            className={`${display.className} text-[34px] font-medium leading-tight tracking-tight ${
+                            style={displayFont}
+                            className={`text-[34px] font-medium leading-tight tracking-tight ${
                               active ? "italic text-[#6EE7A8]" : "text-[#F7F1E3]"
                             }`}
                           >
@@ -281,7 +288,7 @@ export default function Navbar() {
               </span>
             </Link>
             <Link
-              href="/login"
+              href={LOGIN_HREF}
               tabIndex={open ? 0 : -1}
               onClick={() => setOpen(false)}
               className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-transparent py-4 text-base font-semibold text-[#F7F1E3] transition-colors hover:bg-white/10"

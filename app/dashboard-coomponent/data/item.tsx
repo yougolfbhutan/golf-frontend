@@ -11,11 +11,8 @@ import {
 import Role from "../page/AcessessManagement/role/page";
 import User from "../page/AcessessManagement/user/user";
 import PermissionPage from "../page/AcessessManagement/permission/permission";
-import GolfSouvenirs from "../page/Golf-Accessories/golf-souvenirs/page";
-import ItemVariants from "../page/Golf-Accessories/golf-items/page";
 import BookingPage from "../page/Booking/page";
-import ApprovalItemsPage from "../page/Accessories-Item/page";
-import PaymentPage from "../page/payment/page";
+// import PaymentPage from "../page/payment/page";
 import GolfSet from "../page/CaddieCarryset/carryset/page";
 import Gloves from "../page/CaddieCarryset/caddie/page";
 import GolfBalls from "../page/CaddieCarryset/glofballs/page";
@@ -34,12 +31,8 @@ export const menuContent: Record<string, React.ReactNode> = {
   Gloves: <Gloves />,
   GolfSet: <GolfSet />,
   "Golf Balls":<GolfBalls/>,
-  "Souvenirs Variants": <GolfSouvenirs />,
-  "Golf Items": <ItemVariants />,
   "Approve Booking": <BookingPage />,
-  // Webhooks: <DepartmentComponent />,
-  "Accessories Items Approval": <ApprovalItemsPage />,
-  "Payments": <PaymentPage />,
+  // "Payments": <PaymentPage />,
 
 };
 export const mainApps = [

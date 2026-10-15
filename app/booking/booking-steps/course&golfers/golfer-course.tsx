@@ -2,7 +2,6 @@
 import { Minus, Plus, Star } from "lucide-react";
 import type { BookingState } from "../../interface/interface";
 import { CATEGORIES, MAX_GOLFERS } from "./data";
-import SelectableCard from "../../booking-component/selectable-card";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import ImageSliderCard from "../../booking-component/image-slider-component";

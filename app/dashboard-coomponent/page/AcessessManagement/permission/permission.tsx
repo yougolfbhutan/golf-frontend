@@ -7,9 +7,7 @@ import { Delete, Edit, Search, Save, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// import { fields } from "./form-data";
-// import Loader from "@/common-component/loader";
-// import { PermissionFormValues } from "./interface";
+
 import { showToast } from "nextjs-toast-notify";
 
 import { useGetPermissions, usePermissionMutations } from "./tanstack";

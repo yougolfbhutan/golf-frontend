@@ -1,5 +1,4 @@
-export const API_ADMIN = process.env.NEXT_PUBLIC_ADMIN_URL;
-console.log(API_ADMIN)
+export const API_ADMIN = 'https://golf-backend-4h1w.onrender.com';
 const ADMIN_API_URL = {
   // login: `${API_ADMIN}/customer/signin`,
   // LogOut: `${API_ADMIN}/auth/logout`,
@@ -25,30 +24,9 @@ const ADMIN_API_URL = {
   //gloves
   gloves: `${API_ADMIN}/glove`,
   balls: `${API_ADMIN}/ball`,
+  booking: `${API_ADMIN}/booking`,
 
-  //carryset
-  createGolfset: `${API_ADMIN}/create-Golfset`,
-  updateGolfset: `${API_ADMIN}/update-Golfset`,
-  deleteGolfset: `${API_ADMIN}/delete-Golfset`,
-  getGolfsets: `${API_ADMIN}/get-Golfset`,
 
-  //souvenir
-  createSouvenir: `${API_ADMIN}/create-souvenir`,
-  updateSouvenir: `${API_ADMIN}/update-souvenir`,
-  deleteSouvenir: `${API_ADMIN}/delete-souvenir`,
-  getSouvenirs: `${API_ADMIN}/get-souvenirs`,
-
-  //itemvariant
-  createItemVariant: `${API_ADMIN}/create-itemvariant`,
-  updateItemVariant: `${API_ADMIN}/update-itemvariant`,
-  deleteItemVariant: `${API_ADMIN}/delete-itemvariant`,
-  getItemVariants: `${API_ADMIN}/get-itemvariants`,
-//order
-  getOrders: `${API_ADMIN}/get-order`,
-
-  //booking
-  getBookings: `${API_ADMIN}/booking/get-orderbooking`,
-  approveBooking: `${API_ADMIN}`,
 
 
 

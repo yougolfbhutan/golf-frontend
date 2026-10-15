@@ -142,29 +142,7 @@ export default function Sidebar({
         },
       ],
     },
-    {
-      id: "Golf Accessories",
-      label: "Golf Accessories",
-      icon: Receipt,
-      hasSubmenu: true,
-      subItems: [
-        {
-          label: "Souvenirs Variants",
-          onClick: () => {
-            setActiveApp("Golf Accessories");
-            setActiveMenuItem("Souvenirs Variants");
-          },
-        },
-        {
-          label: "Golf Items",
-          onClick: () => {
-            setActiveApp("Golf Accessories");
-            setActiveMenuItem("Golf Items");
-          },
-        },
-       
-      ],
-    },
+   
 
     // {
     //   id: "Accounts Payable",
@@ -239,28 +217,28 @@ export default function Sidebar({
     //     },
     //   ],
     // },
-    {
-      id: "Payments",
-      label: "Payments",
-      icon: DollarSign,
-      hasSubmenu: true,
-      subItems: [
-        {
-          label: "Payments",
-          onClick: () => {
-            setActiveApp("Payments");
-            setActiveMenuItem("Payments");
-          },
-        },
-        // {
-        //   label: "Fixed Assets Payment",
-        //   onClick: () => {
-        //     setActiveApp("Payments");
-        //     setActiveMenuItem("Fixed Assets Payment");
-        //   },
-        // },
-      ],
-    },
+    // {
+    //   id: "Payments",
+    //   label: "Payments",
+    //   icon: DollarSign,
+    //   hasSubmenu: true,
+    //   subItems: [
+    //     {
+    //       label: "Payments",
+    //       onClick: () => {
+    //         setActiveApp("Payments");
+    //         setActiveMenuItem("Payments");
+    //       },
+    //     },
+    //     // {
+    //     //   label: "Fixed Assets Payment",
+    //     //   onClick: () => {
+    //     //     setActiveApp("Payments");
+    //     //     setActiveMenuItem("Fixed Assets Payment");
+    //     //   },
+    //     // },
+    //   ],
+    // },
  
    
     // {
