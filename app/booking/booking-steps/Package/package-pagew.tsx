@@ -23,13 +23,12 @@ import { useKitItems } from "./helper/useKitItems";
 type Props = {
   booking: BookingState;
   onChange: (patch: Partial<BookingState>) => void;
-      footer?: ReactNode;
-  
+  footer?: ReactNode;
 };
 
 type Filters = Record<FilterKey, string>;
 
-export default function PackageStep({footer, booking, onChange }: Props) {
+export default function PackageStep({ footer, booking, onChange }: Props) {
   const { packageId, kit, golfers } = booking;
   // falls back to Bhutanese until a category is picked on the first step
   const category = (booking.categoryId ?? "bhutanese") as CategoryId;
@@ -88,7 +87,7 @@ export default function PackageStep({footer, booking, onChange }: Props) {
 
   // when golfers are reduced on the first step, trim the kit to match
   useEffect(() => {
-    if (allItems.length === 0) return;
+    if (isLoading || allItems.length === 0) return;
     const next: Record<string, number> = { ...kit };
     let changed = false;
 
@@ -109,7 +108,7 @@ export default function PackageStep({footer, booking, onChange }: Props) {
 
     if (changed) onChange({ kit: next });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [golfers, allItems]);
+  }, [golfers, allItems, isLoading]);
 
   // pick a package and drop selected items from the other tier
   function selectPackage(id: string) {
@@ -149,7 +148,7 @@ export default function PackageStep({footer, booking, onChange }: Props) {
 
   return (
     <div className="mt-8 space-y-8 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xl shadow-slate-900/10 sm:p-8">
-      {/* ---------- Packages ---------- */}
+      {/* ---------- Packages (static data, renders instantly) ---------- */}
       <section>
         <h2 className="text-xl font-bold">Choose your package</h2>
         <p className="mt-1 text-sm text-slate-500">
@@ -205,97 +204,127 @@ export default function PackageStep({footer, booking, onChange }: Props) {
           coach.
         </p>
 
-        {/* category tabs */}
-        <div className="mt-4">
-          <AppTabs
-            variant="pill"
-            className="flex-wrap gap-2 border-0 bg-transparent p-0 backdrop-blur-none dark:bg-transparent"
-            triggerClassName="rounded-xl border border-slate-200 bg-white px-4 py-2 text-slate-600 shadow-none
+        {isLoading ? (
+          // skeleton: tabs and counts only appear once all data is ready
+          <div className="mt-4 space-y-4" aria-busy="true">
+            <div className="flex gap-2">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-10 w-24 animate-pulse rounded-xl bg-slate-100"
+                />
+              ))}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-64 animate-pulse rounded-2xl bg-slate-100"
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* category tabs */}
+            <div className="mt-4">
+              <AppTabs
+                variant="pill"
+                className="flex-wrap gap-2 border-0 bg-transparent p-0 backdrop-blur-none dark:bg-transparent"
+                triggerClassName="rounded-xl border border-slate-200 bg-white px-4 py-2 text-slate-600 shadow-none
       hover:border-[#10B759]/50 hover:bg-[#10B759]/5 hover:text-[#0E9F4F]
       data-[state=active]:border-[#10B759]/30 data-[state=active]:bg-none data-[state=active]:bg-[#10B759]/[0.15]
       data-[state=active]:text-[#0E9F4F] data-[state=active]:shadow-none
       dark:border-white/10 dark:bg-white/5 dark:text-slate-300
       dark:data-[state=active]:border-[#10B759]/40 dark:data-[state=active]:bg-[#10B759]/20 dark:data-[state=active]:text-[#4ADE80]"
-            items={kitCategories.map((c) => ({ value: c.id, label: c.label }))}
-            value={activeCategory}
-            onValueChange={setActiveCategory}
-          />
-        </div>
-
-        <div className="mt-4 space-y-4">
-          {/* filter tabs: only the ones this category needs */}
-          {activeCat.filters.length > 0 && (
-            <div className="flex flex-wrap gap-3">
-              {activeCat.filters.map((key) => (
-                <AppTabs
-                  key={key}
-                  variant="pill"
-                  items={filterOptions[key]}
-                  value={current[key]}
-                  onValueChange={(v) => changeFilter(key, v)}
-                />
-              ))}
+                items={kitCategories.map((c) => ({
+                  value: c.id,
+                  label: c.label,
+                }))}
+                value={activeCategory}
+                onValueChange={setActiveCategory}
+              />
             </div>
-          )}
 
-          {/* progress: one kit per golfer */}
-          <p className="text-sm text-slate-500">
-            {usedActive} of {golfers} {activeCat.label.toLowerCase()} chosen
-            {usedActive < golfers && " · one per golfer"}
-          </p>
+            <div className="mt-4 space-y-4">
+              {/* filter tabs: only the ones this category needs */}
+              {activeCat.filters.length > 0 && (
+                <div className="flex flex-wrap gap-3">
+                  {activeCat.filters.map((key) => (
+                    <AppTabs
+                      key={key}
+                      variant="pill"
+                      items={filterOptions[key]}
+                      value={current[key]}
+                      onValueChange={(v) => changeFilter(key, v)}
+                    />
+                  ))}
+                </div>
+              )}
 
-          {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
-          {isError && (
-            <p className="text-sm text-red-600">Could not load some items.</p>
-          )}
-          {!isLoading && visibleItems.length === 0 && (
-            <p className="text-sm text-slate-500">
-              Nothing available for this selection.
-            </p>
-          )}
+              {/* progress: one kit per golfer */}
+              <p className="text-sm text-slate-500">
+                {usedActive} of {golfers} {activeCat.label.toLowerCase()} chosen
+                {usedActive < golfers && " · one per golfer"}
+              </p>
 
-          <div role="radiogroup" className="grid gap-3 sm:grid-cols-3">
-            {visibleItems.map((item) => {
-              const qty = kit[item.id] ?? 0;
-              // most this item can reach: its own qty plus what's still free
-              const maxForItem =
-                golfers === 1 ? 1 : qty + (golfers - usedActive);
+              {isError && (
+                <p className="text-sm text-red-600">
+                  Could not load some items.
+                </p>
+              )}
+              {visibleItems.length === 0 && (
+                <p className="text-sm text-slate-500">
+                  Nothing available for this selection.
+                </p>
+              )}
 
-              return (
-                <ImageSliderCard
-                  key={item.id}
-                  images={item.images}
-                  title={item.title}
-                  description={item.description}
-                  badge={item.tag}
-                  selected={qty > 0}
-                  onClick={() => setQty(item.id, activeCat.id, qty > 0 ? 0 : 1)}
-                >
-                  <div className="flex items-end justify-between gap-3">
-                    <div
-                      className="flex flex-col items-end gap-1"
-                      onClick={(e) => e.stopPropagation()}
-                      onKeyDown={(e) => e.stopPropagation()}
+              <div role="radiogroup" className="grid gap-3 sm:grid-cols-3">
+                {visibleItems.map((item) => {
+                  const qty = kit[item.id] ?? 0;
+                  // most this item can reach: its own qty plus what's still free
+                  const maxForItem =
+                    golfers === 1 ? 1 : qty + (golfers - usedActive);
+
+                  return (
+                    <ImageSliderCard
+                      key={item.id}
+                      images={item.images}
+                      title={item.title}
+                      description={item.description}
+                      badge={item.tag}
+                      selected={qty > 0}
+                      onClick={() =>
+                        setQty(item.id, activeCat.id, qty > 0 ? 0 : 1)
+                      }
                     >
-                      <QuantityStepper
-                        size="sm"
-                        variant="outline"
-                        label={item.title}
-                        value={qty}
-                        min={0}
-                        max={maxForItem}
-                        onChange={(n) => setQty(item.id, activeCat.id, n)}
-                      />
-                    </div>
-                  </div>
-                </ImageSliderCard>
-              );
-            })}
-          </div>
-        </div>
+                      <div className="flex items-end justify-between gap-3">
+                        <div
+                          className="flex flex-col items-end gap-1"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        >
+                          <QuantityStepper
+                            size="sm"
+                            variant="outline"
+                            label={item.title}
+                            value={qty}
+                            min={0}
+                            max={maxForItem}
+                            onChange={(n) => setQty(item.id, activeCat.id, n)}
+                          />
+                        </div>
+                      </div>
+                    </ImageSliderCard>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
       </section>
-                        {footer && <div className="border-t border-slate-200 pt-6">{footer}</div>}
 
+      {footer && <div className="border-t border-slate-200 pt-6">{footer}</div>}
     </div>
   );
 }

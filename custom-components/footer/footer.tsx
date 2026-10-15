@@ -22,9 +22,9 @@ const Footer = () => {
 
   const supportLinks = [
     { label: "FAQs", href: "/faq" },
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Cancellation Policy", href: "/cancellation" },
+    { label: "Terms of Service", href: "/#" },
+    { label: "Privacy Policy", href: "/#" },
+    { label: "Cancellation Policy", href: "/#" },
   ];
 
   const socialLinks = [
