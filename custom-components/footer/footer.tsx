@@ -48,7 +48,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-14">
         {/* Newsletter strip */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 py-10 border-b border-green-100">
-          <div>
+          {/* <div>
             <h3 className="text-xl sm:text-2xl font-bold text-black-950 tracking-tight">
               Never miss a tee time.
             </h3>
@@ -56,7 +56,7 @@ const Footer = () => {
               Course openings, member deals, and weekend availability — straight
               to your inbox.
             </p>
-          </div>
+          </div> */}
           {/* <form
             className="flex w-full lg:w-auto max-w-md items-center gap-2"
             onSubmit={(e) => e.preventDefault()}
