@@ -18,7 +18,7 @@ const sansFont = {
 };
 
 const NAV_LINKS = [
-  { href: "/#golf-courses", label: "Courses", note: "Explore every fairway in Bhutan" },
+  // { href: "/#golf-courses", label: "Courses", note: "Explore every fairway in Bhutan" },
   { href: "/about", label: "About us", note: "Our story in the Himalayas" },
   { href: "/contact", label: "Contact", note: "We usually reply within a day" },
 ];
