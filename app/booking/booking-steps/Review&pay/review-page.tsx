@@ -229,7 +229,7 @@ const router = useRouter();
         </ReviewRow>
         <ReviewRow label="Package" onChange={() => onEditStep(3)}>
           {pkg?.title ?? "—"}
-          {pkg && <span className="text-slate-500"> · {money(unitPrice)} / golfer</span>}
+          {/* {pkg && <span className="text-slate-500"> · {money(unitPrice)} / golfer</span>} */}
         </ReviewRow>
         <ReviewRow label="Kit & extras" onChange={() => onEditStep(3)}>
           {kitLines.length === 0 ? (
