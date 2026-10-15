@@ -29,7 +29,7 @@ type Props = {
 export default function BookingHeader({
   currentStep,
   steps = BOOKING_STEPS,
-  title = "Book a tee time",
+  title = "Book a round",
   onStepClick,
   maxReachableStep = currentStep,
   className,

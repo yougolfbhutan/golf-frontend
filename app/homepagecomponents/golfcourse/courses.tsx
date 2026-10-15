@@ -32,7 +32,6 @@ export const coursesdata: Course[] = [
     green_fee: "$45",
     features: [
       "Mountain Views",
-      "Private Caddies",
       "Dzong Backdrop",
       "Open to Public",
     ],
@@ -62,8 +61,6 @@ export const coursesdata: Course[] = [
     features: [
       "Mountain Terrain",
       "Bentgrass Greens",
-      "Full Spa",
-      "On-site Lodging",
     ],
     club_Facilities: [
       "Practice Facilities",

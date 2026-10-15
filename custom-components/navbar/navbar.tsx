@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, ArrowUpRight, Menu, Phone, UserRound, X } from "lucide-react";
+import { ArrowUpRight, Menu, Phone, UserRound, X } from "lucide-react";
 
 // Fonts are installed from npm (no Google download at build time):
 //   npm i @fontsource-variable/fraunces @fontsource-variable/plus-jakarta-sans
@@ -160,16 +160,6 @@ export default function Navbar() {
           <div className="hidden items-center gap-2 md:flex">
             <Link
               href={LOGIN_HREF}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-[#F7F1E3] transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
-            >
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-white/10">
-                <UserRound className="h-3.5 w-3.5" />
-              </span>
-              Log in
-            </Link>
-
-            <Link
-              href="/#golf-courses"
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[#10B759] py-2 pl-5 pr-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#12C862] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F3D2E]"
             >
               {/* shine sweep */}
@@ -177,9 +167,9 @@ export default function Navbar() {
                 aria-hidden
                 className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/30 blur-sm transition-transform duration-700 ease-out group-hover:translate-x-[450%]"
               />
-              <span className="relative">Book a tee time</span>
+              <span className="relative">Log in</span>
               <span className="relative grid h-7 w-7 place-items-center rounded-full bg-white/20 transition-all duration-300 group-hover:bg-white group-hover:text-emerald-700">
-                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-45" />
+                <UserRound className="h-4 w-4" />
               </span>
             </Link>
           </div>
@@ -221,9 +211,6 @@ export default function Navbar() {
       >
         <div className="relative flex min-h-full flex-col justify-between px-6 pb-10 pt-28 sm:px-8">
           <div>
-            <p className="mb-4 px-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-200/60">
-              Menu
-            </p>
             <ul className="flex flex-col gap-1">
               {NAV_LINKS.map((link, i) => {
                 const active = isActive(link.href);
@@ -245,19 +232,15 @@ export default function Navbar() {
                       }`}
                     >
                       <span className="flex items-baseline gap-4">
-                        <span className="text-xs font-semibold tabular-nums tracking-widest text-amber-300">
-                          0{i + 1}
-                        </span>
                         <span className="flex flex-col">
                           <span
                             style={displayFont}
-                            className={`text-[34px] font-medium leading-tight tracking-tight ${
+                            className={`text-base font-medium leading-tight tracking-tight ${
                               active ? "italic text-[#6EE7A8]" : "text-[#F7F1E3]"
                             }`}
                           >
                             {link.label}
                           </span>
-                          <span className="mt-0.5 text-sm text-emerald-100/60">{link.note}</span>
                         </span>
                       </span>
                       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 text-emerald-100 transition-all duration-300 group-hover:border-[#10B759] group-hover:bg-[#10B759] group-hover:text-white">
@@ -277,24 +260,15 @@ export default function Navbar() {
             }`}
           >
             <Link
-              href="/#golf-courses"
-              tabIndex={open ? 0 : -1}
-              onClick={() => setOpen(false)}
-              className="flex items-center justify-between rounded-full bg-[#10B759] py-2.5 pl-6 pr-2.5 text-base font-semibold text-white"
-            >
-              Book a tee time
-              <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-emerald-700">
-                <ArrowRight className="h-5 w-5" />
-              </span>
-            </Link>
-            <Link
               href={LOGIN_HREF}
               tabIndex={open ? 0 : -1}
               onClick={() => setOpen(false)}
-              className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-transparent py-4 text-base font-semibold text-[#F7F1E3] transition-colors hover:bg-white/10"
+              className="flex items-center justify-between rounded-full bg-[#10B759] py-2.5 pl-6 pr-2.5 text-base font-semibold text-white transition-colors hover:bg-[#12C862]"
             >
-              <UserRound className="h-5 w-5" />
               Log in
+              <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-emerald-700">
+                <UserRound className="h-5 w-5" />
+              </span>
             </Link>
             <Link
               href="/contact"

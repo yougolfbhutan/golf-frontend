@@ -5,7 +5,7 @@ import {
   Mail,
   MapPin,
   Phone,
-  Twitter,
+  Linkedin,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -14,8 +14,8 @@ const Footer = () => {
 
   const quickLinks = [
     { label: "Home", href: "/" },
-    { label: "Courses", href: "/courses" },
-    { label: "Book a Tee Time", href: "/book" },
+    // { label: "Courses", href: "/courses" },
+    // { label: "Book a Tee Time", href: "/book" },
     { label: "About Us", href: "/about" },
     { label: "Contact", href: "/contact" },
   ];
@@ -28,9 +28,9 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Twitter, href: "#", label: "Twitter" },
+    { icon: Facebook, href: "https://www.facebook.com/profile.php?id=61594913026452", label: "Facebook" },
+    { icon: Instagram, href: "https://www.instagram.com/yougolfbhutan/", label: "Instagram" },
+    { icon: Linkedin, href: "https://www.linkedin.com/in/yougolfbhutan-undefined-51931b43a/", label: "Twitter" },
   ];
 
   return (
@@ -102,8 +102,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-sm text-black-700 leading-relaxed max-w-xs">
-              Book tee times at the best golf courses near you, in just a few
-              clicks.
+              Book your round at one of the world highest courses.
             </p>
             <div className="flex items-center gap-2.5 pt-1">
               {socialLinks.map(({ icon: Icon, href, label }) => (
@@ -182,10 +181,10 @@ const Footer = () => {
                   <Phone size={14} />
                 </span>
                 <a
-                  href="tel:+15551234567"
+                  href="tel:+975 17875268"
                   className="hover:text-black-950 transition-colors"
                 >
-                  +1 (555) 123-4567
+                  +975 17875268
                 </a>
               </li>
               <li className="flex items-center gap-2.5 text-sm text-black-700">

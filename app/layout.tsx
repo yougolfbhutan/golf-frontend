@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/providers";
 import { AuthProvider } from "./context/auth-context";
 import { BookingDraftProvider } from "./context/booking-draft-context";
+import WhatsAppButton from "@/whats-app/whatsappbutton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,9 @@ export default function RootLayout({
             <BookingDraftProvider>{children}</BookingDraftProvider>
           </Providers>
         </AuthProvider>
+
+                <WhatsAppButton />
+
       </body>
     </html>
   );

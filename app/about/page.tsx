@@ -144,10 +144,10 @@ export default function AboutPage() {
             </p>
           </div>
           <Link
-            href="/#golf-courses"
+            href="/"
             className="shrink-0 rounded-full bg-[#10B759] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 transition hover:-translate-y-px hover:bg-emerald-500"
           >
-            Book a tee time
+            Book a Round
           </Link>
         </div>
       </section>
