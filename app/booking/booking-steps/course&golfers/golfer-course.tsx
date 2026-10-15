@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import ImageSliderCard from "../../booking-component/image-slider-component";
 import { coursesdata } from "@/app/homepagecomponents/golfcourse/courses";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import CategoryCard from "../../booking-component/category-card";
 import QuantityStepper from "../../booking-component/quantity-stepper";
 
@@ -15,9 +15,11 @@ type Props = {
   booking: BookingState;
   onChange: (patch: Partial<BookingState>) => void;
   golfcourseId: string;
+    footer?: ReactNode;
+
 };
 
-export default function CourseStep({ booking, onChange, golfcourseId }: Props) {
+export default function CourseStep({ footer,booking, onChange, golfcourseId }: Props) {
   useEffect(() => {
     if (booking.courseId) return; // don't overwrite what the user picked
     const match = coursesdata.find(
@@ -30,8 +32,7 @@ export default function CourseStep({ booking, onChange, golfcourseId }: Props) {
   return (
     <div className="mt-8 space-y-8 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xl shadow-slate-900/10 sm:p-8">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Where and who?</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-base text-black">
           Choose a course, then tell us who&apos;s playing. Everyone in one
           booking pays the same category rate.
         </p>
@@ -108,6 +109,8 @@ export default function CourseStep({ booking, onChange, golfcourseId }: Props) {
           </span>
         </div>
       </section>
+            {footer && <div className="border-t border-slate-200 pt-6">{footer}</div>}
+
     </div>
   );
 }

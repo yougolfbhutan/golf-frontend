@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-// import { DataTable, Column, ActionConfig } from "@/component/table";
 import { Delete, Edit, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCaddieMutations, useGetCaddies } from "./tanstack";
+import { useGetGloves, useGlovesMutations } from "./tanstack";
 import { showToast } from "nextjs-toast-notify";
 import {
   DataTable,
@@ -14,22 +13,22 @@ import {
   type Column,
 } from "../../../table/table";
 import { CustomDialog } from "../../../customDialogbox";
-import type { CaddieData, CaddieFormAttributes } from "./interface";
-import { CaddieFields } from "./data";
+import { GlovesFields } from "./data";
+import type { Glove, GlovesPayloadAttribes } from "./interface";
 
-export default function Caddie() {
-  const [selected, setSelected] = useState<CaddieData[]>([]);
+export default function Gloves() {
+  const [selected, setSelected] = useState<Glove[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<CaddieData | null>(null);
+  const [editingGlove, setEditingGlove] = useState<Glove | null>(null);
 
-  //   // Fetch roles, permissions, and users
+  // Fetch gloves
   const [page, setPage] = useState(1);
   const limit = 10;
-  const { data: caddieData, isFetching } = useGetCaddies(page, limit);
+  const { data: glovesData, isFetching } = useGetGloves(page, limit);
 
-  //   // User mutations
-  const { createCaddie, updateCaddie, deleteCaddie } = useCaddieMutations({
+  // Glove mutations
+  const { createGloves, updateGloves, deleteGloves } = useGlovesMutations({
     onSuccess: (data) => {
       showToast.success(data.message, {
         duration: 5000,
@@ -39,7 +38,7 @@ export default function Caddie() {
         sound: true,
       });
       setIsDialogOpen(false);
-      setEditingUser(null);
+      setEditingGlove(null);
     },
     onError: (error) => {
       console.log("Error", error);
@@ -52,14 +51,29 @@ export default function Caddie() {
       });
     },
   });
-  const columns: Column<CaddieData>[] = [
-    { header: "Name", accessor: "caddiename" },
-    { header: "CID No", accessor: "cidNo" },
-    { header: "Phone Number", accessor: "phone_number" },
+
+  const columns: Column<Glove>[] = [
+    { header: "Name", accessor: "name" },
+    {
+      header: "Audience",
+      render: (_value, row) => row.audience?.name || "N/A",
+    },
+    { header: "Size", accessor: "size" },
+    { header: "Handedness", accessor: "handedness" },
+    { header: "Tier", accessor: "tierName" },
+    { header: "Quantity", accessor: "quantity" },
+    {
+      header: "Price",
+      render: (_value, row) => `${row.currency} ${row.price}`,
+    },
+    {
+      header: "Available",
+      render: (_value, row) => (row.isAvailable ? "Yes" : "No"),
+    },
   ];
 
-  //   // Table actions
-  const getActions = (): ActionConfig<CaddieData>[] => [
+  // Table actions
+  const getActions = (): ActionConfig<Glove>[] => [
     {
       label: "Edit",
       icon: <Edit className="h-4 w-4" />,
@@ -72,46 +86,69 @@ export default function Caddie() {
     },
   ];
 
-  //   // Edit user
-  const handleEdit = (row: CaddieData) => {
-    setEditingUser(row);
+  // Edit glove
+  const handleEdit = (row: Glove) => {
+    setEditingGlove(row);
     setIsDialogOpen(true);
   };
 
-  //   // Delete user
-  const handleDelete = (row: CaddieData) => {
+  // Delete glove
+  const handleDelete = (row: Glove) => {
     const confirmed = window.confirm(
-      `⚠️ Are you sure you want to delete the caddie "${row.caddiename}"? This action cannot be undone.`,
+      `⚠️ Are you sure you want to delete the glove "${row.name}"? This action cannot be undone.`,
     );
     if (!confirmed) return;
-    deleteCaddie(row.id);
+    deleteGloves(row.id);
   };
 
-  //   // Handle form submit
+  // Handle form submit
   const handleSubmit = (values: Record<string, any>) => {
-    if (editingUser?.id) {
-      console.log(values, "values <><><>");
-      updateCaddie({
-        id: editingUser.id,
-        data: values as CaddieFormAttributes,
+    const formData = new FormData();
+
+    formData.append("name", values.name);
+    formData.append("audienceId", String(Number(values.audienceId)));
+    formData.append("size", values.size);
+    formData.append("handedness", values.handedness);
+    formData.append("tierName", values.tierName);
+    formData.append("quantity", String(Number(values.quantity)));
+    formData.append("price", String(Number(values.price)));
+    formData.append(
+      "isAvailable",
+      String(values.isAvailable ?? editingGlove?.isAvailable ?? true),
+    );
+
+    // image is either a new File or the existing URL string
+    if (values.image instanceof File) {
+      formData.append("image", values.image);
+    } else if (typeof values.image === "string" && values.image) {
+      // Tell the backend to keep the current image
+      formData.append("imageUrl", values.image);
+    }
+
+    if (editingGlove?.id) {
+      updateGloves({
+        id: editingGlove.id,
+        data: formData as unknown as GlovesPayloadAttribes,
       });
     } else {
-      createCaddie(values as CaddieFormAttributes);
+      createGloves(formData as unknown as GlovesPayloadAttribes);
     }
   };
 
-  //   // Filter users by search query
-  const filteredUsers = useMemo(() => {
-    if (!caddieData?.data?.caddies) return [];
-    if (!searchQuery.trim()) return caddieData.data.caddies;
+  // Filter gloves by search query
+  const filteredGloves = useMemo(() => {
+    const list = glovesData?.data?.data;
+    if (!list) return [];
+    if (!searchQuery.trim()) return list;
 
     const query = searchQuery.toLowerCase();
-    return caddieData.data.caddies.filter(
-      (caddie) =>
-        caddie.caddiename.toLowerCase().includes(query) ||
-        caddie.cidNo.toLowerCase().includes(query),
+    return list.filter(
+      (glove) =>
+        glove.name.toLowerCase().includes(query) ||
+        glove.tierName.toLowerCase().includes(query) ||
+        glove.size.toLowerCase().includes(query),
     );
-  }, [caddieData, searchQuery]);
+  }, [glovesData, searchQuery]);
 
   return (
     <div className="min-h-screen w-full p-6">
@@ -132,13 +169,12 @@ export default function Caddie() {
 
         <Button
           onClick={() => {
-            console.log("hy");
-            setEditingUser(null);
+            setEditingGlove(null);
             setIsDialogOpen(true);
           }}
           className="bg-orange-500 text-white hover:bg-orange-600 h-12 px-6 rounded-md shadow-md"
         >
-          Create Caddie
+          Create Glove
         </Button>
       </div>
 
@@ -147,31 +183,35 @@ export default function Caddie() {
         isOpen={isDialogOpen}
         onClose={() => {
           setIsDialogOpen(false);
-          setEditingUser(null);
+          setEditingGlove(null);
         }}
-        title={editingUser ? "Edit Caddie" : "Create Caddie"}
-        fields={CaddieFields}
+        title={editingGlove ? "Edit Glove" : "Create Glove"}
+        fields={GlovesFields}
         defaultValues={{
-          caddiename: editingUser?.caddiename || "",
-          cidNo: editingUser?.cidNo || "",
-          phone_number: editingUser?.phone_number || "",
+          name: editingGlove?.name || "",
+          audienceId: editingGlove?.audienceId?.toString() || "",
+          size: editingGlove?.size || "",
+          handedness: editingGlove?.handedness || "",
+          tierName: editingGlove?.tierName || "",
+          quantity: editingGlove?.quantity ?? "",
+          price: editingGlove?.price ?? "",
+          image: editingGlove?.imageUrl || "",
         }}
-        OnSubmitTitle={editingUser ? "Update Caddie" : "Create Caddie"}
-        CustomDialogBoxStyle="px-8 py-6 flex flex-col gap-5 overflow-y-auto flex-1
-"
+        OnSubmitTitle={editingGlove ? "Update Glove" : "Create Glove"}
+        CustomDialogBoxStyle="px-8 py-6 grid grid-cols-3 gap-5 overflow-y-auto flex-1"
         onSubmit={handleSubmit}
       />
 
-      {/* User Table */}
+      {/* Gloves Table */}
       <DataTable
-        data={filteredUsers}
+        data={filteredGloves}
         columns={columns}
         actions={getActions()}
         selectable
         onSelectionChange={setSelected}
-         serverPagination={{
+        serverPagination={{
           currentPage: page,
-          totalPages: caddieData?.data?.meta?.totalPages || 1,
+          totalPages: glovesData?.data?.totalPages || 1,
           onPageChange: setPage,
           isFetching,
         }}

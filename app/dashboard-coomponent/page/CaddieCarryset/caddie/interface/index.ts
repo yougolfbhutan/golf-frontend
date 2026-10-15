@@ -1,30 +1,46 @@
-export interface CaddieFormAttributes {
-    caddie_name: string;
-    cidNo: string;
-    phone_number: string;
+export interface GlovesPayloadAttribes {
+  name: string;
+  audienceId: number;
+
+  size: string;
+
+  handedness: string;
+  tierName: string;
+  isAvailable: boolean;
+
+  quantity: number;
+  price: number;
+  image?: string;
 }
 
-export interface CaddieData{
+export interface Audience {
   id: number;
-  caddiename: string;
-  cidNo: string;
-  phone_number: string;
+  name: string;
 }
 
-export interface PaginationMeta {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
+export interface Glove {
+  id: number;
+  name: string;
+  audienceId: number;
+  audience: Audience;
+  size: string;
+  handedness: string;
+  isAvailable: boolean;
+  imageUrl: string;
+  quantity: number;
+  price: number;
+  tierName: string;
+  currency: string;
 }
 
-export interface GetCaddiesData {
-  caddies: CaddieData[];
-  meta: PaginationMeta;
-}
-
-export interface GetCaddiesResponse {
-  status: number;
+export interface GlovesGetResponse {
+  success: boolean;
   message: string;
-  data: GetCaddiesData;
+  data: {
+    data: Glove[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }

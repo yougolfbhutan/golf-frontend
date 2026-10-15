@@ -1,142 +1,180 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { ArrowRight, ArrowUpRight, Menu, Phone, UserRound, X } from "lucide-react";
 
-interface NavbarProps {
-  /** Starts transparent over a hero image and turns into a floating bar on scroll.
-   * Set to false on plain/light pages so it is always solid. */
-  transparent?: boolean;
-}
+const display = Fraunces({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const sans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 const NAV_LINKS = [
-  { href: "/#golf-courses", label: "Courses" },
-  { href: "/about", label: "About us" },
-  { href: "/contact", label: "Contact" },
+  { href: "/#golf-courses", label: "Courses", note: "Explore every fairway in Bhutan" },
+  { href: "/about", label: "About us", note: "Our story in the Himalayas" },
+  { href: "/contact", label: "Contact", note: "We usually reply within a day" },
 ];
 
-export default function Navbar({ transparent = true }: NavbarProps) {
+export default function Navbar() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
+  // Sliding hover pill (desktop)
+  const listRef = useRef<HTMLUListElement>(null);
+  const [pill, setPill] = useState({ left: 0, width: 0, visible: false });
+
+  const isActive = (href: string) => !href.includes("#") && pathname === href;
+
+  // Shrink into a floating bar after scrolling
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close the mobile menu on route change
   useEffect(() => setOpen(false), [pathname]);
 
+  // Lock body scroll + close on Escape while the mobile menu is open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
     };
   }, [open]);
 
-  const solid = !transparent || scrolled || open;
+  const movePill = (el: HTMLElement) => {
+    const list = listRef.current;
+    if (!list) return;
+    const a = el.getBoundingClientRect();
+    const b = list.getBoundingClientRect();
+    setPill({ left: a.left - b.left, width: a.width, visible: true });
+  };
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-out motion-reduce:transition-none ${
-        solid ? "px-3 pt-3 sm:px-6 sm:pt-4" : "px-0 pt-0"
+      className={`${sans.className} fixed inset-x-0 top-0 z-50 transition-[padding] duration-500 ease-out ${
+        scrolled ? "px-3 pt-3 sm:px-6" : "px-0 pt-0"
       }`}
     >
       <div
-        className={`mx-auto transition-all duration-500 ease-out motion-reduce:transition-none ${
-          solid
-            ? "max-w-6xl rounded-2xl bg-white/85 shadow-[0_8px_30px_-12px_rgba(6,40,24,0.25)] backdrop-blur-xl backdrop-saturate-150"
-            : "max-w-7xl rounded-none bg-transparent"
+        className={`mx-auto transition-all duration-500 ease-out ${
+          scrolled
+            ? "max-w-6xl rounded-full border border-white/10 bg-[#0F3D2E] shadow-[0_10px_40px_-12px_rgba(6,40,30,0.55)]"
+            : "max-w-full rounded-none border-b border-white/10 bg-[#0F3D2E]"
         }`}
       >
         <nav
           aria-label="Main"
-          className={`flex items-center justify-between transition-all duration-500 ease-out motion-reduce:transition-none ${
-            solid ? "h-16 px-4 sm:px-6" : "h-24 px-6 lg:px-10"
+          className={`mx-auto flex max-w-7xl items-center justify-between transition-all duration-500 ${
+            scrolled ? "h-16 px-3 sm:px-4" : "h-20 px-5 sm:px-8 lg:px-12"
           }`}
         >
-          {/* Logo: white over the hero, original colors once scrolled */}
+          {/* Logo */}
           <Link
-            href="/"
-            className="flex items-center gap-2.5 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            href="#"
+            className="group flex items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-4 focus-visible:ring-offset-[#0F3D2E]"
           >
             <span
-              className={`relative shrink-0 transition-all duration-500 ${
-                solid ? "h-8 w-8" : "h-10 w-10"
+              className={`relative grid shrink-0 place-items-center rounded-full bg-[#F7F1E3] ring-1 ring-amber-300/60 transition-all duration-500 group-hover:rotate-[-8deg] group-hover:ring-amber-300 ${
+                scrolled ? "h-10 w-10" : "h-12 w-12"
               }`}
             >
-              <Image
-                src="/logo-mark-white.png"
-                alt=""
-                fill
-                sizes="40px"
-                priority
-                className={`object-contain drop-shadow-md transition-opacity duration-500 ${
-                  solid ? "opacity-0" : "opacity-100"
-                }`}
-              />
-              <Image
-                src="/logo.png"
-                alt=""
-                fill
-                sizes="40px"
-                priority
-                className={`object-contain transition-opacity duration-500 ${
-                  solid ? "opacity-100" : "opacity-0"
-                }`}
-              />
-            </span>
-            <span
-              className={`font-bold tracking-tight transition-all duration-500 ${
-                solid ? "text-lg" : "text-xl drop-shadow-md"
-              }`}
-            >
-              <span className={`transition-colors duration-500 ${solid ? "text-emerald-800" : "text-white"}`}>
-                YouGolf
+              <span className="relative h-[72%] w-[72%]">
+                <Image src="/logo.png" alt="" fill sizes="48px" priority className="object-contain" />
               </span>
-              <span className={`transition-colors duration-500 ${solid ? "text-amber-500" : "text-white"}`}>
+            </span>
+            <span className="flex flex-col">
+              <span
+                className={`${display.className} font-semibold leading-none tracking-tight text-[#F7F1E3] transition-all duration-500 ${
+                  scrolled ? "text-[22px]" : "text-[26px]"
+                }`}
+              >
+                You
+                <span className="italic text-[#6EE7A8]">Golf</span>
+              </span>
+              <span className="mt-1.5 flex items-center gap-1.5 text-[9.5px] font-semibold uppercase leading-none tracking-[0.42em] text-amber-300">
+                <span className="h-px w-3 bg-amber-300" />
                 Bhutan
               </span>
             </span>
           </Link>
 
           {/* Desktop links */}
+          <ul
+            ref={listRef}
+            onMouseLeave={() => setPill((p) => ({ ...p, visible: false }))}
+            className="relative hidden items-center rounded-full bg-white/5 p-1 ring-1 ring-white/10 lg:flex"
+          >
+            <span
+              aria-hidden
+              className={`absolute top-1 bottom-1 rounded-full bg-white/15 ring-1 ring-white/10 transition-all duration-300 ease-out ${
+                pill.visible ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ left: pill.left, width: pill.width }}
+            />
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <li key={link.href} className="relative">
+                  <Link
+                    href={link.href}
+                    onMouseEnter={(e) => movePill(e.currentTarget)}
+                    onFocus={(e) => movePill(e.currentTarget)}
+                    aria-current={active ? "page" : undefined}
+                    className={`relative z-10 flex items-center gap-2 rounded-full px-5 py-2 text-[14.5px] font-medium transition-colors duration-200 focus-visible:outline-none ${
+                      active ? "text-white" : "text-emerald-100/80 hover:text-white"
+                    }`}
+                  >
+                    {active && <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />}
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Desktop actions */}
           <div className="hidden items-center gap-2 md:flex">
-            <ul className="flex items-center gap-1 text-sm font-medium">
-              {NAV_LINKS.map((link) => {
-                const active = pathname === link.href;
-                return (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      aria-current={active ? "page" : undefined}
-                      className={`rounded-full px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                        solid
-                          ? active
-                            ? "bg-emerald-50 text-emerald-800"
-                            : "text-slate-600 hover:bg-emerald-50/70 hover:text-emerald-800"
-                          : active
-                            ? "bg-white/15 text-white"
-                            : "text-white/85 hover:bg-white/10 hover:text-white"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <Link
+              href="/signin"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-[#F7F1E3] transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+            >
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-white/10">
+                <UserRound className="h-3.5 w-3.5" />
+              </span>
+              Log in
+            </Link>
 
             <Link
               href="/#golf-courses"
-              className="ml-3 rounded-full bg-[#10B759] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/25 transition hover:-translate-y-px hover:bg-emerald-600 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[#10B759] py-2 pl-5 pr-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#12C862] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F3D2E]"
             >
-              Book a tee time
+              {/* shine sweep */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/30 blur-sm transition-transform duration-700 ease-out group-hover:translate-x-[450%]"
+              />
+              <span className="relative">Book a tee time</span>
+              <span className="relative grid h-7 w-7 place-items-center rounded-full bg-white/20 transition-all duration-300 group-hover:bg-white group-hover:text-emerald-700">
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-45" />
+              </span>
             </Link>
           </div>
 
@@ -147,53 +185,119 @@ export default function Navbar({ transparent = true }: NavbarProps) {
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
-            className={`rounded-full p-2 transition md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-              solid
-                ? "text-emerald-900 hover:bg-emerald-50"
-                : "text-white hover:bg-white/10"
+            className={`relative grid h-11 w-11 place-items-center rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 md:hidden ${
+              open
+                ? "bg-[#F7F1E3] text-emerald-900"
+                : "bg-white/10 text-[#F7F1E3] ring-1 ring-white/15 hover:bg-white/20"
             }`}
           >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <Menu
+              className={`absolute h-5 w-5 transition-all duration-300 ${
+                open ? "rotate-90 scale-50 opacity-0" : "rotate-0 scale-100 opacity-100"
+              }`}
+            />
+            <X
+              className={`absolute h-5 w-5 transition-all duration-300 ${
+                open ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-50 opacity-0"
+              }`}
+            />
           </button>
         </nav>
+      </div>
 
-        {/* Mobile menu */}
-        <div
-          id="mobile-menu"
-          className={`grid transition-all duration-300 ease-out md:hidden motion-reduce:transition-none ${
-            open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <ul className="flex flex-col gap-1 px-3 pb-4">
-              {NAV_LINKS.map((link) => {
-                const active = pathname === link.href;
+      {/* Mobile menu */}
+      <div
+        id="mobile-menu"
+        aria-hidden={!open}
+        className={`fixed inset-x-0 bottom-0 top-0 -z-10 overflow-y-auto bg-[#0F3D2E] transition-all duration-500 ease-out md:hidden ${
+          open ? "visible opacity-100" : "invisible opacity-0"
+        }`}
+      >
+        <div className="relative flex min-h-full flex-col justify-between px-6 pb-10 pt-28 sm:px-8">
+          <div>
+            <p className="mb-4 px-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-200/60">
+              Menu
+            </p>
+            <ul className="flex flex-col gap-1">
+              {NAV_LINKS.map((link, i) => {
+                const active = isActive(link.href);
                 return (
-                  <li key={link.href}>
+                  <li
+                    key={link.href}
+                    style={{ transitionDelay: open ? `${120 + i * 70}ms` : "0ms" }}
+                    className={`transition-all duration-500 ease-out ${
+                      open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+                    }`}
+                  >
                     <Link
                       href={link.href}
+                      tabIndex={open ? 0 : -1}
                       onClick={() => setOpen(false)}
-                      className={`block rounded-xl px-4 py-3 text-base font-medium transition ${
-                        active
-                          ? "bg-emerald-50 text-emerald-800"
-                          : "text-slate-700 hover:bg-emerald-50/70 hover:text-emerald-800"
+                      aria-current={active ? "page" : undefined}
+                      className={`group flex items-center justify-between gap-4 rounded-3xl px-4 py-4 transition-colors ${
+                        active ? "bg-white/10" : "hover:bg-white/5"
                       }`}
                     >
-                      {link.label}
+                      <span className="flex items-baseline gap-4">
+                        <span className="text-xs font-semibold tabular-nums tracking-widest text-amber-300">
+                          0{i + 1}
+                        </span>
+                        <span className="flex flex-col">
+                          <span
+                            className={`${display.className} text-[34px] font-medium leading-tight tracking-tight ${
+                              active ? "italic text-[#6EE7A8]" : "text-[#F7F1E3]"
+                            }`}
+                          >
+                            {link.label}
+                          </span>
+                          <span className="mt-0.5 text-sm text-emerald-100/60">{link.note}</span>
+                        </span>
+                      </span>
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 text-emerald-100 transition-all duration-300 group-hover:border-[#10B759] group-hover:bg-[#10B759] group-hover:text-white">
+                        <ArrowUpRight className="h-4 w-4" />
+                      </span>
                     </Link>
                   </li>
                 );
               })}
-              <li className="pt-2">
-                <Link
-                  href="/#golf-courses"
-                  onClick={() => setOpen(false)}
-                  className="block rounded-xl bg-[#10B759] py-3.5 text-center text-sm font-semibold text-white shadow-lg shadow-emerald-900/20 transition hover:bg-emerald-600"
-                >
-                  Book a tee time
-                </Link>
-              </li>
             </ul>
+          </div>
+
+          <div
+            style={{ transitionDelay: open ? "360ms" : "0ms" }}
+            className={`mt-10 space-y-3 transition-all duration-500 ease-out ${
+              open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+            }`}
+          >
+            <Link
+              href="/#golf-courses"
+              tabIndex={open ? 0 : -1}
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-between rounded-full bg-[#10B759] py-2.5 pl-6 pr-2.5 text-base font-semibold text-white"
+            >
+              Book a tee time
+              <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-emerald-700">
+                <ArrowRight className="h-5 w-5" />
+              </span>
+            </Link>
+            <Link
+              href="/login"
+              tabIndex={open ? 0 : -1}
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-transparent py-4 text-base font-semibold text-[#F7F1E3] transition-colors hover:bg-white/10"
+            >
+              <UserRound className="h-5 w-5" />
+              Log in
+            </Link>
+            <Link
+              href="/contact"
+              tabIndex={open ? 0 : -1}
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center gap-2 pt-3 text-sm text-emerald-100/70 hover:text-white"
+            >
+              <Phone className="h-4 w-4" />
+              Need help? Talk to our team
+            </Link>
           </div>
         </div>
       </div>

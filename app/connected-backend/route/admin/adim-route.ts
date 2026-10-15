@@ -20,17 +20,17 @@ const ADMIN_API_URL = {
   updateUser: `${API_ADMIN}/update-user`,
   deleteUser: `${API_ADMIN}/delete-user`,
   getUsers: `${API_ADMIN}/get-user`,
-  //caddie
-  createCaddie: `${API_ADMIN}/create-caddie`,
-  updateCaddie: `${API_ADMIN}/update-caddie`,
-  deleteCaddie: `${API_ADMIN}/delete-caddie`,
-  getCaddies: `${API_ADMIN}/get-caddie`,
+  //golfset
+  golfset: `${API_ADMIN}/golf-set`,
+  //gloves
+  gloves: `${API_ADMIN}/glove`,
+  balls: `${API_ADMIN}/ball`,
 
   //carryset
-  createCarrySet: `${API_ADMIN}/create-carryset`,
-  updateCarrySet: `${API_ADMIN}/update-carryset`,
-  deleteCarrySet: `${API_ADMIN}/delete-carryset`,
-  getCarrySets: `${API_ADMIN}/get-carryset`,
+  createGolfset: `${API_ADMIN}/create-Golfset`,
+  updateGolfset: `${API_ADMIN}/update-Golfset`,
+  deleteGolfset: `${API_ADMIN}/delete-Golfset`,
+  getGolfsets: `${API_ADMIN}/get-Golfset`,
 
   //souvenir
   createSouvenir: `${API_ADMIN}/create-souvenir`,

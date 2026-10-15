@@ -11,7 +11,7 @@ export function SubmitButton({
   return (
     <RippleWaveButton
       type="submit"
-      variant="default"
+      // variant="default"
       enableWave
       enableRipple
       disabled={loading}

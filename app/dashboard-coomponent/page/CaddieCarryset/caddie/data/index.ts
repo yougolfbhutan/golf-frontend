@@ -1,30 +1,82 @@
 import * as Yup from "yup";
 import { RollerCoaster } from "lucide-react";
-import type { PermssionForm } from "../../../AcessessManagement/permission/data";
-//form Data
-export const CaddieFields: PermssionForm[] = [
+import type { FieldConfig } from "@/app/dashboard-coomponent/customDialogbox";
+
+export const GlovesFields: FieldConfig[] = [
   {
-    name: "caddiename",
-    label: "Caddie Name",
+    name: "name",
+    label: "Glove Name",
     type: "text",
-    placeholder: "Enter your Caddie Name",
-    validation: Yup.string().required("Caddie name is required"),
-    Icon: RollerCoaster,
-  },
-    {
-    name: "cidNo",
-    label: "CID No",
-    type: "text",
-    placeholder: "Enter CID No",
-    validation: Yup.string().required("CID No is required"),
+    placeholder: "Enter glove name",
+    validation: Yup.string().required("Glove name is required"),
     Icon: RollerCoaster,
   },
   {
-    name: "phone_number",
-    label: "Phone Number",
-    type: "text",
-    placeholder: "Enter Phone Number",
-    validation: Yup.string().required("Phone number is required"),
+    name: "audienceId",
+    label: "Audience Category",
+    type: "select",
+    placeholder: "Select audience category",
+    validation: Yup.string().required("Audience category is required"),
+    options: [
+      { label: "Mens", value: "1" },
+      { label: "Ladies", value: "2" },
+    ],
+  },
+  {
+    name: "size",
+    label: "Size",
+    type: "select",
+    placeholder: "Select size",
+    validation: Yup.string().required("Size is required"),
+    options: [
+      { label: "Small", value: "Small" },
+      { label: "Medium", value: "Medium" },
+      { label: "Large", value: "Large" },
+    ],
+  },
+  {
+    name: "handedness",
+    label: "Handedness",
+    type: "select",
+    placeholder: "Select handedness",
+    validation: Yup.string().required("Handedness is required"),
+    options: [
+      { label: "Left", value: "Left" },
+      { label: "Right", value: "Right" },
+    ],
+  },
+  {
+    name: "tierName",
+    label: "Tier",
+    type: "select",
+    placeholder: "Select tier",
+    validation: Yup.string().required("Tier is required"),
+    options: [
+      { label: "Standard", value: "standard" },
+      { label: "Premium", value: "premium" },
+    ],
+  },
+  {
+    name: "quantity",
+    label: "Quantity",
+    type: "number",
+    placeholder: "Enter quantity",
+    validation: Yup.number().min(0).required("Quantity is required"),
+    Icon: RollerCoaster,
+  },
+  {
+    name: "price",
+    label: "Price",
+    type: "number",
+    placeholder: "Enter price",
+    validation: Yup.number().min(0).required("Price is required"),
+    Icon: RollerCoaster,
+  },
+  {
+    name: "image",
+    label: "Upload Image",
+    type: "image",
+    placeholder: "Upload image",
     Icon: RollerCoaster,
   },
 ];

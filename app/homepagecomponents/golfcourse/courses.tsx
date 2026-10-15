@@ -55,7 +55,7 @@ export const coursesdata: Course[] = [
     tagline: "Mountain grandeur, immaculate greens",
     holes: 9,
     par: 72,
-    length: "6,820 yds",
+    length: "6,608 yds",
     rating: "73.1 / 138",
     founded: "1964",
     green_fee: "$95",

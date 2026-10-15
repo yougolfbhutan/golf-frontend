@@ -1,0 +1,13 @@
+$kind: http-request
+url: https://golf-backend-4h1w.onrender.com/roles
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\":\"Admin\",\r
+
+    \    \"permissions\":[\"22b28331-13ca-4163-9b3b-42230b25ab62\"]\r
+
+    }"
+order: 1000

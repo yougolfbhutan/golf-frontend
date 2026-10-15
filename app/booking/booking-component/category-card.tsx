@@ -49,7 +49,7 @@ export default function CategoryCard({ category, selected, onSelect }: Props) {
 
       <p className="mt-auto pt-4 text-base font-extrabold">
         {currency} {price.toLocaleString("en-US")}{" "}
-        <span className="text-xs font-semibold text-slate-500">/ golfer</span>
+        <span className="text-xs font-semibold text-slate-500">/ golfer / round</span>
       </p>
     </SelectableCard>
   );

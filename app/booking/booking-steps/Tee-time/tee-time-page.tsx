@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { format, isBefore, parseISO, startOfToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import type { BookingState } from "../../interface/interface";
@@ -14,11 +14,14 @@ type Props = {
   onChange: (patch: Partial<BookingState>) => void;
   /** days of the week the course is closed: 0 = Sunday ... 6 = Saturday */
   closedDays?: number[];
+     footer?: ReactNode;
+  
 };
 
 export default function DateTimeStep({
   booking,
   onChange,
+  footer,
   closedDays = [],
 }: Props) {
   const { slots, loading, error } = useTeeSlots(booking.courseId, booking.date);
@@ -124,6 +127,8 @@ export default function DateTimeStep({
           }
         />
       </section>
+                  {footer && <div className="border-t border-slate-200 pt-6">{footer}</div>}
+
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import QuantityStepper from "../../booking-component/quantity-stepper";
 import ImageSliderCard from "../../booking-component/image-slider-component";
@@ -23,11 +23,13 @@ import { useKitItems } from "./helper/useKitItems";
 type Props = {
   booking: BookingState;
   onChange: (patch: Partial<BookingState>) => void;
+      footer?: ReactNode;
+  
 };
 
 type Filters = Record<FilterKey, string>;
 
-export default function PackageStep({ booking, onChange }: Props) {
+export default function PackageStep({footer, booking, onChange }: Props) {
   const { packageId, kit, golfers } = booking;
   // falls back to Bhutanese until a category is picked on the first step
   const category = (booking.categoryId ?? "bhutanese") as CategoryId;
@@ -292,6 +294,8 @@ export default function PackageStep({ booking, onChange }: Props) {
           </div>
         </div>
       </section>
+                        {footer && <div className="border-t border-slate-200 pt-6">{footer}</div>}
+
     </div>
   );
 }

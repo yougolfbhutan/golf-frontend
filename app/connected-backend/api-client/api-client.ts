@@ -59,7 +59,7 @@ apiClient.interceptors.response.use(
         console.log("🔒 Refresh failed - redirecting to login",refreshError);
         processQueue(refreshError);
         console.log("🔒 Refresh failed - redirecting to login");
-        window.location.href = "/login";
+        window.location.href = "/signin";
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-// import { DataTable, Column, ActionConfig } from "@/component/table";
 import { Delete, Edit, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,77 +12,77 @@ import {
   type Column,
 } from "../../../table/table";
 import { CustomDialog } from "../../../customDialogbox";
-import { useCarrySetMutations, useGetCarrySets } from "./tanstack";
-import type {
-  CarrySet,
-  CarrySetAttributes,
-  CarrySetData,
-} from "./interface/indec";
-import { CarrySetFields } from "./data";
-import { useGetCaddiesList } from "../caddie/tanstack";
 
-export default function Carryset() {
-  const [selected, setSelected] = useState<CarrySet[]>([]);
+import { useGetGolfSet, useGolfSetMutations } from "./tanstack";
+import type { GolfSetAttributes, GolfSetData } from "./interface/indec";
+import { GolfSetFields } from "./data";
+
+export default function GolfSet() {
+  const [selected, setSelected] = useState<GolfSetData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<CarrySet | null>(null);
+  const [editingGolfSet, setEditingGolfSet] = useState<GolfSetData | null>(
+    null,
+  );
 
-  //   // Fetch roles, permissions, and users
+  // Fetch golf sets
   const [page, setPage] = useState(1);
   const limit = 10;
-  const { data: carrysetData, isFetching } = useGetCarrySets(page, limit);
-  console.log("carrysetData", carrysetData?.data);
-  const { data: caddiesData } = useGetCaddiesList();
-  const carrysetCaddiesOptions =
-    caddiesData?.data?.caddies.map((caddie) => ({
-      label: caddie.caddiename,
-      value: caddie.id.toString(),
-    })) || [];
+  const { data: golfSetData, isFetching } = useGetGolfSet(page, limit);
 
-  const newCarrySetFields = CarrySetFields(carrysetCaddiesOptions);
-  //   // User mutations
-  const { createCarrySet, updateCarrySet, deleteCarrySet } =
-    useCarrySetMutations({
-      onSuccess: (data) => {
-        showToast.success(data.message, {
-          duration: 5000,
-          position: "top-right",
-          transition: "topBounce",
-          icon: "",
-          sound: true,
-        });
-        setIsDialogOpen(false);
-        setEditingUser(null);
-      },
-      onError: (error) => {
-        console.log("Error", error);
-        showToast.error(error?.data?.message || "Something went wrong", {
-          duration: 5000,
-          position: "top-right",
-          transition: "topBounce",
-          icon: "",
-          sound: true,
-        });
-      },
-    });
-  const columns: Column<CarrySet>[] = [
-    { header: "Name", accessor: "carrysetname" },
+  // Golf set mutations
+  const { createGolfSet, updateGolfSet, deleteGolfSet } = useGolfSetMutations({
+    onSuccess: (data) => {
+      showToast.success(data.message, {
+        duration: 5000,
+        position: "top-right",
+        transition: "topBounce",
+        icon: "",
+        sound: true,
+      });
+      setIsDialogOpen(false);
+      setEditingGolfSet(null);
+    },
+    onError: (error) => {
+      console.log("Error", error);
+      showToast.error(error?.data?.message || "Something went wrong", {
+        duration: 5000,
+        position: "top-right",
+        transition: "topBounce",
+        icon: "",
+        sound: true,
+      });
+    },
+  });
+
+  const columns: Column<GolfSetData>[] = [
+    { header: "GolfSet Name", accessor: "name" },
+    { header: "Description", accessor: "description" },
     {
-      header: "People Category",
-      render: (_value, row) => row.peopleCategory?.peoplecategoryname || "N/A",
+      header: "Audience",
+      render: (_value, row) => row.audience?.name || "N/A",
     },
     {
-      header: "Round Type",
-      render: (_value, row) => row.roundType?.roundname || "N/A",
+      header: "Handedness",
+      render: (_value, row) =>
+        row.handedness
+          ? row.handedness.charAt(0).toUpperCase() + row.handedness.slice(1)
+          : "N/A",
+    },
+    { header: "Tier", accessor: "tierName" },
+    { header: "Quantity", accessor: "quantity" },
+    {
+      header: "Price",
+      render: (_value, row) => `${row.price}`,
     },
     {
-      header: "Caddie Name",
-      render: (_value, row) => row.caddie?.caddiename || "N/A",
+      header: "Available",
+      render: (_value, row) => (row.isAvailable ? "Yes" : "No"),
     },
   ];
 
-  //   // Table actions
-  const getActions = (): ActionConfig<CarrySet>[] => [
+  // Table actions
+  const getActions = (): ActionConfig<GolfSetData>[] => [
     {
       label: "Edit",
       icon: <Edit className="h-4 w-4" />,
@@ -96,69 +95,69 @@ export default function Carryset() {
     },
   ];
 
-  //   // Edit user
-  const handleEdit = (row: CarrySet) => {
-    setEditingUser(row);
+  // Edit golf set
+  const handleEdit = (row: GolfSetData) => {
+    setEditingGolfSet(row);
     setIsDialogOpen(true);
   };
 
-  //   // Delete user
-  const handleDelete = (row: CarrySet) => {
+  // Delete golf set
+  const handleDelete = (row: GolfSetData) => {
     const confirmed = window.confirm(
-      `⚠️ Are you sure you want to delete the caddie "${row.carrysetname}"? This action cannot be undone.`,
+      `⚠️ Are you sure you want to delete the golf set "${row.name}"? This action cannot be undone.`,
     );
     if (!confirmed) return;
-    deleteCarrySet(row.id);
+    deleteGolfSet(row.id);
   };
 
-  //   // Handle form submit
-  //   // Handle form submit
+  // Handle form submit
   const handleSubmit = (values: Record<string, any>) => {
     const formData = new FormData();
 
-    formData.append("carrysetname", values.carrysetname);
-    formData.append("peopleId", String(Number(values.peopleId)));
-    formData.append("roundId", String(Number(values.roundId)));
-    formData.append("caddieId", String(Number(values.caddieId)));
-    formData.append("availability", String(values.availability ?? true));
-
-    // urls is a mix of kept string URLs and new File objects
-    const urlArray: (string | File)[] = Array.isArray(values.urls)
-      ? values.urls
-      : [];
-    const existingUrls = urlArray.filter(
-      (u): u is string => typeof u === "string",
+    formData.append("name", values.name);
+    formData.append("description", values.description);
+    formData.append("audienceId", String(Number(values.audienceId)));
+    formData.append("handedness", values.handedness);
+    formData.append("tierName", values.tierName);
+    formData.append("quantity", String(Number(values.quantity)));
+    formData.append("price", String(Number(values.price)));
+    formData.append(
+      "isAvailable",
+      String(values.isAvailable ?? editingGolfSet?.isAvailable ?? true),
     );
-    const newFiles = urlArray.filter((u): u is File => u instanceof File);
 
-    // Tell the backend which existing images to keep
-    formData.append("existingUrls", JSON.stringify(existingUrls));
+    // image is either a new File or the existing URL string
+    if (values.image instanceof File) {
+      formData.append("image", values.image);
+    } else if (typeof values.image === "string" && values.image) {
+      // Tell the backend to keep the current image
+      formData.append("imageUrl", values.image);
+    }
 
-    // Attach new files for the backend to upload
-    newFiles.forEach((file) => {
-      formData.append("file", file);
-    });
-
-    if (editingUser?.id) {
-      updateCarrySet({
-        id: editingUser.id,
-        data: formData as unknown as CarrySetAttributes,
+    if (editingGolfSet?.id) {
+      updateGolfSet({
+        id: editingGolfSet.id,
+        data: formData as unknown as GolfSetAttributes,
       });
     } else {
-      createCarrySet(formData as unknown as CarrySetAttributes);
+      createGolfSet(formData as unknown as GolfSetAttributes);
     }
   };
 
-  //   // Filter users by search query
-  const filteredUsers = useMemo(() => {
-    if (!carrysetData?.data?.carrySets) return [];
-    if (!searchQuery.trim()) return carrysetData.data.carrySets;
+  // Filter golf sets by search query
+  const filteredGolfSets = useMemo(() => {
+    const list = golfSetData?.data?.data;
+    if (!list) return [];
+    if (!searchQuery.trim()) return list;
 
     const query = searchQuery.toLowerCase();
-    return carrysetData.data.carrySets.filter((carryset) =>
-      carryset.carrysetname.toLowerCase().includes(query),
+    return list.filter(
+      (set) =>
+        set.name.toLowerCase().includes(query) ||
+        set.tierName.toLowerCase().includes(query) ||
+        set.audience?.name?.toLowerCase().includes(query),
     );
-  }, [carrysetData, searchQuery]);
+  }, [golfSetData, searchQuery]);
 
   return (
     <div className="min-h-screen w-full p-6">
@@ -179,13 +178,12 @@ export default function Carryset() {
 
         <Button
           onClick={() => {
-            console.log("hy");
-            setEditingUser(null);
+            setEditingGolfSet(null);
             setIsDialogOpen(true);
           }}
           className="bg-orange-500 text-white hover:bg-orange-600 h-12 px-6 rounded-md shadow-md"
         >
-          Create Carry Set
+          Create Golf Set
         </Button>
       </div>
 
@@ -194,33 +192,35 @@ export default function Carryset() {
         isOpen={isDialogOpen}
         onClose={() => {
           setIsDialogOpen(false);
-          setEditingUser(null);
+          setEditingGolfSet(null);
         }}
-        title={editingUser ? "Edit Carry Set" : "Create Carry Set"}
-        fields={newCarrySetFields}
+        title={editingGolfSet ? "Edit Golf Set" : "Create Golf Set"}
+        fields={GolfSetFields}
         defaultValues={{
-          carrysetname: editingUser?.carrysetname || "",
-          peopleId: editingUser?.peopleCategory?.id?.toString() || null,
-          roundId: editingUser?.roundType?.id?.toString() || null,
-          caddieId: editingUser?.caddie?.id?.toString() || null,
-          urls: editingUser?.urls || [], // keep as array, not joined string
+          name: editingGolfSet?.name || "",
+          description: editingGolfSet?.description || "",
+          audienceId: editingGolfSet?.audienceId?.toString() || "",
+          handedness: editingGolfSet?.handedness || "",
+          tierName: editingGolfSet?.tierName || "",
+          quantity: editingGolfSet?.quantity ?? "",
+          price: editingGolfSet?.price ?? "",
+          image: editingGolfSet?.imageUrl || "",
         }}
-        OnSubmitTitle={editingUser ? "Update Carry Set" : "Create Carry Set"}
-        CustomDialogBoxStyle="px-8 py-6 flex flex-col gap-5 overflow-y-auto flex-1
-"
+        OnSubmitTitle={editingGolfSet ? "Update Golf Set" : "Create Golf Set"}
+        CustomDialogBoxStyle="px-8 py-6 grid grid-cols-3 gap-5 overflow-y-auto flex-1"
         onSubmit={handleSubmit}
       />
 
-      {/* User Table */}
+      {/* Golf Set Table */}
       <DataTable
-        data={filteredUsers}
+        data={filteredGolfSets}
         columns={columns}
         actions={getActions()}
         selectable
         onSelectionChange={setSelected}
         serverPagination={{
           currentPage: page,
-          totalPages: carrysetData?.data?.meta?.totalPages || 1,
+          totalPages: golfSetData?.data?.totalPages || 1,
           onPageChange: setPage,
           isFetching,
         }}

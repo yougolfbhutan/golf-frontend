@@ -7,6 +7,7 @@ import { useGetGloves } from "../tanstack-function/glove-tanstack";
 export function useKitItems() {
   const { data, isLoading, isError } = useGetGolfSets();
    const { data: gloveData, isLoading: isGloveLoading, isError: isGloveError } = useGetGloves();
+   console.log(gloveData?.data.data)
     const { data: ballData, isLoading: isBallLoading, } = useGetBalls();
   const sets = mapGolfSets(data?.data.data ?? []);
   const gloves = mapGloves(gloveData?.data.data ?? [])

@@ -16,8 +16,7 @@ interface Props {
 export default function ClientLayout({ children }: Props) {
   const pathname = usePathname();
 
-  const hideHeaderPaths = ["/dashboard", "/login", "/register"];
-  const shouldHideHeader = pathname
+const hideHeaderPaths = ["/dashboard", "/login", "/register", "/signin"];  const shouldHideHeader = pathname
     ? hideHeaderPaths.some((path) => pathname.startsWith(path))
     : false;
 

@@ -28,7 +28,7 @@ const TITLES: Record<AuthTab, string> = {
   register: "Create your golfer ID",
 };
 
-function AuthTabs({
+export function AuthTabs({
   value,
   onChange,
 }: {

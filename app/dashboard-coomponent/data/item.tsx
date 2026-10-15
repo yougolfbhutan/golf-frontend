@@ -11,13 +11,14 @@ import {
 import Role from "../page/AcessessManagement/role/page";
 import User from "../page/AcessessManagement/user/user";
 import PermissionPage from "../page/AcessessManagement/permission/permission";
-import Caddie from "../page/CaddieCarryset/caddie/page";
-import Carryset from "../page/CaddieCarryset/carryset/page";
 import GolfSouvenirs from "../page/Golf-Accessories/golf-souvenirs/page";
 import ItemVariants from "../page/Golf-Accessories/golf-items/page";
 import BookingPage from "../page/Booking/page";
 import ApprovalItemsPage from "../page/Accessories-Item/page";
 import PaymentPage from "../page/payment/page";
+import GolfSet from "../page/CaddieCarryset/carryset/page";
+import Gloves from "../page/CaddieCarryset/caddie/page";
+import GolfBalls from "../page/CaddieCarryset/glofballs/page";
 
 export const menuContent: Record<string, React.ReactNode> = {
   Dashboard: (
@@ -30,42 +31,16 @@ export const menuContent: Record<string, React.ReactNode> = {
   User: <User />,
   Permission: <PermissionPage />,
   Role: <Role />,
-  Caddie: <Caddie />,
-  Carryset: <Carryset />,
+  Gloves: <Gloves />,
+  GolfSet: <GolfSet />,
+  "Golf Balls":<GolfBalls/>,
   "Souvenirs Variants": <GolfSouvenirs />,
   "Golf Items": <ItemVariants />,
   "Approve Booking": <BookingPage />,
   // Webhooks: <DepartmentComponent />,
   "Accessories Items Approval": <ApprovalItemsPage />,
   "Payments": <PaymentPage />,
-  // "Product Unit Cost": <ProductUnitCostComponent />,
-  // "Purchase Invoice Payment": <PurchaseInvoicePaymentComponent />,
-  // "Other Production Cost": <OtherProductionCostComponent />,
-  // "Labour Cost": <LabourCostComponent />,
-  // Labour: <LabourComponent />,
-  // "Machines Cost": <MachinesCostComponent />,
-  // Machines: <MachinesComponent />,
-  // "Production Batch": <ProductionBatchComponent />,
-  // Customer: <Customer />,
-  // "Sales": <SalesInvoicesComponent />,
-  // "Sales Receipt": <SalesReceiptComponent />,
-  // Forms: <div className="text-7xl font-bold">Forms</div>,
-  // "Price List": <PriceListComponent />,
-  // "Discount Scheme": <DiscountSchemeComponent />,
-  // //ERP
-  // "Leave Types": <LeaveTypesComponent />,
-  // "Leave Application": <LeaveApplicationComponent />,
-  // "Leave Encashment": <LeaveEncashmentComponent />,
-  // Payroll: <PayRollComponent />,
-  // "Purchase Approval": <PurchaseInvoicePaymentApproval />,
-  // "Fixed Assets approval":<FixedAssetsApprovalComponent/>,
-  // //INVENTORY MANAGEMENT
-  // "Raw Material Inventory": <RawMaterialInventoryComponent />,
-  // "WIP Inventory Component": <WIPInventoryComponent />,
-  // //Account Costing
-  // "Raw Material Categories": <RawMaterialComponent />,
-  // //Assets  "Fixed Assets": <div className="text-7xl font-bold">Fixed Assets</div>,
-  // "Fixed Assets": <FixedAssetsComponent />,
+
 };
 export const mainApps = [
   { label: "Access Management", icon: MoreHorizontal },

@@ -72,26 +72,12 @@ export default function TimeSlotPicker({
                       : "text-emerald-700",
                 )}
               >
-                {spotsLabel(s.spotsLeft, golfers)}
+                {/* {spotsLabel(s.spotsLeft, golfers)} */}
               </span>
             </ToggleGroupItem>
           );
         })}
       </ToggleGroup>
-
-      {/* legend */}
-      <div className="flex flex-wrap gap-4 text-xs text-slate-500">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-emerald-600" /> Open
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-amber-500" /> Filling up
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-slate-300" /> Full or too few
-          spots
-        </span>
-      </div>
     </div>
   );
 }

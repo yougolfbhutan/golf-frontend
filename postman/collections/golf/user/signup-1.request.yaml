@@ -1,5 +1,30 @@
 $kind: http-request
 name: signup
-url: ""
-method: GET
+url: https://golf-backend-4h1w.onrender.com/users
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \   \"name\": \"Ratnay Rana\",\r
+
+    \  \"email\": \"ranaratnay1794@example.com\",\r
+
+    \  \"phone_no\": \"17949827\",\r
+
+    \  \"identification_no\": \"11311002496\",\r
+
+    \  \"password\": \"Admin@1234\",\r
+
+    \  \"is_active\": true,\r
+
+    \  \"is_verified\": false,\r
+
+    \r
+
+    \    \"roles\": [\"6a485ef8-b04a-42ff-a011-66fe8d2c5a45\"],\r
+
+    \    \"permission\": [\"22b28331-13ca-4163-9b3b-42230b25ab62\"]\r
+
+    }"
 order: 2000

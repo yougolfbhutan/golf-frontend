@@ -5,20 +5,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ADMIN_API_URL from "@/app/connected-backend/route/admin/adim-route";
 import apiClient from "@/app/connected-backend/api-client/api-client";
 import type { errorResponse } from "@/app/universal-interface/error.interface";
-import type { CarrySetAttributes, GetCarrySetsResponse } from "../interface/indec";
-// import type { CarrySetAttributes, GetCarrySetsResponse } from "../interface";
-// import type { GetCarrySetsResponse, CarrySetAttributes } from "../interface";
+import type { GolfSetAttributes, GolfSetGetResponse } from "../interface/indec";
+
 
 interface MutationOptions {
-  onSuccess?: (data: GetCarrySetsResponse) => void;
+  onSuccess?: (data: GolfSetGetResponse) => void;
   onError?: (error: errorResponse) => void;
 }
 
 // ============= API CALLS =============
 
-// Create CarrySet
-const createCarrySet = async (data: CarrySetAttributes) => {
-  const response = await apiClient.post(ADMIN_API_URL.createCarrySet, data);
+// Create Golfset
+const createGolfSet = async (data: GolfSetAttributes) => {
+  const response = await apiClient.post(ADMIN_API_URL.golfset, data);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -26,16 +25,16 @@ const createCarrySet = async (data: CarrySetAttributes) => {
   return response.data;
 };
 
-// Update CarrySet
-const updateCarrySet = async ({
+// Update Golfset
+const updateGolfSet = async ({
   id,
   data,
 }: {
   id: number | string;
-  data: CarrySetAttributes;
+  data: GolfSetAttributes;
 }) => {
-  const response = await apiClient.put(
-    `${ADMIN_API_URL.updateCarrySet}/${id}`,
+  const response = await apiClient.patch(
+    `${ADMIN_API_URL.golfset}/${id}`,
     data
   );
 
@@ -45,41 +44,26 @@ const updateCarrySet = async ({
   return response.data;
 };
 
-// Delete CarrySet
-const deleteCarrySet = async (id: number | string) => {
-  const response = await apiClient.delete(`${ADMIN_API_URL.deleteCarrySet}/${id}`);
+// Delete Golfset
+const deleteGolfSet = async (id: number | string) => {
+  const response = await apiClient.delete(`${ADMIN_API_URL.golfset}/${id}`);
 
   if (response.data?.success === false) {
     throw { data: response.data };
   }
   return response.data;
 };
-
-// Get CarrySets List
-// const getCarrySets = async (): Promise<GetCarrySetsResponse> => {
-//   const response = await apiClient.get(ADMIN_API_URL.getCaddies);
-
-//   if (response.data?.success === false) {
-//     throw { data: response.data };
-//   }
-
-//   return response.data;
-// };
-
-// ============= HOOKS =============
-
-// Hook for all CarrySet mutations
-export const useCarrySetMutations = (options?: MutationOptions) => {
+export const useGolfSetMutations = (options?: MutationOptions) => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation<
-    GetCarrySetsResponse,
+    GolfSetGetResponse,
     errorResponse,
-    CarrySetAttributes
+    GolfSetAttributes
   >({
-    mutationFn: createCarrySet,
+    mutationFn: createGolfSet,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["carryset-list"] });
+      queryClient.invalidateQueries({ queryKey: ["Golfset-list"] });
       options?.onSuccess?.(data);
     },
     onError: (error) => {
@@ -88,13 +72,13 @@ export const useCarrySetMutations = (options?: MutationOptions) => {
   });
 
   const updateMutation = useMutation<
-    GetCarrySetsResponse,
+    GolfSetGetResponse,
     errorResponse,
-    { id: number | string; data: CarrySetAttributes }
+    { id: number | string; data: GolfSetAttributes }
   >({
-    mutationFn: updateCarrySet,
+    mutationFn: updateGolfSet,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["carryset-list"] });
+      queryClient.invalidateQueries({ queryKey: ["Golfset-list"] });
       options?.onSuccess?.(data);
     },
     onError: (error) => {
@@ -103,13 +87,13 @@ export const useCarrySetMutations = (options?: MutationOptions) => {
   });
 
   const deleteMutation = useMutation<
-    GetCarrySetsResponse,
+    GolfSetGetResponse,
     errorResponse,
     number | string
   >({
-    mutationFn: deleteCarrySet,
+    mutationFn: deleteGolfSet,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["carryset-list"] });
+      queryClient.invalidateQueries({ queryKey: ["Golfset-list"] });
       options?.onSuccess?.(data);
     },
     onError: (error) => {
@@ -119,11 +103,11 @@ export const useCarrySetMutations = (options?: MutationOptions) => {
   });
 
   return {
-    createCarrySet: createMutation.mutate,
+    createGolfSet: createMutation.mutate,
     isCreating: createMutation.isPending,
-    updateCarrySet: updateMutation.mutate,
+    updateGolfSet: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
-    deleteCarrySet: deleteMutation.mutate,
+    deleteGolfSet: deleteMutation.mutate,
     isDeleting: deleteMutation.isPending,
     isLoading:
       createMutation.isPending ||
@@ -133,11 +117,11 @@ export const useCarrySetMutations = (options?: MutationOptions) => {
 };
 
 
-export function useGetCarrySets(page: number, limit: number = 10) {
-  return useQuery<GetCarrySetsResponse>({
-    queryKey: ["carryset-list", page, limit],
+export function useGetGolfSet(page: number, limit: number = 10) {
+  return useQuery<GolfSetGetResponse>({
+    queryKey: ["Golfset-list", page, limit],
     queryFn: async () => {
-    const res = await  apiClient.get(`${ADMIN_API_URL.getCarrySets}?page=${page}&limit=${limit}`);
+    const res = await  apiClient.get(`${ADMIN_API_URL.golfset}?page=${page}&limit=${limit}`);
       return res.data;
     },
     // Keeps the previous page's rows visible while the next page loads,

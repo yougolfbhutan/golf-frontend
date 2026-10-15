@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
-import TeeTimeSearch from "@/app/booking/tee-time/tee-time-search/tee-options";
 
 export interface HeroSlide {
   src: string;
@@ -112,9 +111,6 @@ export default function HeroSlider({
           />
         ))}
       </div>
-      {/* Headline + CTA */}
-
-      <TeeTimeSearch className="absolute inset-x-0 bottom-20 z-10 mx-auto max-w-7xl px-6  lg:px-10" />
-    </section>
+        </section>
   );
 }

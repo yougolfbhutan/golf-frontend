@@ -5,19 +5,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ADMIN_API_URL from "@/app/connected-backend/route/admin/adim-route";
 import apiClient from "@/app/connected-backend/api-client/api-client";
 import type { errorResponse } from "@/app/universal-interface/error.interface";
-import type { CaddieFormAttributes, GetCaddiesResponse } from "../interface";
-// import type { GetCaddiesResponse, CaddieFormAttributes } from "../interface";
+import type { GlovesGetResponse, GlovesPayloadAttribes } from "../interface";
+// import type { GlovesGetResponse, GlovesPayloadAttribes } from "../interface";
 
 interface MutationOptions {
-  onSuccess?: (data: GetCaddiesResponse) => void;
+  onSuccess?: (data: GlovesGetResponse) => void;
   onError?: (error: errorResponse) => void;
 }
 
 // ============= API CALLS =============
 
-// Create Caddie
-const createCaddie = async (data: CaddieFormAttributes) => {
-  const response = await apiClient.post(ADMIN_API_URL.createCaddie, data);
+// Create Gloves
+const createGloves = async (data: GlovesPayloadAttribes) => {
+  const response = await apiClient.post(ADMIN_API_URL.gloves, data);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -25,16 +25,16 @@ const createCaddie = async (data: CaddieFormAttributes) => {
   return response.data;
 };
 
-// Update Caddie
-const updateCaddie = async ({
+// Update Gloves
+const updateGloves = async ({
   id,
   data,
 }: {
   id: number | string;
-  data: CaddieFormAttributes;
+  data: GlovesPayloadAttribes;
 }) => {
-  const response = await apiClient.put(
-    `${ADMIN_API_URL.updateCaddie}/${id}`,
+  const response = await apiClient.patch(
+    `${ADMIN_API_URL.gloves}/${id}`,
     data
   );
 
@@ -44,9 +44,9 @@ const updateCaddie = async ({
   return response.data;
 };
 
-// Delete Caddie
-const deleteCaddie = async (id: number | string) => {
-  const response = await apiClient.delete(`${ADMIN_API_URL.deleteCaddie}/${id}`);
+// Delete Gloves
+const deleteGloves = async (id: number | string) => {
+  const response = await apiClient.delete(`${ADMIN_API_URL.gloves}/${id}`);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -54,9 +54,9 @@ const deleteCaddie = async (id: number | string) => {
   return response.data;
 };
 
-// Get Caddies List
-const getCaddies = async (): Promise<GetCaddiesResponse> => {
-  const response = await apiClient.get(ADMIN_API_URL.getCaddies);
+// Get Glovess List
+const getGloves = async (): Promise<GlovesGetResponse> => {
+  const response = await apiClient.get(ADMIN_API_URL.gloves);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -67,18 +67,18 @@ const getCaddies = async (): Promise<GetCaddiesResponse> => {
 
 // ============= HOOKS =============
 
-// Hook for all Caddie mutations
-export const useCaddieMutations = (options?: MutationOptions) => {
+// Hook for all Gloves mutations
+export const useGlovesMutations = (options?: MutationOptions) => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation<
-    GetCaddiesResponse,
+    GlovesGetResponse,
     errorResponse,
-    CaddieFormAttributes
+    GlovesPayloadAttribes
   >({
-    mutationFn: createCaddie,
+    mutationFn: createGloves,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["caddie-list"] });
+      queryClient.invalidateQueries({ queryKey: ["Gloves-list"] });
       options?.onSuccess?.(data);
     },
     onError: (error) => {
@@ -87,13 +87,13 @@ export const useCaddieMutations = (options?: MutationOptions) => {
   });
 
   const updateMutation = useMutation<
-    GetCaddiesResponse,
+    GlovesGetResponse,
     errorResponse,
-    { id: number | string; data: CaddieFormAttributes }
+    { id: number | string; data: GlovesPayloadAttribes }
   >({
-    mutationFn: updateCaddie,
+    mutationFn: updateGloves,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["caddie-list"] });
+      queryClient.invalidateQueries({ queryKey: ["Gloves-list"] });
       options?.onSuccess?.(data);
     },
     onError: (error) => {
@@ -102,13 +102,13 @@ export const useCaddieMutations = (options?: MutationOptions) => {
   });
 
   const deleteMutation = useMutation<
-    GetCaddiesResponse,
+    GlovesGetResponse,
     errorResponse,
     number | string
   >({
-    mutationFn: deleteCaddie,
+    mutationFn: deleteGloves,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["caddie-list"] });
+      queryClient.invalidateQueries({ queryKey: ["Gloves-list"] });
       options?.onSuccess?.(data);
     },
     onError: (error) => {
@@ -118,11 +118,11 @@ export const useCaddieMutations = (options?: MutationOptions) => {
   });
 
   return {
-    createCaddie: createMutation.mutate,
+    createGloves: createMutation.mutate,
     isCreating: createMutation.isPending,
-    updateCaddie: updateMutation.mutate,
+    updateGloves: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
-    deleteCaddie: deleteMutation.mutate,
+    deleteGloves: deleteMutation.mutate,
     isDeleting: deleteMutation.isPending,
     isLoading:
       createMutation.isPending ||
@@ -132,11 +132,11 @@ export const useCaddieMutations = (options?: MutationOptions) => {
 };
 
 
-export function useGetCaddies(page: number, limit: number = 10) {
-  return useQuery<GetCaddiesResponse>({
-    queryKey: ["caddie-list", page, limit],
+export function useGetGloves(page: number, limit: number = 10) {
+  return useQuery<GlovesGetResponse>({
+    queryKey: ["Gloves-list", page, limit],
     queryFn: async () => {
-    const res = await  apiClient.get(`${ADMIN_API_URL.getCaddies}?page=${page}&limit=${limit}`);
+    const res = await  apiClient.get(`${ADMIN_API_URL.gloves}?page=${page}&limit=${limit}`);
       return res.data;
     },
     // Keeps the previous page's rows visible while the next page loads,
@@ -146,10 +146,10 @@ export function useGetCaddies(page: number, limit: number = 10) {
 }
 
 
-export const useGetCaddiesList = () => {
-  return useQuery<GetCaddiesResponse, errorResponse>({
-    queryKey: ["caddie-list"],
-    queryFn: getCaddies,
+export const useGetGlovesList = () => {
+  return useQuery<GlovesGetResponse, errorResponse>({
+    queryKey: ["Gloves-list"],
+    queryFn: getGloves,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

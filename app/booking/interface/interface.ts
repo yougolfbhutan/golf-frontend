@@ -16,7 +16,7 @@ export type BookingState = {
 export const initialBooking: BookingState = {
   categoryId: null,
   courseId: null,
-  golfers: 2,
+  golfers:1,
   date: null,
   slot: null,
   packageId: null,

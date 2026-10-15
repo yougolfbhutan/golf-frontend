@@ -85,32 +85,32 @@ export default function Sidebar({
       ],
     },
     {
-      id: "CarrysetCaddie",
-      label: "CarrysetCaddie",
+      id: "golfkits",
+      label: "Golf kits",
       icon: ShoppingCart,
       hasSubmenu: true,
       subItems: [
         {
-          label: "Caddie",
+          label: "Gloves",
           onClick: () => {
-            setActiveApp("CarrysetCaddie");
-            setActiveMenuItem("Caddie");
+            setActiveApp("golfkits");
+            setActiveMenuItem("Gloves");
           },
         },
         {
-          label: "Carryset",
+          label: "GolfSet",
           onClick: () => {
-            setActiveApp("CarrysetCaddie");
-            setActiveMenuItem("Carryset");
+            setActiveApp("golfkits");
+            setActiveMenuItem("GolfSet");
           },
         },
-        // {
-        //   label: "Sales Receipt",
-        //   onClick: () => {
-        //     setActiveApp("CarrysetCaddie");
-        //     setActiveMenuItem("Sales Receipt");
-        //   },
-        // },
+        {
+          label: "Golf Balls",
+          onClick: () => {
+            setActiveApp("golfkits");
+            setActiveMenuItem("Golf Balls");
+          },
+        },
         // {
         //   label: "Discount Scheme",
         //   onClick: () => {
