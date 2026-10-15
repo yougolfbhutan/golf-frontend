@@ -176,12 +176,12 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
                 ))}
               </ul>
 
-              <p className="mt-4">
+              {/* <p className="mt-4">
                 <span className="text-xl font-extrabold">
                   {formatPrice(p.prices[category], category)}
                 </span>{" "}
                 <span className="text-xs text-slate-500">/ golfer</span>
-              </p>
+              </p> */}
               <p className="text-xs text-slate-500">
                 Total for {golfers} {golfers === 1 ? "golfer" : "golfers"}:{" "}
                 {formatPrice(p.prices[category] * golfers, category)}
