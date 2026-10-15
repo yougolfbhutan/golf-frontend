@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import { CalendarDays, Check, Flag, Mail, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   reference?: string;
@@ -13,7 +16,7 @@ type Props = {
   total: string;
   onBookAnother?: () => void;
   /** Where golfers see their bookings */
-  bookingsHref?: string;
+  homeHref?: string;
 };
 
 export default function BookingConfirmed({
@@ -25,8 +28,10 @@ export default function BookingConfirmed({
   packageLabel,
   total,
   onBookAnother,
-  bookingsHref = "/my-bookings",
+  homeHref = "/",
 }: Props) {
+  const router = useRouter();
+
   return (
     <div
       role="status"
@@ -47,11 +52,12 @@ export default function BookingConfirmed({
           Your tee time is requested
         </h2>
         <p className="mt-2 max-w-md text-[15px] leading-relaxed text-slate-600">
-          Thank you! We&rsquo;ve sent your booking to <strong>{courseName}</strong>. The course
-          will confirm it shortly
+          Thank you! We&rsquo;ve sent your booking to{" "}
+          <strong>{courseName}</strong>. The course will confirm it shortly
           {email ? (
             <>
-              {" "}and we&rsquo;ll email you at <strong>{email}</strong>
+              {" "}
+              and we&rsquo;ll email you at <strong>{email}</strong>
             </>
           ) : null}
           .
@@ -69,14 +75,32 @@ export default function BookingConfirmed({
 
       {/* Details */}
       <dl className="mx-6 divide-y divide-slate-100 rounded-2xl border border-slate-100 sm:mx-10">
-        <Detail icon={<Flag className="h-4 w-4" />} label="Course" value={courseName} />
-        <Detail icon={<CalendarDays className="h-4 w-4" />} label="When" value={dateLabel} />
-        <Detail icon={<Users className="h-4 w-4" />} label="Golfers" value={golfersLabel} />
+        <Detail
+          icon={<Flag className="h-4 w-4" />}
+          label="Course"
+          value={courseName}
+        />
+        <Detail
+          icon={<CalendarDays className="h-4 w-4" />}
+          label="When"
+          value={dateLabel}
+        />
+        <Detail
+          icon={<Users className="h-4 w-4" />}
+          label="Golfers"
+          value={golfersLabel}
+        />
         {packageLabel && (
-          <Detail icon={<Mail className="h-4 w-4" />} label="Package" value={packageLabel} />
+          <Detail
+            icon={<Mail className="h-4 w-4" />}
+            label="Package"
+            value={packageLabel}
+          />
         )}
         <div className="flex items-center justify-between bg-[#F3F6F2] px-4 py-3.5">
-          <dt className="text-sm font-semibold text-slate-700">Total (pay at the course)</dt>
+          <dt className="text-sm font-semibold text-slate-700">
+            Total (pay at the course)
+          </dt>
           <dd className="text-lg font-extrabold text-slate-900">{total}</dd>
         </div>
       </dl>
@@ -87,35 +111,50 @@ export default function BookingConfirmed({
         <ol className="list-inside list-decimal space-y-1">
           <li>The course reviews your request.</li>
           <li>You get a confirmation email.</li>
-          <li>Arrive 20 minutes before your tee time and check in at the pro shop.</li>
+          <li>
+            Arrive 20 minutes before your tee time and check in at the pro shop.
+          </li>
         </ol>
       </div>
 
       {/* Actions */}
       <div className="flex flex-col gap-3 px-6 pb-8 pt-6 sm:flex-row sm:px-10">
-        <Link
-          href={bookingsHref}
-          className="flex flex-1 items-center justify-center rounded-2xl bg-[#1F4D36] px-6 py-3.5 font-semibold text-white
-            shadow-md shadow-[#1F4D36]/20 transition hover:bg-[#256343]"
+        <Button
+          type="button"
+          onClick={() => {
+            window.location.href = homeHref;
+          }}
+          className="h-auto flex-1 rounded-2xl bg-[#1F4D36] px-6 py-3.5 text-base font-semibold text-white
+      shadow-md shadow-[#1F4D36]/20 hover:bg-[#256343]"
         >
-          View my bookings
-        </Link>
+          Back to home
+        </Button>
+
         {onBookAnother && (
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onBookAnother}
-            className="flex flex-1 items-center justify-center rounded-2xl border border-slate-200 px-6 py-3.5 font-semibold
-              text-slate-800 transition hover:bg-slate-50"
+            className="h-auto flex-1 rounded-2xl border-slate-200 px-6 py-3.5 text-base font-semibold
+        text-slate-800 hover:bg-slate-50"
           >
             Book another tee time
-          </button>
+          </Button>
         )}
       </div>
     </div>
   );
 }
 
-function Detail({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function Detail({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="flex items-center gap-3 px-4 py-3.5">
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F3F6F2] text-[#1F4D36]">

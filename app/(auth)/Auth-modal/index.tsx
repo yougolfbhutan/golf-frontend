@@ -114,7 +114,8 @@ export function AuthModal({
               onSwitchToRegister={() => setTab("register")}
             />
           ) : (
-            <RegisterForm onSuccess={onSuccess} />
+            <RegisterForm     onRegistered={() => setTab("signin")}
+/>
           )}
         </div>
       </DialogContent>

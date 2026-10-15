@@ -44,7 +44,7 @@ export default function AccountPage() {
             {tab === "signin" ? (
               <SignInForm onSuccess={handleSuccess} onSwitchToRegister={() => setTab("register")} />
             ) : (
-              <RegisterForm onSuccess={handleSuccess} onSwitchToSignIn={() => setTab("signin")} />
+              <RegisterForm  onSwitchToSignIn={() => setTab("signin")} />
             )}
           </div>
         </div>

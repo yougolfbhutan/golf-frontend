@@ -37,7 +37,7 @@ export const useRegisterMutation = (options?: MutationOptions<RegisterResponse, 
   });
 
   return {
-    register: mutation.mutate,
+    register: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error,
   };
