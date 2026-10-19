@@ -19,6 +19,7 @@ import {
 } from "./data";
 import AppTabs from "../../booking-component/booking-tabs";
 import { useKitItems } from "./helper/useKitItems";
+import CardCarousel from "../../booking-component/card-carasouel";
 
 type Props = {
   booking: BookingState;
@@ -145,77 +146,77 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
   const activeCat = kitCategories.find((c) => c.id === activeCategory)!;
   const visibleItems = itemsFor(activeCat.id);
   const usedActive = usedInCategory(activeCat.id);
+  const selectedPackageIndex = packages.findIndex((p) => p.id === packageId);
 
   return (
-    <div className="mt-8 space-y-8 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xl shadow-slate-900/10 sm:p-8">
+    <div className="mt-4 space-y-8 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xl shadow-slate-900/10 sm:mt-8 sm:p-6 lg:p-8">
       {/* ---------- Packages (static data, renders instantly) ---------- */}
       <section>
-        <h2 className="text-xl font-bold">Choose your package</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          A package bundles your green fee and a full kit for each golfer at 10%
-          less than buying separately.
+        <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+          Choose your package
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Tap a package to select it. Swipe or use the arrows to compare.
         </p>
 
-        <div role="radiogroup" className="mt-4 grid gap-3 sm:grid-cols-3">
-          {packages.map((p) => (
-            <ImageSliderCard
-              key={p.id}
-              images={p.images}
-              title={p.title}
-              description={p.description}
-              badge={p.badge}
-              selected={packageId === p.id}
-              onClick={() => selectPackage(p.id)}
-            >
-              <ul className="space-y-1 text-xs">
-                {p.features.map((f) => (
-                  <li key={f} className="flex gap-1.5">
-                    <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-700" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
+        <div role="radiogroup" aria-label="Package" className="mt-4">
+          <CardCarousel mobileOnly scrollToIndex={selectedPackageIndex}>
+            {packages.map((p) => (
+              <ImageSliderCard
+                key={p.id}
+                images={p.images}
+                title={p.title}
+                description={p.description}
+                badge={p.badge}
+                selected={packageId === p.id}
+                onClick={() => selectPackage(p.id)}
+              >
+                <ul className="space-y-1 text-xs">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex gap-1.5">
+                      <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-700" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
 
-              {/* <p className="mt-4">
-                <span className="text-xl font-extrabold">
-                  {formatPrice(p.prices[category], category)}
-                </span>{" "}
-                <span className="text-xs text-slate-500">/ golfer</span>
-              </p> */}
-              <p className="text-xs text-slate-500">
-                Total for {golfers} {golfers === 1 ? "golfer" : "golfers"}:{" "}
-                {formatPrice(p.prices[category] * golfers, category)}
-              </p>
-              {p.savings[category] > 0 && (
-                <span className="mt-1 block w-fit rounded bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
-                  Save {formatPrice(p.savings[category], category)}
-                </span>
-              )}
-            </ImageSliderCard>
-          ))}
+                <p className="mt-3 text-xs text-slate-500">
+                  Total for {golfers} {golfers === 1 ? "golfer" : "golfers"}:{" "}
+                  <span className="font-semibold text-slate-800">
+                    {formatPrice(p.prices[category] * golfers, category)}
+                  </span>
+                </p>
+                {p.savings[category] > 0 && (
+                  <span className="mt-1 block w-fit rounded bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                    Save {formatPrice(p.savings[category], category)}
+                  </span>
+                )}
+              </ImageSliderCard>
+            ))}
+          </CardCarousel>
         </div>
       </section>
 
       {/* ---------- Customise ---------- */}
       <section>
-        <h2 className="text-lg font-bold">Customise your kit</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          See exactly what&lsquo;s included, upgrade items, or add a caddie or
-          coach.
+        <h2 className="text-lg font-bold text-slate-900">Customise your kit</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Optional. See what&lsquo;s included, upgrade items, or add a caddie or
+          coach. You can have one per golfer in each group.
         </p>
 
         {isLoading ? (
           // skeleton: tabs and counts only appear once all data is ready
           <div className="mt-4 space-y-4" aria-busy="true">
-            <div className="flex gap-2">
+            <div className="flex gap-2 overflow-hidden">
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-10 w-24 animate-pulse rounded-xl bg-slate-100"
+                  className="h-10 w-24 shrink-0 animate-pulse rounded-xl bg-slate-100"
                 />
               ))}
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
@@ -263,62 +264,78 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
               )}
 
               {/* progress: one kit per golfer */}
-              <p className="text-sm text-slate-500">
-                {usedActive} of {golfers} {activeCat.label.toLowerCase()} chosen
+              <p
+                className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600"
+                aria-live="polite"
+              >
+                <span className="font-semibold text-slate-800">
+                  {usedActive} of {golfers}
+                </span>{" "}
+                {activeCat.label.toLowerCase()} chosen
                 {usedActive < golfers && " · one per golfer"}
               </p>
 
               {isError && (
                 <p className="text-sm text-red-600">
-                  Could not load some items.
+                  Could not load some items. Please refresh the page.
                 </p>
               )}
               {visibleItems.length === 0 && (
                 <p className="text-sm text-slate-500">
-                  Nothing available for this selection.
+                  Nothing available for this selection. Try a different filter.
                 </p>
               )}
 
-              <div role="radiogroup" className="grid gap-3 sm:grid-cols-3">
-                {visibleItems.map((item) => {
-                  const qty = kit[item.id] ?? 0;
-                  // most this item can reach: its own qty plus what's still free
-                  const maxForItem =
-                    golfers === 1 ? 1 : qty + (golfers - usedActive);
+              {visibleItems.length > 0 && (
+                <div role="radiogroup" aria-label={activeCat.label}>
+                  {/* key: start from the first card when the tab or filter changes */}
+                  <CardCarousel
+                    key={`${activeCategory}-${filters.gender}-${filters.hand}-${packageTier}`}
+                  >
+                    {visibleItems.map((item) => {
+                      const qty = kit[item.id] ?? 0;
+                      // most this item can reach: its own qty plus what's still free
+                      const maxForItem =
+                        golfers === 1 ? 1 : qty + (golfers - usedActive);
 
-                  return (
-                    <ImageSliderCard
-                      key={item.id}
-                      images={item.images}
-                      title={item.title}
-                      description={item.description}
-                      badge={item.tag}
-                      selected={qty > 0}
-                      onClick={() =>
-                        setQty(item.id, activeCat.id, qty > 0 ? 0 : 1)
-                      }
-                    >
-                      <div className="flex items-end justify-between gap-3">
-                        <div
-                          className="flex flex-col items-end gap-1"
-                          onClick={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => e.stopPropagation()}
+                      return (
+                        <ImageSliderCard
+                          key={item.id}
+                          images={item.images}
+                          title={item.title}
+                          description={item.description}
+                          badge={item.tag}
+                          selected={qty > 0}
+                          onClick={() =>
+                            setQty(item.id, activeCat.id, qty > 0 ? 0 : 1)
+                          }
                         >
-                          <QuantityStepper
-                            size="sm"
-                            variant="outline"
-                            label={item.title}
-                            value={qty}
-                            min={0}
-                            max={maxForItem}
-                            onChange={(n) => setQty(item.id, activeCat.id, n)}
-                          />
-                        </div>
-                      </div>
-                    </ImageSliderCard>
-                  );
-                })}
-              </div>
+                          <div
+                            className="flex items-center justify-between gap-3"
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          >
+                            <span className="text-xs text-slate-500">
+                              {qty > 0 ? `${qty} added` : "Tap card to add"}
+                            </span>
+                            <QuantityStepper
+                              size="sm"
+                              variant="outline"
+                              label={item.title}
+                              value={qty}
+                              min={0}
+                              max={maxForItem}
+                              onChange={(n) =>
+                                setQty(item.id, activeCat.id, n)
+                              }
+                            />
+                          </div>
+                        </ImageSliderCard>
+                      );
+                    })}
+                  </CardCarousel>
+                </div>
+              )}
             </div>
           </>
         )}

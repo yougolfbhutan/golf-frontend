@@ -46,40 +46,7 @@ const Footer = () => {
       />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-14">
-        {/* Newsletter strip */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 py-10 border-b border-green-100">
-          {/* <div>
-            <h3 className="text-xl sm:text-2xl font-bold text-black-950 tracking-tight">
-              Never miss a tee time.
-            </h3>
-            <p className="text-sm text-black-700 mt-1.5">
-              Course openings, member deals, and weekend availability — straight
-              to your inbox.
-            </p>
-          </div> */}
-          {/* <form
-            className="flex w-full lg:w-auto max-w-md items-center gap-2"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <label htmlFor="footer-email" className="sr-only">
-              Email address
-            </label>
-            <input
-              id="footer-email"
-              type="email"
-              required
-              placeholder="you@email.com"
-              className="flex-1 lg:w-72 px-4 py-2.5 rounded-full border border-green-200 bg-green-50/50 text-sm text-black-950 placeholder:text-black-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition-shadow"
-            />
-            <button
-              type="submit"
-              className="shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-green-700 hover:bg-green-800 text-white text-sm font-semibold transition-colors duration-200"
-            >
-              Subscribe
-              <ArrowRight size={15} />
-            </button>
-          </form> */}
-        </div>
+       
 
         {/* Main grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1.2fr] gap-10 py-12">

@@ -33,7 +33,7 @@ export const formloginFields: AuthField[] = [
     subType: "email",
     name: "email",
     label: "Email",
-    placeholder: "you@example.com",
+    placeholder: "Enter your mail",
     autoComplete: "email",
   },
   {
@@ -64,7 +64,7 @@ export const registerTopFields: AuthField[] = [
     type: "input",
     name: "name",
     label: "Full name",
-    placeholder: "Karma Wangchuk",
+    placeholder: "Enter your name",
     autoComplete: "name",
   },
   // {
@@ -78,7 +78,7 @@ export const registerTopFields: AuthField[] = [
     type: "phone",
     name: "phone_no", // the number; the country is stored in "country_code"
     label: "Mobile number",
-    placeholder: "17 123 456",
+    placeholder: "Enter your Phone No",
   },
 ];
 
@@ -88,14 +88,14 @@ export const registerBottomFields: AuthField[] = [
     subType: "email",
     name: "email",
     label: "Email",
-    placeholder: "you@example.com",
+    placeholder: "Enter Your Email",
     autoComplete: "email",
   },
   {
     type: "password",
     name: "password",
     label: "Password",
-    placeholder: "At least 8 characters",
+    placeholder: "Enter Your password",
     autoComplete: "new-password",
   },
 ];

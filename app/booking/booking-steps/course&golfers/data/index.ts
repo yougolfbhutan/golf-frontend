@@ -1,6 +1,6 @@
 import type { CategoryId } from "../../Package/data";
 
-export const MAX_GOLFERS = 4;
+export const MAX_GOLFERS = 5;
 export type CategoryIcon = "bhutan" | "saarc" | "globe";
 
 export type Category = {

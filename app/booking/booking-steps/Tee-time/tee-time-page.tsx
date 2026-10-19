@@ -14,8 +14,7 @@ type Props = {
   onChange: (patch: Partial<BookingState>) => void;
   /** days of the week the course is closed: 0 = Sunday ... 6 = Saturday */
   closedDays?: number[];
-     footer?: ReactNode;
-  
+  footer?: ReactNode;
 };
 
 export default function DateTimeStep({
@@ -59,7 +58,7 @@ export default function DateTimeStep({
         <h2 className="text-2xl font-bold tracking-tight">
           Pick a date and tee time
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-base text-slate-500">
           {course?.name} · showing times with room for {booking.golfers}{" "}
           {booking.golfers === 1 ? "golfer" : "golfers"}.
         </p>
@@ -67,7 +66,7 @@ export default function DateTimeStep({
 
       {/* Date */}
       <section>
-        <p className="mb-3 text-sm font-bold">Date</p>
+        <p className="mb-3 text-base font-bold">Date</p>
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -84,13 +83,13 @@ export default function DateTimeStep({
 
       {/* Tee time */}
       <section>
-        <p className="mb-3 text-sm font-bold">
+        <p className="mb-3 text-base font-bold">
           Tee time
           {selectedDate && ` · ${format(selectedDate, "EEEE d MMMM")}`}
         </p>
 
         {!selectedDate && (
-          <p className="text-sm text-slate-500">
+          <p className="text-base text-slate-500">
             Choose a date to see tee times.
           </p>
         )}
@@ -127,8 +126,7 @@ export default function DateTimeStep({
           }
         />
       </section>
-                  {footer && <div className="border-t border-slate-200 pt-6">{footer}</div>}
-
+      {footer && <div className="border-t border-slate-200 pt-6">{footer}</div>}
     </div>
   );
 }

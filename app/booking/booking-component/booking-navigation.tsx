@@ -2,13 +2,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const STEP_NAMES = [
-  "Course & golfers",
-  "Tee time",
-  "Package",
-  "Pro shop",
-  "Review & pay",
-];
+const STEP_NAMES = ["Course & golfers", "Tee time", "Package", "Review & pay"];
 
 type Props = {
   step: number; // 1-based

@@ -1,4 +1,4 @@
-import { Flag, Globe2, Zap, Heart, History } from "lucide-react";
+// import { Flag, Globe2, Zap, Heart, History } from "lucide-react";
 
 // export const stats = [
 //   {

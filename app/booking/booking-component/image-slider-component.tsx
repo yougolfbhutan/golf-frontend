@@ -16,10 +16,10 @@ import {
 import { cn } from "@/lib/utils";
 
 type Props = {
-  images?: string[]; // was required
+  images?: string[];
   title: string;
-  location?: string; // was required
-  description?: string; // NEW, optional
+  location?: string;
+  description?: string;
   meta?: string;
   badge?: string;
   tags?: string[];
@@ -30,7 +30,7 @@ type Props = {
 };
 
 export default function ImageSliderCard({
-  images = [], // default to empty
+  images = [],
   title,
   location,
   description,
@@ -87,7 +87,15 @@ export default function ImageSliderCard({
           if ((e.target as HTMLElement).closest("button")) e.stopPropagation();
         }}
       >
-        <Carousel setApi={setApi} opts={{ loop: hasMany }}>
+        <Carousel
+          setApi={setApi}
+          opts={{
+            loop: hasMany,
+            // phones: the card row owns finger swiping, so photos change
+            // with the arrows/dots instead of fighting the row's scroll
+            breakpoints: { "(max-width: 639px)": { watchDrag: false } },
+          }}
+        >
           <CarouselContent className="ml-0">
             {(images.length ? images : [""]).map((src, i) => (
               <CarouselItem key={src + i} className="pl-0">
@@ -97,7 +105,7 @@ export default function ImageSliderCard({
                       src={src}
                       alt={`${title} photo ${i + 1}`}
                       fill
-                      sizes="(min-width: 640px) 50vw, 100vw"
+                      sizes="(max-width: 639px) 82vw, (max-width: 1023px) 50vw, 33vw"
                       className="object-cover"
                       draggable={false}
                     />
@@ -109,8 +117,9 @@ export default function ImageSliderCard({
 
           {hasMany && (
             <>
-              <CarouselPrevious className="left-2 size-8 border-0 bg-white/90 opacity-0 shadow transition group-hover:opacity-100 focus-visible:opacity-100" />
-              <CarouselNext className="right-2 size-8 border-0 bg-white/90 opacity-0 shadow transition group-hover:opacity-100 focus-visible:opacity-100" />
+              {/* always visible on phones (no hover on touch), hover-only from sm up */}
+              <CarouselPrevious className="left-2 size-8 border-0 bg-white/90 shadow transition sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100" />
+              <CarouselNext className="right-2 size-8 border-0 bg-white/90 shadow transition sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100" />
             </>
           )}
         </Carousel>

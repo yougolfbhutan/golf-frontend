@@ -105,20 +105,17 @@ export default function Navbar() {
                 <Image src="/logo.png" alt="" fill sizes="48px" priority className="object-contain" />
               </span>
             </span>
-            <span className="flex flex-col">
+            <span className="flex">
               <span
                 style={displayFont}
                 className={`font-semibold leading-none tracking-tight text-[#F7F1E3] transition-all duration-500 ${
                   scrolled ? "text-[22px]" : "text-[26px]"
                 }`}
               >
-                You
-                <span className="italic text-[#6EE7A8]">Golf</span>
+                You 
+                <span className="italic ">GolfBhutan</span>
               </span>
-              <span className="mt-1.5 flex items-center gap-1.5 text-[9.5px] font-semibold uppercase leading-none tracking-[0.42em] text-amber-300">
-                <span className="h-px w-3 bg-amber-300" />
-                Bhutan
-              </span>
+   
             </span>
           </Link>
 
