@@ -6,15 +6,16 @@ export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
 export interface CreateBookingPayload {
   customerId: string; // UUID
   golfCourseId: number;
-  golferCategoryId: number;
   teeDate: string; // "YYYY-MM-DD"
   teeTime: string; // "HH:mm" (24-hour)
   numberOfGolfers: number;
-  notes?: string;
-  items: any[];
-  status: BookingStatus;
-}
 
+  // customer booking only (bulk booking leaves these out)
+  golferCategoryId?: number;
+  notes?: string;
+  items?: any[];
+  status?: BookingStatus;
+}
 
 export interface Booking {
   id: number;
@@ -58,6 +59,7 @@ export interface Booking {
 }
 
 export interface BookingsResponse {
+  reference: string | undefined;
   success: boolean;
   message: string;
   data: {

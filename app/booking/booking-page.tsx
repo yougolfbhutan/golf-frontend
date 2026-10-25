@@ -24,13 +24,18 @@ export default function CustomerBookingPage() {
   const [booking, setBooking] = useState<BookingState>(initialBooking);
   const [returnToReview, setReturnToReview] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
+  const firstRender = useRef(true);
 
   const showSummary = step !== REVIEW_STEP;
   const ok = canContinue(step, booking);
 
   // every time the step changes, bring the user back to the top of the form
-  // so they always see the progress bar and instructions for the new step
+  // (skipped on first load so the page doesn't jump)
   useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [step]);
 
@@ -72,9 +77,12 @@ export default function CustomerBookingPage() {
   return (
     // overflow-x-clip (not overflow-hidden) so sticky children keep working
     <div className="relative overflow-x-clip bg-[#E9ECEF]">
+      {/* The navbar spacer now lives in the parent page, so top padding is small.
+          scroll-mt-36 = navbar (4rem) + sticky tab bar (~5rem) so the scroll
+          target isn't hidden underneath them. */}
       <div
         ref={topRef}
-        className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-32 pt-24 sm:px-6 sm:pt-28 lg:px-8 lg:pb-16"
+        className="mx-auto max-w-6xl scroll-mt-36 px-4 pb-32 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pb-16"
       >
         <BookingGuide step={step} canContinue={ok} onGoToStep={goToStep} />
 

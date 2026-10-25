@@ -3,7 +3,15 @@
 import { Check, CircleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const BOOKING_STEPS = [
+export type BookingStep = {
+  label: string;
+  title: string;
+  help: string;
+  /** shown when the user can't continue yet; leave empty on the last step */
+  todo?: string;
+};
+
+export const DEFAULT_BOOKING_STEPS: BookingStep[] = [
   {
     label: "Course & golfers",
     title: "Choose your course and how many are playing",
@@ -26,21 +34,31 @@ export const BOOKING_STEPS = [
     label: "Review & pay",
     title: "Check your booking and pay",
     help: "Make sure everything looks right. Use Edit next to any section to change it. Nothing is charged until you pay.",
-    todo: "",
   },
-] as const;
+];
 
 type Props = {
   step: number; // 1-based
   canContinue: boolean;
   /** only called for steps the user has already completed */
   onGoToStep: (step: number) => void;
+  /** optional — falls back to DEFAULT_BOOKING_STEPS */
+  steps?: BookingStep[];
 };
 
-export default function BookingGuide({ step, canContinue, onGoToStep }: Props) {
-  const total = BOOKING_STEPS.length;
-  const current = BOOKING_STEPS[step - 1];
-  const isReview = step === total;
+export default function BookingGuide({
+  step,
+  canContinue,
+  onGoToStep,
+  steps = DEFAULT_BOOKING_STEPS,
+}: Props) {
+  const total = steps.length;
+  if (total === 0) return null;
+
+  // keep step inside 1..total so a bad value can't crash the page
+  const safeStep = Math.min(Math.max(step, 1), total);
+  const current = steps[safeStep - 1];
+  const isReview = safeStep === total;
 
   return (
     <section aria-label="Booking progress" className="mb-5 space-y-4">
@@ -48,7 +66,7 @@ export default function BookingGuide({ step, canContinue, onGoToStep }: Props) {
       <div className="sm:hidden">
         <div className="mb-2 flex items-baseline justify-between text-sm">
           <span className="font-semibold text-slate-900">
-            Step {step} of {total}
+            Step {safeStep} of {total}
           </span>
           <span className="text-slate-600">{current.label}</span>
         </div>
@@ -56,16 +74,16 @@ export default function BookingGuide({ step, canContinue, onGoToStep }: Props) {
           role="progressbar"
           aria-valuemin={1}
           aria-valuemax={total}
-          aria-valuenow={step}
-          aria-label={`Step ${step} of ${total}`}
+          aria-valuenow={safeStep}
+          aria-label={`Step ${safeStep} of ${total}`}
           className="flex gap-1.5"
         >
-          {BOOKING_STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <span
-              key={s.label}
+              key={`${i}-${s.label}`}
               className={cn(
                 "h-1.5 flex-1 rounded-full transition-colors",
-                i + 1 <= step ? "bg-[#1F4D36]" : "bg-slate-300",
+                i + 1 <= safeStep ? "bg-[#1F4D36]" : "bg-slate-300",
               )}
             />
           ))}
@@ -74,13 +92,13 @@ export default function BookingGuide({ step, canContinue, onGoToStep }: Props) {
 
       {/* ---- tablet / desktop: full stepper ---- */}
       <ol className="hidden items-center sm:flex">
-        {BOOKING_STEPS.map((s, i) => {
+        {steps.map((s, i) => {
           const n = i + 1;
-          const done = n < step;
-          const active = n === step;
+          const done = n < safeStep;
+          const active = n === safeStep;
           return (
             <li
-              key={s.label}
+              key={`${i}-${s.label}`}
               className={cn("flex items-center", n < total && "flex-1")}
             >
               <button
@@ -150,12 +168,12 @@ export default function BookingGuide({ step, canContinue, onGoToStep }: Props) {
             {canContinue ? (
               <>
                 <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                All set. Press Continue when you&lsquo;re ready.
+                All set. Press Continue when you&rsquo;re ready.
               </>
             ) : (
               <>
                 <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                {current.todo}
+                {current.todo || "Complete this step to continue."}
               </>
             )}
           </p>
