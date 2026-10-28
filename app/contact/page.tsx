@@ -15,14 +15,14 @@ const DETAILS = [
   {
     icon: Mail,
     label: "Email",
-    value: "hello@yougolfbhutan.com",
-    href: "mailto:hello@yougolfbhutan.com",
+    value: "info@yougolfbhutan.com",
+    href: "mailto:info@yougolfbhutan.com",
   },
   {
     icon: Phone,
     label: "Phone / WhatsApp",
-    value: "+975 17 000 000",
-    href: "tel:+97517000000",
+    value: "+975 17875268",
+    href: "tel:+97517875268",
   },
   {
     icon: MapPin,
