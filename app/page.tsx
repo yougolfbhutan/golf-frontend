@@ -23,10 +23,19 @@ const TABS: {
   hint: string;
   icon: typeof Users;
 }[] = [
-  { id: "bulk", label: "Bulk booking", hint: "Tourism guides & groups", icon: Users },
-  { id: "pro", label: "Pro booking", hint: "Book a round or session", icon: User },
+  {
+    id: "bulk",
+    label: "Group booking",
+    hint: "Tour guides, agencies & groups",
+    icon: Users,
+  },
+  {
+    id: "pro",
+    label: "Individual booking",
+    hint: "Book a round or session for yourself",
+    icon: User,
+  },
 ];
-
 export default function Home() {
   const [tab, setTab] = useState<Tab>("bulk");
   const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({
@@ -63,8 +72,8 @@ export default function Home() {
             Book your time on the course
           </h1>
           <p className="mt-2 max-w-xl text-sm text-slate-600 sm:text-base">
-            Choose how you&lsquo;d like to book. Groups and tour operators can reserve
-            several players at once.
+            Choose how you&lsquo;d like to book. Groups and tour operators can
+            reserve several players at once.
           </p>
         </div>
       </header>

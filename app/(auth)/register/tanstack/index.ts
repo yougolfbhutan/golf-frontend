@@ -30,6 +30,7 @@ export const useRegisterMutation = (options?: MutationOptions<RegisterResponse, 
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["Register-User"] }); // if needed
       options?.onSuccess?.(data);
+      console.log(data)
     },
     onError: (error) => {
       options?.onError?.(error);

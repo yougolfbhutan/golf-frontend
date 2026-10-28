@@ -162,7 +162,7 @@ const Footer = () => {
                   href="mailto:support@golfbook.com"
                   className="hover:text-black-950 transition-colors"
                 >
-                  yougolfbhuatan@gmail.com
+                  info@yougolfbhutan.com
                 </a>
               </li>
             </ul>

@@ -88,14 +88,19 @@ export const registerBottomFields: AuthField[] = [
     subType: "email",
     name: "email",
     label: "Email",
-    placeholder: "Enter Your Email",
+    placeholder: "Enter your email",
     autoComplete: "email",
   },
   {
     type: "password",
     name: "password",
     label: "Password",
-    placeholder: "Enter Your password",
+    placeholder: "Enter your password",
     autoComplete: "new-password",
+  },
+  {
+    type: "switch",
+    name: "isTourism",
+    label: "Are you a tourism business?",
   },
 ];

@@ -29,14 +29,15 @@ type Props = {
 type Confirmed = {
   reference?: string;
   email?: string;
-  total?:any
+  total?: any;
 };
 
 /* ---------------------------------- helpers --------------------------------- */
 
 function kitToItems(kit: Record<string, number>) {
   const items: Array<
-    { golfSetId: number; quantity: number } | { ballId: number; quantity: number }
+    | { golfSetId: number; quantity: number }
+    | { ballId: number; quantity: number }
   > = [];
 
   for (const [key, quantity] of Object.entries(kit)) {
@@ -56,17 +57,24 @@ function readError(e: unknown): { status?: number; message: string } {
 
   if (axios.isAxiosError(e)) {
     if (!e.response) {
-      return { message: "We couldn't reach the server. Check your connection and try again." };
+      return {
+        message:
+          "We couldn't reach the server. Check your connection and try again.",
+      };
     }
     return {
       status: e.response.status,
-      message: e.response.data?.message ?? "Something went wrong. Please try again.",
+      message:
+        e.response.data?.message ?? "Something went wrong. Please try again.",
     };
   }
 
   return {
     status: err?.status ?? err?.statusCode,
-    message: err?.data?.message ?? err?.message ?? "Something went wrong. Please try again.",
+    message:
+      err?.data?.message ??
+      err?.message ??
+      "Something went wrong. Please try again.",
   };
 }
 
@@ -78,7 +86,10 @@ function friendlyMessage(status: number | undefined, fallback: string) {
       return "Sorry, that tee time was just taken. Please choose another slot.";
     case 422:
     case 400:
-      return fallback || "Some booking details look incomplete. Please check and try again.";
+      return (
+        fallback ||
+        "Some booking details look incomplete. Please check and try again."
+      );
     default:
       return fallback;
   }
@@ -86,7 +97,12 @@ function friendlyMessage(status: number | undefined, fallback: string) {
 
 /* --------------------------------- component -------------------------------- */
 
-export default function ReviewStep({ footer, booking, onEditStep, onBookAnother }: Props) {
+export default function ReviewStep({
+  footer,
+  booking,
+  onEditStep,
+  onBookAnother,
+}: Props) {
   const { user } = useAuth();
   const { items } = useKitItems();
   const { createBooking } = useBookingMutation(); // must return mutateAsync (see tanstack.ts)
@@ -95,17 +111,17 @@ export default function ReviewStep({ footer, booking, onEditStep, onBookAnother 
   const [error, setError] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [confirmed, setConfirmed] = useState<Confirmed | null>(null);
-const router = useRouter();
+  const router = useRouter();
 
   // Set after a successful sign-in / register. The effect below books once
   // React has committed the new user to context (so the auth token is ready).
-  const [pendingCustomerId, setPendingCustomerId] = useState<string | number | null>(null);
+  const [pendingCustomerId, setPendingCustomerId] = useState<
+    string | number | null
+  >(null);
   const topRef = useRef<HTMLDivElement>(null);
 
-  const { course, category, pkg, kitLines, unitPrice, total, money } = getBookingSummary(
-    booking,
-    items,
-  );
+  const { course, category, pkg, kitLines, total, money } =
+    getBookingSummary(booking, items);
 
   const ready = Boolean(booking.courseId && booking.slot && booking.categoryId);
   const dateLabel = booking.slot
@@ -136,17 +152,19 @@ const router = useRouter();
         status: "pending",
       });
 
-      
       const saved = Array.isArray((res.data as any)?.data)
         ? (res.data as any).data[0]
         : res.data;
 
       setConfirmed({
-        reference: saved?.id ? `GB-${String(saved.id).padStart(5, "0")}` : undefined,
-        email: saved?.customer?.email ?? user?.email,
-        total: saved?.totalAmount != null
-          ? `${saved.currency ?? "Nu."} ${Number(saved.totalAmount).toLocaleString()}`
+        reference: saved?.id
+          ? `GB-${String(saved.id).padStart(5, "0")}`
           : undefined,
+        email: saved?.customer?.email ?? user?.email,
+        total:
+          saved?.totalAmount != null
+            ? `${saved.currency ?? "Nu."} ${Number(saved.totalAmount).toLocaleString()}`
+            : undefined,
       });
 
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -174,10 +192,10 @@ const router = useRouter();
       setAuthOpen(true);
       return;
     }
-     if (isSystemUser(user)) {
-       router.replace("/dashboard");
-       return;
-     }
+    if (isSystemUser(user)) {
+      router.replace("/dashboard");
+      return;
+    }
     submit(user.id);
   }
 
@@ -307,10 +325,10 @@ const router = useRouter();
         onSuccess={(loggedInUser) => {
           setAuthOpen(false);
           setError(null);
-           if (isSystemUser(loggedInUser)) {
-     router.replace("/dashboard");
-     return;
-   }
+          if (isSystemUser(loggedInUser)) {
+            router.replace("/dashboard");
+            return;
+          }
           setPendingCustomerId(loggedInUser.id); // books right after login – no redirect
         }}
       />

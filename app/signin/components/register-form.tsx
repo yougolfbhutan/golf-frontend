@@ -43,7 +43,8 @@ export function RegisterForm({ onSwitchToSignIn }: Props) {
       onSwitchToSignIn();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      const msg = err?.message ?? "Something went wrong";
+
+      const msg = err?.response?.data?.message;
       setError(msg);
       showToast.error(msg, toastOpts);
     }

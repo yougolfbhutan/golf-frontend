@@ -145,49 +145,53 @@ function FormikController({
     }
 
     case "phone":
-  return (
-    <div className={className}>
-      <label htmlFor={name}>{label}</label>
-      <div className="flex gap-2">
-        <Field name="country_code">
-          {({ field, form }: any) => {
-            const selected = COUNTRY_CODES.find((c) => c.iso === field.value);
-            return (
-              <Select
-                value={field.value}
-                onValueChange={(v) => form.setFieldValue("country_code", v)}
-              >
-                <SelectTrigger
-                  className={`${fieldstyle} w-[120px] shrink-0 data-[size=default]:h-12`}
-                >
-                  <SelectValue>
-                    {selected ? `${flagEmoji(selected.iso)} ${selected.dial}` : null}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {COUNTRY_CODES.map((c) => (
-                    <SelectItem key={c.iso} value={c.iso}>
-                      {flagEmoji(c.iso)} {c.name} ({c.dial})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            );
-          }}
-        </Field>
-        <Field
-          id={name}
-          name={name}
-          type="tel"
-          inputMode="numeric"
-          placeholder={fieldConfig.placeholder}
-          className={`${fieldstyle} flex-1`}
-          autoComplete="tel-national"
-        />
-      </div>
-      <ErrorMessage name={name} component="div" className={errorstyle} />
-    </div>
-  );
+      return (
+        <div className={className}>
+          <label htmlFor={name}>{label}</label>
+          <div className="flex gap-2">
+            <Field name="country_code">
+              {({ field, form }: any) => {
+                const selected = COUNTRY_CODES.find(
+                  (c) => c.iso === field.value,
+                );
+                return (
+                  <Select
+                    value={field.value}
+                    onValueChange={(v) => form.setFieldValue("country_code", v)}
+                  >
+                    <SelectTrigger
+                      className={`${fieldstyle} w-[120px] shrink-0 data-[size=default]:h-12`}
+                    >
+                      <SelectValue>
+                        {selected
+                          ? `${flagEmoji(selected.iso)} ${selected.dial}`
+                          : null}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {COUNTRY_CODES.map((c) => (
+                        <SelectItem key={c.iso} value={c.iso}>
+                          {flagEmoji(c.iso)} {c.name} ({c.dial})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                );
+              }}
+            </Field>
+            <Field
+              id={name}
+              name={name}
+              type="tel"
+              inputMode="numeric"
+              placeholder={fieldConfig.placeholder}
+              className={`${fieldstyle} flex-1`}
+              autoComplete="tel-national"
+            />
+          </div>
+          <ErrorMessage name={name} component="div" className={errorstyle} />
+        </div>
+      );
 
     // NEW: shadcn select, options come from fieldConfig.values (string[])
     case "select": {
@@ -200,7 +204,9 @@ function FormikController({
               <Select
                 value={field.value}
                 onValueChange={(v) => form.setFieldValue(name, v)}
-                onOpenChange={(open) => !open && form.setFieldTouched(name, true)}
+                onOpenChange={(open) =>
+                  !open && form.setFieldTouched(name, true)
+                }
               >
                 <SelectTrigger
                   id={name}
@@ -224,22 +230,27 @@ function FormikController({
     }
 
     case "switch": // shadcn switch
-      return (
-        <div className={className}>
-          <label className="flex items-center justify-between">
-            <span>{label}</span>
-            <Field name={name}>
-              {({ field }: any) => (
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={(checked) => setFieldValue?.(name, checked)}
-                />
-              )}
-            </Field>
-          </label>
-          <ErrorMessage name={name} component="div" className={errorstyle} />
-        </div>
-      );
+  return (
+    <div className="flex flex-col gap-1">
+      <label
+        htmlFor={name}
+        className="flex cursor-pointer items-center justify-between gap-6 px-4 py-3 transition-colors"
+      >
+        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <Field name={name}>
+          {({ field, form }: any) => (
+            <Switch
+              id={name}
+              checked={!!field.value}
+              onCheckedChange={(checked) => form.setFieldValue(name, checked)}
+              className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300 focus-visible:ring-green-500"
+            />
+          )}
+        </Field>
+      </label>
+      <ErrorMessage name={name} component="div" className={errorstyle} />
+    </div>
+  );
 
     default:
       return null;

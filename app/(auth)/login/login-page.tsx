@@ -36,11 +36,9 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
     try {
       const response = await login(values);
       const user = response?.data as User | undefined;
-
       if (!user?.id) {
         throw { message: "Login succeeded but no user was returned" };
       }
-
       setUser(user);
       showToast.success(response.message ?? "Signed in", toastOpts);
       onSuccess(user); // hand the user straight to ReviewStep

@@ -29,12 +29,13 @@ const toastOpts = {
 
 export function RegisterForm({ onRegistered }: Props) {
   const [error, setError] = useState<string | null>(null);
-  const { register } = useRegisterMutation(); // must return mutateAsync
-
+  const { register } = useRegisterMutation();
   async function handleSubmit(values: RegisterAttributes) {
+    console.log('values',values)
     setError(null);
     try {
       const res = await register(values);
+
       showToast.success(
         res?.message ?? "Account created. Please sign in.",
         toastOpts,
@@ -42,7 +43,8 @@ export function RegisterForm({ onRegistered }: Props) {
       onRegistered(); // switch to the Sign in tab
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      const msg = err?.message ?? "Something went wrong";
+      console.log(err.response?.data); // see what the backend actually says
+      const msg = err?.response?.data?.message;
       setError(msg);
       showToast.error(msg, toastOpts);
     }
