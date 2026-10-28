@@ -146,9 +146,9 @@ export default function ImageSliderCard({
           </span>
         )}
 
-        {/* dots */}
+        {/* dots: phones only (hidden from sm / 640px and up) */}
         {hasMany && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-2 flex justify-center gap-1.5">
+          <div className="pointer-events-none absolute inset-x-0 bottom-2 flex justify-center gap-1.5 sm:hidden">
             {images.map((_, i) => (
               <span
                 key={i}

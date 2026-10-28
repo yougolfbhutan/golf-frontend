@@ -14,31 +14,31 @@ export type Category = {
 };
 
 export const CATEGORIES: Category[] = [
-  {
-    id: "2",
-    priceKey: "bhutanese",
-    label: "Bhutanese",
-    description: "Citizens with a valid CID",
-    price: 3800,
-    currency: "Nu",
-    icon: "bhutan",
-  },
+  // {
+  //   id: "2",
+  //   priceKey: "bhutanese",
+  //   label: "Bhutanese",
+  //   description: "Citizens with a valid CID",
+  //   price: 3800,
+  //   currency: "Nu",
+  //   icon: "bhutan",
+  // },
   {
     id: "1",
     priceKey: "saarc",
-    label: "Non-Bhutanese · SAARC",
+    label: "SAARC",
     description:
       "India, Bangladesh, Nepal, Sri Lanka, Maldives, Pakistan, Afghanistan",
-    price: 120,
+    price: 160,
     currency: "USD",
     icon: "saarc",
   },
   {
     id: "3",
     priceKey: "international",
-    label: "Non-Bhutanese · Non-SAARC",
+    label: "Non-SAARC",
     description: "All other nationalities",
-    price: 180,
+    price: 220,
     currency: "USD",
     icon: "globe",
   },

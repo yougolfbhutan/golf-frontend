@@ -103,16 +103,18 @@ export default function CardCarousel({
           ))}
         </CarouselContent>
 
-        {/* arrows: never on phones (swipe instead) */}
+        {/* arrows: never on phones (swipe instead).
+            sm:disabled:hidden hides an arrow when there is nothing to scroll
+            in that direction (start / end / all cards fit). */}
         {items.length > 1 && !mobileOnly && (
           <>
-            <CarouselPrevious className="-left-3 hidden size-10 border-slate-200 bg-white shadow-md sm:flex lg:-left-5" />
-            <CarouselNext className="-right-3 hidden size-10 border-slate-200 bg-white shadow-md sm:flex lg:-right-5" />
+            <CarouselPrevious className="-left-3 hidden size-10 border-slate-200 bg-white shadow-md sm:flex sm:disabled:hidden lg:-left-5" />
+            <CarouselNext className="-right-3 hidden size-10 border-slate-200 bg-white shadow-md sm:flex sm:disabled:hidden lg:-right-5" />
           </>
         )}
       </Carousel>
 
-      {/* dots + counter */}
+      {/* dots + counter (only when there is more than one slide to scroll to) */}
       {count > 1 && (
         <div
           className={cn(
