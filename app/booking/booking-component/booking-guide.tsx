@@ -146,7 +146,7 @@ export default function BookingGuide({
       </ol>
 
       {/* ---- instructions: what to do on this step ---- */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      {/* <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <h1 className="text-lg font-bold leading-snug text-slate-900 sm:text-xl">
           {current.title}
         </h1>
@@ -178,7 +178,7 @@ export default function BookingGuide({
             )}
           </p>
         )}
-      </div>
+      </div> */}
     </section>
   );
 }
