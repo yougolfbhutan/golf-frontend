@@ -1,65 +1,80 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import apiClient from "@/api-client/api-client";
 import CUSTOMER_API_URL from "@/app/connected-backend/route/customer/customer-route";
+import {
+  kitItems,
+  mapGolfSets,
+  mapGloves,
+  mapBalls,
+  type KitCategoryId,
+} from "../data";
 
-// ADJUST these imports to wherever your mappers and static items live.
-// From your error, mapGolfSets lives in Package/data/index.ts
-import { kitItems, mapGolfSets, mapGloves, mapBalls } from "../data";
+const STALE_TIME = 10 * 60 * 1000; // data stays fresh for 10 minutes
+const GC_TIME = 30 * 60 * 1000; // keep cached tabs for 30 minutes
 
-export const KIT_QUERY_KEY = ["kit-items"] as const;
-export const KIT_STALE_TIME = 10 * 60 * 1000; // 10 minutes
-
-// Pull the array out of the response body: res.data.data.data
-// (your original hooks returned res.data, then read data?.data.data).
-// Array.isArray means a wrong shape gives [] instead of crashing.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const toArray = (res: PromiseSettledResult<any>) =>
-  res.status === "fulfilled" && Array.isArray(res.value.data?.data?.data)
-    ? res.value.data.data.data
-    : [];
-
-// Fetch golf sets, gloves and balls in parallel.
-// allSettled: if one endpoint fails, the other two still show up.
-export async function fetchKitData() {
-  const [sets, gloves, balls] = await Promise.allSettled([
-    apiClient.get(CUSTOMER_API_URL.golfSet),
-    apiClient.get(CUSTOMER_API_URL.glove),
-    apiClient.get(CUSTOMER_API_URL.ball),
-  ]);
-
-  // temporary: check the real response shape, then delete this line
-  // console.log("kit responses", sets, gloves, balls);
-
-  return {
-    sets: toArray(sets),
-    gloves: toArray(gloves),
-    balls: toArray(balls),
-    hasError: [sets, gloves, balls].some((r) => r.status === "rejected"),
-  };
+// Throws on failure so React Query retries instead of caching an empty list
+async function fetchList(url: string) {
+  const res = await apiClient.get(url);
+  const list = res.data?.data?.data;
+  if (!Array.isArray(list)) throw new Error(`Unexpected response from ${url}`);
+  return list;
 }
 
-export function useKitItems() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: KIT_QUERY_KEY,
-    queryFn: fetchKitData,
-    staleTime: KIT_STALE_TIME,
+const options = (key: string, url: string, enabled: boolean) => ({
+  queryKey: ["kit", key],
+  queryFn: () => fetchList(url),
+  enabled,
+  staleTime: STALE_TIME,
+  gcTime: GC_TIME,
+  retry: 3,
+  retryDelay: (attempt: number) => Math.min(1000 * 2 ** attempt, 8000),
+});
+
+/**
+ * useKitItems("sets")  -> fetches only that tab (used by PackageStep)
+ * useKitItems()        -> loads ALL lists (used by ReviewStep).
+ *                         Tabs already opened come from the cache, so only
+ *                         missing or stale lists are requested.
+ */
+export function useKitItems(activeCategory?: KitCategoryId) {
+  const all = activeCategory === undefined;
+
+  const [setsQ, glovesQ, ballsQ] = useQueries({
+    queries: [
+      options("sets", CUSTOMER_API_URL.golfSet, all || activeCategory === "sets"),
+      options("gloves", CUSTOMER_API_URL.glove, all || activeCategory === "gloves"),
+      options("balls", CUSTOMER_API_URL.ball, all || activeCategory === "balls"),
+    ],
   });
 
-  // memoised so downstream useEffects don't re-run on every render
   const items = useMemo(
     () => [
-      ...mapGolfSets(data?.sets ?? []),
-      ...mapGloves(data?.gloves ?? []),
-      ...mapBalls(data?.balls ?? []),
+      ...mapGolfSets(setsQ.data ?? []),
+      ...mapGloves(glovesQ.data ?? []),
+      ...mapBalls(ballsQ.data ?? []),
       ...kitItems,
     ],
-    [data],
+    [setsQ.data, glovesQ.data, ballsQ.data],
   );
+
+  // which queries decide the loading / error state
+  const watched = all
+    ? [setsQ, glovesQ, ballsQ]
+    : activeCategory === "sets"
+      ? [setsQ]
+      : activeCategory === "gloves"
+        ? [glovesQ]
+        : activeCategory === "balls"
+          ? [ballsQ]
+          : []; // static categories (e.g. caddie) have no API
 
   return {
     items,
-    isLoading,
-    isError: isError || (data?.hasError ?? false),
+    isLoading: watched.some((q) => q.isLoading),
+    isError: watched.some((q) => q.isError),
+    refetch: () => {
+      watched.forEach((q) => q.refetch());
+    },
   };
 }

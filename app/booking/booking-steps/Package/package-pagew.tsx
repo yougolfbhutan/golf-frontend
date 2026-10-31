@@ -12,6 +12,7 @@ import {
   type KitItem,
   type FilterKey,
   type Tier,
+  ENABLE_TIER_FILTER,
   kitCategories,
   filterOptions,
   packages,
@@ -31,11 +32,19 @@ type Filters = Record<FilterKey, string>;
 
 export default function PackageStep({ footer, booking, onChange }: Props) {
   const { packageId, kit, golfers } = booking;
+
   // falls back to Bhutanese until a category is picked on the first step
   const category = (booking.categoryId ?? "bhutanese") as CategoryId;
 
   const [activeCategory, setActiveCategory] = useState<KitCategoryId>("sets");
-  const { items: allItems, isLoading, isError } = useKitItems();
+
+  // only the active tab is fetched; opened tabs stay cached
+  const {
+    items: allItems,
+    isLoading,
+    isError,
+    refetch,
+  } = useKitItems(activeCategory);
 
   // only gender and hand are tabs ("all" = no filtering)
   const [filters, setFilters] = useState<Filters>({
@@ -49,11 +58,17 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
 
   // does an item match the package tier and the tabs its category uses?
   function matches(item: KitItem, f: Filters, tier: Tier = packageTier) {
-    const cat = kitCategories.find((c) => c.id === item.category)!;
-    const tierOk = !item.tier || item.tier === tier; // no tier = always show
+    const cat = kitCategories.find((c) => c.id === item.category);
+    if (!cat) return false;
+
+    // tier filtering is off until you have more than one package
+    const tierOk = !ENABLE_TIER_FILTER || !item.tier || item.tier === tier;
+
+    // items without gender/hand (unisex / unknown) show under every tab
     const tabsOk = cat.filters.every(
-      (key) => f[key] === "all" || item[key] === f[key],
+      (key) => f[key] === "all" || !item[key] || item[key] === f[key],
     );
+
     return tierOk && tabsOk;
   }
 
@@ -86,9 +101,10 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
     onChange({ kit: next });
   }
 
-  // when golfers are reduced on the first step, trim the kit to match
+  // when golfers are reduced on the first step, trim the kit to match.
+  // Runs again each time a new tab finishes loading.
   useEffect(() => {
-    if (isLoading || allItems.length === 0) return;
+    if (allItems.length === 0) return;
     const next: Record<string, number> = { ...kit };
     let changed = false;
 
@@ -109,16 +125,17 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
 
     if (changed) onChange({ kit: next });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [golfers, allItems, isLoading]);
+  }, [golfers, allItems]);
 
-  // pick a package and drop selected items from the other tier
+  // pick a package and drop selected items from the other tier.
+  // Items from tabs not loaded yet (!item) are kept, never dropped.
   function selectPackage(id: string) {
     const tier: Tier = id === "premium" ? "premium" : "standard";
 
     const nextKit: Record<string, number> = {};
     Object.entries(kit).forEach(([itemId, qty]) => {
       const item = allItems.find((i) => i.id === itemId);
-      if (item && matches(item, filters, tier)) nextKit[itemId] = qty;
+      if (!item || matches(item, filters, tier)) nextKit[itemId] = qty;
     });
 
     onChange({ packageId: id, kit: nextKit });
@@ -132,7 +149,7 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
     const nextKit: Record<string, number> = {};
     Object.entries(kit).forEach(([id, qty]) => {
       const item = allItems.find((i) => i.id === id);
-      if (item && matches(item, nextFilters)) nextKit[id] = qty;
+      if (!item || matches(item, nextFilters)) nextKit[id] = qty;
     });
 
     const patch: Partial<BookingState> = { kit: nextKit };
@@ -180,12 +197,6 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
                   ))}
                 </ul>
 
-                <p className="mt-3 text-xs text-slate-500">
-                  Total for {golfers} {golfers === 1 ? "golfer" : "golfers"}:{" "}
-                  <span className="font-semibold text-slate-800">
-                    {formatPrice(p.prices[category] * golfers, category)}
-                  </span>
-                </p>
                 {p.savings[category] > 0 && (
                   <span className="mt-1 block w-fit rounded bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
                     Save {formatPrice(p.savings[category], category)}
@@ -205,18 +216,60 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
           coach. You can have one per golfer in each group.
         </p>
 
-        {isLoading ? (
-          // skeleton: tabs and counts only appear once all data is ready
-          <div className="mt-4 space-y-4" aria-busy="true">
-            <div className="flex gap-2 overflow-hidden">
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-10 w-24 shrink-0 animate-pulse rounded-xl bg-slate-100"
+        {/* category tabs: always visible, switching a tab loads that tab's data */}
+        <div className="mt-4">
+          <AppTabs
+            variant="pill"
+            className="flex-wrap gap-2 border-0 bg-transparent p-0 backdrop-blur-none dark:bg-transparent"
+            triggerClassName="rounded-xl border border-slate-200 bg-white px-4 py-2 text-slate-600 shadow-none
+      hover:border-[#10B759]/50 hover:bg-[#10B759]/5 hover:text-[#0E9F4F]
+      data-[state=active]:border-[#10B759]/30 data-[state=active]:bg-none data-[state=active]:bg-[#10B759]/[0.15]
+      data-[state=active]:text-[#0E9F4F] data-[state=active]:shadow-none
+      dark:border-white/10 dark:bg-white/5 dark:text-slate-300
+      dark:data-[state=active]:border-[#10B759]/40 dark:data-[state=active]:bg-[#10B759]/20 dark:data-[state=active]:text-[#4ADE80]"
+            items={kitCategories.map((c) => ({
+              value: c.id,
+              label: c.label,
+            }))}
+            value={activeCategory}
+            onValueChange={setActiveCategory}
+          />
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {/* filter tabs: only the ones this category needs */}
+          {activeCat.filters.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {activeCat.filters.map((key) => (
+                <AppTabs
+                  key={key}
+                  variant="pill"
+                  items={filterOptions[key]}
+                  value={current[key]}
+                  onValueChange={(v) => changeFilter(key, v)}
                 />
               ))}
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          )}
+
+          {/* progress: one kit per golfer */}
+          <p
+            className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600"
+            aria-live="polite"
+          >
+            <span className="font-semibold text-slate-800">
+              {usedActive} of {golfers}
+            </span>{" "}
+            {activeCat.label.toLowerCase()} chosen
+            {usedActive < golfers && " · one per golfer"}
+          </p>
+
+          {/* loading: skeleton for the active tab only */}
+          {isLoading && (
+            <div
+              className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+              aria-busy="true"
+            >
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
@@ -224,121 +277,77 @@ export default function PackageStep({ footer, booking, onChange }: Props) {
                 />
               ))}
             </div>
-          </div>
-        ) : (
-          <>
-            {/* category tabs */}
-            <div className="mt-4">
-              <AppTabs
-                variant="pill"
-                className="flex-wrap gap-2 border-0 bg-transparent p-0 backdrop-blur-none dark:bg-transparent"
-                triggerClassName="rounded-xl border border-slate-200 bg-white px-4 py-2 text-slate-600 shadow-none
-      hover:border-[#10B759]/50 hover:bg-[#10B759]/5 hover:text-[#0E9F4F]
-      data-[state=active]:border-[#10B759]/30 data-[state=active]:bg-none data-[state=active]:bg-[#10B759]/[0.15]
-      data-[state=active]:text-[#0E9F4F] data-[state=active]:shadow-none
-      dark:border-white/10 dark:bg-white/5 dark:text-slate-300
-      dark:data-[state=active]:border-[#10B759]/40 dark:data-[state=active]:bg-[#10B759]/20 dark:data-[state=active]:text-[#4ADE80]"
-                items={kitCategories.map((c) => ({
-                  value: c.id,
-                  label: c.label,
-                }))}
-                value={activeCategory}
-                onValueChange={setActiveCategory}
-              />
-            </div>
+          )}
 
-            <div className="mt-4 space-y-4">
-              {/* filter tabs: only the ones this category needs */}
-              {activeCat.filters.length > 0 && (
-                <div className="flex flex-wrap gap-3">
-                  {activeCat.filters.map((key) => (
-                    <AppTabs
-                      key={key}
-                      variant="pill"
-                      items={filterOptions[key]}
-                      value={current[key]}
-                      onValueChange={(v) => changeFilter(key, v)}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* progress: one kit per golfer */}
-              <p
-                className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600"
-                aria-live="polite"
+          {/* error: only for the active tab, with a retry button */}
+          {!isLoading && isError && (
+            <div className="flex items-center gap-3 text-sm text-red-600">
+              <span>Could not load {activeCat.label.toLowerCase()}.</span>
+              <button
+                type="button"
+                onClick={refetch}
+                className="rounded-lg border border-red-200 px-3 py-1 font-medium hover:bg-red-50"
               >
-                <span className="font-semibold text-slate-800">
-                  {usedActive} of {golfers}
-                </span>{" "}
-                {activeCat.label.toLowerCase()} chosen
-                {usedActive < golfers && " · one per golfer"}
-              </p>
-
-              {isError && (
-                <p className="text-sm text-red-600">
-                  Could not load some items. Please refresh the page.
-                </p>
-              )}
-              {visibleItems.length === 0 && (
-                <p className="text-sm text-slate-500">
-                  Nothing available for this selection. Try a different filter.
-                </p>
-              )}
-
-              {visibleItems.length > 0 && (
-                <div role="radiogroup" aria-label={activeCat.label}>
-                  {/* key: start from the first card when the tab or filter changes */}
-                  <CardCarousel
-                    key={`${activeCategory}-${filters.gender}-${filters.hand}-${packageTier}`}
-                  >
-                    {visibleItems.map((item) => {
-                      const qty = kit[item.id] ?? 0;
-                      // most this item can reach: its own qty plus what's still free
-                      const maxForItem =
-                        golfers === 1 ? 1 : qty + (golfers - usedActive);
-
-                      return (
-                        <ImageSliderCard
-                          key={item.id}
-                          images={item.images}
-                          title={item.title}
-                          description={item.description}
-                          badge={item.tag}
-                          selected={qty > 0}
-                          onClick={() =>
-                            setQty(item.id, activeCat.id, qty > 0 ? 0 : 1)
-                          }
-                        >
-                          <div
-                            className="flex items-center justify-between gap-3"
-                            onClick={(e) => e.stopPropagation()}
-                            onKeyDown={(e) => e.stopPropagation()}
-                          >
-                            <span className="text-xs text-slate-500">
-                              {qty > 0 ? `${qty} added` : "Tap card to add"}
-                            </span>
-                            <QuantityStepper
-                              size="sm"
-                              variant="outline"
-                              label={item.title}
-                              value={qty}
-                              min={0}
-                              max={maxForItem}
-                              onChange={(n) =>
-                                setQty(item.id, activeCat.id, n)
-                              }
-                            />
-                          </div>
-                        </ImageSliderCard>
-                      );
-                    })}
-                  </CardCarousel>
-                </div>
-              )}
+                Try again
+              </button>
             </div>
-          </>
-        )}
+          )}
+
+          {!isLoading && !isError && visibleItems.length === 0 && (
+            <p className="text-sm text-slate-500">
+              Nothing available for this selection. Try a different filter.
+            </p>
+          )}
+
+          {!isLoading && visibleItems.length > 0 && (
+            <div role="radiogroup" aria-label={activeCat.label}>
+              {/* key: start from the first card when the tab or filter changes */}
+              <CardCarousel
+                key={`${activeCategory}-${filters.gender}-${filters.hand}-${packageTier}`}
+              >
+                {visibleItems.map((item) => {
+                  const qty = kit[item.id] ?? 0;
+                  // most this item can reach: its own qty plus what's still free
+                  const maxForItem =
+                    golfers === 1 ? 1 : qty + (golfers - usedActive);
+
+                  return (
+                    <ImageSliderCard
+                      key={item.id}
+                      images={item.images}
+                      title={item.title}
+                      description={item.description}
+                      badge={item.tag}
+                      selected={qty > 0}
+                      onClick={() =>
+                        setQty(item.id, activeCat.id, qty > 0 ? 0 : 1)
+                      }
+                    >
+                      <div
+                        className="flex items-center justify-between gap-3"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      >
+                        <span className="text-xs text-slate-500">
+                          {qty > 0 ? `${qty} added` : "Tap card to add"}
+                        </span>
+                        <QuantityStepper
+                          size="sm"
+                          variant="outline"
+                          label={item.title}
+                          value={qty}
+                          min={0}
+                          max={maxForItem}
+                          onChange={(n) => setQty(item.id, activeCat.id, n)}
+                        />
+                      </div>
+                    </ImageSliderCard>
+                  );
+                })}
+              </CardCarousel>
+            </div>
+          )}
+        </div>
       </section>
 
       {footer && <div className="border-t border-slate-200 pt-6">{footer}</div>}

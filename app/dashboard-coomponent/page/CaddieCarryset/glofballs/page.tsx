@@ -92,31 +92,38 @@ export default function GolfBalls() {
   };
 
   // Handle form submit
-  const handleSubmit = (values: Record<string, any>) => {
-    const formData = new FormData();
+const handleSubmit = (values: Record<string, any>) => {
+  const formData = new FormData();
 
-    formData.append("name", values.name);
-    formData.append("tierName", values.tierName);
-    formData.append("quantity", String(Number(values.quantity)));
-    formData.append("price", String(Number(values.price)));
+  formData.append("name", values.name);
+  formData.append("tierName", values.tierName);
+  formData.append("quantity", String(Number(values.quantity)));
+  formData.append("price", String(Number(values.price)));
 
-    // image is either a new File or the existing URL string
-    if (values.image instanceof File) {
-      formData.append("image", values.image);
-    } else if (typeof values.image === "string" && values.image) {
-      // Tell the backend to keep the current image
-      formData.append("imageUrl", values.image);
-    }
+  // CustomDialog's file field returns File[] (or an existing URL string on edit)
+  const rawImage = values.image;
+  const imageFile: File | undefined =
+    rawImage instanceof File
+      ? rawImage
+      : Array.isArray(rawImage) && rawImage[0] instanceof File
+        ? rawImage[0]
+        : undefined;
 
-    if (editingBall?.id) {
-      updateBalls({
-        id: editingBall.id,
-        data: formData as unknown as BallsPayloadAttribes,
-      });
-    } else {
-      createBalls(formData as unknown as BallsPayloadAttribes);
-    }
-  };
+  if (imageFile) {
+    formData.append("image", imageFile);
+  } else if (typeof rawImage === "string" && rawImage) {
+    formData.append("image", rawImage); // keep existing image on edit
+  }
+
+  if (editingBall?.id) {
+    updateBalls({
+      id: editingBall.id,
+      data: formData as unknown as BallsPayloadAttribes,
+    });
+  } else {
+    createBalls(formData as unknown as BallsPayloadAttribes);
+  }
+};
 
   // Filter balls by search query
   const filteredBalls = useMemo(() => {

@@ -9,8 +9,7 @@ export type BookingStep = {
 export const BOOKING_STEPS: BookingStep[] = [
   { label: "Course & golfers" },
   { label: "Tee time" },
-  { label: "Package" },
-  // { label: "Pro shop", optional: true },
+  { label: "Accessories" },
   { label: "Review & pay" },
 ];
 

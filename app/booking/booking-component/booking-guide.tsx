@@ -25,7 +25,7 @@ export const DEFAULT_BOOKING_STEPS: BookingStep[] = [
     todo: "Select a date and a tee time to continue.",
   },
   {
-    label: "Package",
+    label: "Accessories",
     title: "Choose your package",
     help: "Packages add extras like carts, caddies or meals. Choose the one that suits your group.",
     todo: "Select a package to continue.",

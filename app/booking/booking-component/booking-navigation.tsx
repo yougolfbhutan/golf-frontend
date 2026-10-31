@@ -2,16 +2,12 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const STEP_NAMES = ["Course & golfers", "Tee time", "Package", "Review & pay"];
-
 type Props = {
   step: number; // 1-based
   lastStep: number;
   canContinue: boolean;
   onBack: () => void;
   onNext: () => void;
-  /** Optional override for the step names (index 0 = step 1). */
-  stepNames?: string[];
 };
 
 export default function BookingNavigation({
@@ -20,9 +16,7 @@ export default function BookingNavigation({
   canContinue,
   onBack,
   onNext,
-  stepNames = STEP_NAMES,
 }: Props) {
-  const nextName = stepNames[step] ?? "Next"; // step is 1-based, so stepNames[step] is the next step
   const showBack = step > 1;
   const showNext = step < lastStep;
 
@@ -54,7 +48,7 @@ export default function BookingNavigation({
           type="button"
           disabled={!canContinue}
           onClick={onNext}
-          aria-label={`Continue to ${nextName}`}
+          aria-label="Continue to the next step"
           className={cn(
             "group relative h-12 min-w-0 flex-1 justify-between rounded-full py-0 pl-6 pr-1.5",
             "text-sm font-semibold transition-all duration-200",
@@ -67,7 +61,7 @@ export default function BookingNavigation({
             "disabled:opacity-100 disabled:shadow-none disabled:pointer-events-auto",
           )}
         >
-          <span className="truncate">{nextName}</span>
+          <span className="truncate">Next</span>
           <span
             className={cn(
               "ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200",

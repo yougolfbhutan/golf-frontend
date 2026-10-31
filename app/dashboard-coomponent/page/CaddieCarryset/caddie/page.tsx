@@ -118,11 +118,18 @@ export default function Gloves() {
     );
 
     // image is either a new File or the existing URL string
-    if (values.image instanceof File) {
-      formData.append("image", values.image);
-    } else if (typeof values.image === "string" && values.image) {
-      // Tell the backend to keep the current image
-      formData.append("imageUrl", values.image);
+    const rawImage = values.image;
+    const imageFile: File | undefined =
+      rawImage instanceof File
+        ? rawImage
+        : Array.isArray(rawImage) && rawImage[0] instanceof File
+          ? rawImage[0]
+          : undefined;
+
+    if (imageFile) {
+      formData.append("image", imageFile);
+    } else if (typeof rawImage === "string" && rawImage) {
+      formData.append("image", rawImage); // keep existing image on edit
     }
 
     if (editingGlove?.id) {

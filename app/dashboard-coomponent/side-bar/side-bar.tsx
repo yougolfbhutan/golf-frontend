@@ -1,23 +1,17 @@
+/* eslint-disable react/jsx-no-undef */
 // app/components/Sidebar.tsx
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import {
   Grid3X3,
-  // FileText,
-  // Package,
-  // Settings,
   ShoppingCart,
   Menu,
   ChevronLeft,
   Magnet,
   ChevronDown,
   ChevronRight,
-  // Receipt,
-  // Workflow,
-  // DollarSign,
   User,
-  DollarSign,
-  Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -29,7 +23,21 @@ interface SidebarProps {
   setActiveMenuItem: (item: string) => void;
 }
 
+/*
+  Green palette (matches TopNavbar)
+  ─────────────────────────────
+  forest   #14532D  active text / strong accents
+  emerald  #0F9D58  primary brand green
+  fresh    #34D399  light accent
+  sage     #5C7A69  muted text
+  mist     #F1F8F4  sidebar background
+  active   #DDEFE4  active item background
+  hover    #E8F4EC  hover background
+  line     #D5EBDD  borders
+*/
+
 export default function Sidebar({
+  theme,
   setActiveApp,
   activeMenuItem,
   setActiveMenuItem,
@@ -39,11 +47,25 @@ export default function Sidebar({
     "Dashboard",
   );
 
+  const isDark = theme === "dark";
+
   const toggleSection = (section: string) => {
     setExpandedSection((prev) => (prev === section ? null : section));
   };
 
-  // Define sidebar structure similar to the image
+  /* ── theme tokens ── */
+  const shell = isDark
+    ? "bg-[#0d1512] border-[#1f3a2d]"
+    : "bg-[#F1F8F4] border-[#D5EBDD]";
+
+  const idleItem = isDark
+    ? "text-[#8FB5A0] hover:bg-[#16261f] hover:text-[#6EE7B7]"
+    : "text-[#5C7A69] hover:bg-[#E8F4EC] hover:text-[#14532D]";
+
+  const activeItem = isDark
+    ? "bg-[#1b3a2b] text-[#6EE7B7] font-medium"
+    : "bg-[#DDEFE4] text-[#14532D] font-medium";
+
   const sidebarStructure = [
     {
       id: "Dashboard",
@@ -111,16 +133,9 @@ export default function Sidebar({
             setActiveMenuItem("Golf Balls");
           },
         },
-        // {
-        //   label: "Discount Scheme",
-        //   onClick: () => {
-        //     setActiveApp("CarrysetCaddie");
-        //     setActiveMenuItem("Discount Scheme");
-        //   },
-        // },
       ],
     },
-     {
+    {
       id: "Booking Management",
       label: "Booking Management",
       icon: Magnet,
@@ -142,209 +157,44 @@ export default function Sidebar({
         },
       ],
     },
-   
-
-    // {
-    //   id: "Accounts Payable",
-    //   label: "Accounts Payable",
-    //   icon: FileText,
-    //   hasSubmenu: true,
-    //   subItems: [
-    //     {
-    //       label: "Purchase Invoice",
-    //       onClick: () => {
-    //         setActiveApp("Accounts Payable");
-    //         setActiveMenuItem("Purchase Invoice");
-    //       },
-    //     },
-    //     {
-    //       label: "Raw Materials Receipt",
-    //       onClick: () => {
-    //         setActiveApp("Accounts Payable");
-    //         setActiveMenuItem("Raw Materials Receipt");
-    //       },
-    //     },
-    //   ],
-    // },
-    //    {
-    //   id: "Production Batch",
-    //   label: "Production Batch",
-    //   icon: Package,
-    //   hasSubmenu: true,
-    //   subItems: [
-    //     {
-    //       label: "Production Batch",
-    //       onClick: () => {
-    //         setActiveApp("Production Batch");
-    //         setActiveMenuItem("Production Batch");
-    //       },
-    //     },
-    //     {
-    //       label: "Machines",
-    //       onClick: () => {
-    //         setActiveApp("Production Batch");
-    //         setActiveMenuItem("Machines");
-    //       },
-    //     },
-
-    //     {
-    //       label: "Labour",
-    //       onClick: () => {
-    //         setActiveApp("Production Batch");
-    //         setActiveMenuItem("Labour");
-    //       },
-    //     },
-    //      {
-    //       label: "Labour Cost",
-    //       onClick: () => {
-    //         setActiveApp("Production Batch");
-    //         setActiveMenuItem("Labour Cost");
-    //       },
-    //     },
-    //     {
-    //       label: "Product Unit Cost",
-    //       onClick: () => {
-    //         setActiveApp("Production Batch");
-    //         setActiveMenuItem("Product Unit Cost"); // ✅ FIXED
-    //       },
-    //     },
-    //     {
-    //       label: "Other Production Cost",
-    //       onClick: () => {
-    //         setActiveApp("Production Batch");
-    //         setActiveMenuItem("Other Production Cost"); // ✅ FIXED
-    //       },
-    //     },
-    //   ],
-    // },
-    // {
-    //   id: "Payments",
-    //   label: "Payments",
-    //   icon: DollarSign,
-    //   hasSubmenu: true,
-    //   subItems: [
-    //     {
-    //       label: "Payments",
-    //       onClick: () => {
-    //         setActiveApp("Payments");
-    //         setActiveMenuItem("Payments");
-    //       },
-    //     },
-    //     // {
-    //     //   label: "Fixed Assets Payment",
-    //     //   onClick: () => {
-    //     //     setActiveApp("Payments");
-    //     //     setActiveMenuItem("Fixed Assets Payment");
-    //     //   },
-    //     // },
-    //   ],
-    // },
- 
-   
-    // {
-    //   id: "ERP",
-    //   label: "ERP",
-    //   icon: Settings,
-    //   hasSubmenu: true,
-    //   subItems: [
-    //     {
-    //       label: "Leave Types",
-    //       onClick: () => {
-    //         setActiveApp("ERP");
-    //         setActiveMenuItem("Leave Types");
-    //       },
-    //     },
-    //     {
-    //       label: "Leave Application",
-    //       onClick: () => {
-    //         setActiveApp("ERP");
-    //         setActiveMenuItem("Leave Application");
-    //       },
-    //     },
-    //     {
-    //       label: "Leave Encashment",
-    //       onClick: () => {
-    //         setActiveApp("ERP");
-    //         setActiveMenuItem("Leave Encashment");
-    //       },
-    //     },
-    //     {
-    //       label: "Payroll",
-    //       onClick: () => {
-    //         setActiveApp("ERP");
-    //         setActiveMenuItem("Payroll");
-    //       },
-    //     },
-    //   ],
-    // },
-    // {
-    //   id: "Approval",
-    //   label: "Approval",
-    //   icon: Workflow,
-    //   hasSubmenu: true,
-    //   subItems: [
-    //     {
-    //       label: "Purchase Approval",
-    //       onClick: () => {
-    //         setActiveApp("Approval");
-    //         setActiveMenuItem("Purchase Approval");
-    //       },
-    //     },
-    //     {
-    //       label: "Fixed Assets approval",
-    //       onClick: () => {
-    //         setActiveApp("Approval");
-    //         setActiveMenuItem("Fixed Assets approval");
-    //       },
-    //     },
-    //   ],
-    // },
-    // {
-    //   id: "Assets",
-    //   label: "Assets",
-    //   icon: Workflow,
-    //   hasSubmenu: true,
-    //   subItems: [
-    //     {
-    //       label: "Fixed Assets",
-    //       onClick: () => {
-    //         setActiveApp("Assets");
-    //         setActiveMenuItem("Fixed Assets");
-    //       },
-    //     },
-    //   ],
-    // },
   ];
 
   return (
     <div
       className={`
-        h-screen  flex flex-col transition-all duration-300 ease-in-out bg-background
+        h-screen flex flex-col border-r transition-all duration-300 ease-in-out
+        ${shell}
         ${isCollapsed ? "w-20" : "w-64"}
       `}
     >
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded flex items-center justify-center">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="w-full h-full text-foreground"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                fill="currentColor"
-                opacity="0.2"
+          <span
+            className={`group relative grid shrink-0 place-items-center rounded-full h-10 w-10 ring-1 transition-all duration-500 hover:-rotate-6 motion-reduce:transition-none ${
+              isDark
+                ? "bg-[#16261f] ring-[#2f5a43] hover:ring-[#34D399]"
+                : "bg-white ring-[#BFDECB] hover:ring-[#0F9D58]"
+            }`}
+          >
+            <span className="relative h-[72%] w-[72%]">
+              <Image
+                src="/logo.png"
+                alt="YouGolfBhutan logo"
+                fill
+                sizes="40px"
+                priority
+                className="object-contain"
               />
-              <circle cx="12" cy="12" r="6" fill="currentColor" />
-            </svg>
-          </div>
+            </span>
+          </span>
           {!isCollapsed && (
-            <span className="text-lg font-semibold text-foreground">
-              LogoIpsum
+            <span
+              className={`text-lg font-semibold ${
+                isDark ? "text-[#E6F4EC]" : "text-[#14532D]"
+              }`}
+            >
+              YouGolfBhutan
             </span>
           )}
         </div>
@@ -353,19 +203,21 @@ export default function Sidebar({
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="h-8 w-8"
+          className={`h-8 w-8 ${
+            isDark
+              ? "text-[#8FB5A0] hover:bg-[#16261f] hover:text-[#6EE7B7]"
+              : "text-[#5C7A69] hover:bg-[#DDEFE4] hover:text-[#14532D]"
+          }`}
         >
           {isCollapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4">
+      <nav className="flex-1 overflow-y-auto py-4 px-2">
         {sidebarStructure.map((section) => {
           const Icon = section.icon;
-          const isExpanded = expandedSection === section.id; // const isSectionActive = section.subItems?.some(
-          //   (item) => item.label === activeMenuItem,
-          // );
+          const isExpanded = expandedSection === section.id;
           const isDirectActive =
             !section.hasSubmenu && activeMenuItem === section.label;
 
@@ -381,16 +233,15 @@ export default function Sidebar({
                   }
                 }}
                 className={`
-                  w-full flex items-center gap-3 px-4 py-2.5 text-sm
+                  w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg
                   transition-colors relative group
-                  ${
-                    isDirectActive
-                      ? "bg-[#e8d5c4] text-[#6b5344] font-medium"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  }
+                  ${isDirectActive ? activeItem : idleItem}
                   ${isCollapsed ? "justify-center" : ""}
                 `}
               >
+                {isDirectActive && (
+                  <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-[#0F9D58]" />
+                )}
                 <Icon size={20} className="flex-shrink-0" />
                 {!isCollapsed && (
                   <>
@@ -410,7 +261,11 @@ export default function Sidebar({
 
               {/* Submenu Items */}
               {section.hasSubmenu && isExpanded && !isCollapsed && (
-                <div className="pl-11 py-1">
+                <div
+                  className={`ml-6 pl-4 py-1 border-l ${
+                    isDark ? "border-[#24402f]" : "border-[#CFE6D8]"
+                  }`}
+                >
                   {section.subItems?.map((item) => {
                     const isActive = activeMenuItem === item.label;
 
@@ -419,13 +274,9 @@ export default function Sidebar({
                         key={item.label}
                         onClick={item.onClick}
                         className={`
-                          w-full text-left px-4 py-2 text-sm rounded-md
+                          w-full text-left px-3 py-2 text-sm rounded-md
                           transition-colors
-                          ${
-                            isActive
-                              ? "bg-[#e8d5c4] text-[#6b5344] font-medium"
-                              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                          }
+                          ${isActive ? activeItem : idleItem}
                         `}
                       >
                         {item.label}
