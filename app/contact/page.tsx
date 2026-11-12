@@ -27,7 +27,7 @@ const DETAILS = [
   {
     icon: MapPin,
     label: "Office",
-    value: "Norzin Lam, Thimphu, Bhutan",
+    value: "Thimphu, Bhutan",
   },
   {
     icon: Clock,
