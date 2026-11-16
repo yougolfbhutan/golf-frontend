@@ -16,10 +16,9 @@ export interface PermssionForm extends FieldConfig {
 
 export const fields: PermssionForm[] = [
     {
-      name: "permission_name",
+      name: "name",
       label: "Permission Name",
       type: "text",
-      placeholder: "Enter your name",
       validation: Yup.string().required("Name is required"),
       Icon: RollerCoaster,
     },

@@ -1,15 +1,16 @@
 "use client";
 
-import { useAuth } from "@/app/context/auth-context";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/app/context/auth-context";
+import { canAccess } from "@/app/src/lib/auth/menu-access";
+import { SYSTEM_ROLES } from "@/app/src/lib/auth/auth-roles";
 import { menuContent } from "../../dashboard-coomponent/data/item";
-// import { getInitials } from "../../dashboard-coomponent/helper-function";
 import TopNavbar from "../../dashboard-coomponent/dashboard-nabar";
 import Sidebar from "../../dashboard-coomponent/side-bar/side-bar";
+import { RoleGuard } from "@/app/src/lib/auth/dasboardguard";
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user } = useAuth();
-  console.log("user ", user);
   const [theme, setTheme] = useState<"light" | "dark" | "orange">("light");
 
   // Apply theme to <body>
@@ -29,30 +30,6 @@ export default function DashboardPage() {
 
   const [activeMenuItem, setActiveMenuItem] = useState("Dashboard");
   const [activeApp, setActiveApp] = useState("Home");
-
-  // Rename this to avoid conflict
-  // const bodyTheme = useSyncExternalStore(
-  //   (callback) => {
-  //     if (typeof document === "undefined") return () => { };
-
-  //     const observer = new MutationObserver(callback);
-  //     observer.observe(document.body, {
-  //       attributes: true,
-  //       attributeFilter: ["class"],
-  //     });
-  //     return () => observer.disconnect();
-  //   },
-  //   () => {
-  //     if (typeof document === "undefined") return "light";
-
-  //     if (document.body.classList.contains("dark")) return "dark";
-  //     if (document.body.classList.contains("theme-orange")) return "orange";
-  //     // if (document.body.classList.contains("theme-blue")) return "blue";
-  //     // if (document.body.classList.contains("theme-green")) return "green";
-  //     return "light";
-  //   },
-  //   () => "light"
-  // );
 
   return (
     <div className="flex h-screen bg-background text-foreground">
@@ -74,13 +51,27 @@ export default function DashboardPage() {
 
           <div className="min-h-96 flex m-4 backdrop-blur-sm transition-all duration-300">
             <div className="flex-1 w-full">
-              {menuContent[activeMenuItem] || (
-                <p className="text-3xl opacity-50">Select a menu item</p>
+              {!canAccess(user, activeMenuItem) ? (
+                <p className="text-xl opacity-60">
+                  You do not have permission to view this page.
+                </p>
+              ) : (
+                menuContent[activeMenuItem] || (
+                  <p className="text-3xl opacity-50">Select a menu item</p>
+                )
               )}
             </div>
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <RoleGuard allow={SYSTEM_ROLES}>
+      <DashboardContent />
+    </RoleGuard>
   );
 }

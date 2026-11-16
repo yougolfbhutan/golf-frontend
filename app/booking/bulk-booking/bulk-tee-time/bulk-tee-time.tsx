@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import { format, isBefore, parseISO, startOfToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import TimeSlotPicker from "../../booking-component/time-slotpicker";
-import { useTeeSlots } from "../../booking-component/use-tee-slots";
-import { type BulkState, findCourse, totalGolfers } from "../bulk-types/bulk-types";
-;
+import TimeSlotPicker, {
+  type TeeSlot,
+} from "../../booking-component/time-slotpicker";
+import { useGetTeeTimes } from "../../booking-steps/Tee-time/tanstack";
+import {
+  type BulkState,
+  findCourse,
+  totalGolfers,
+} from "../bulk-types/bulk-types";
 
 type Props = {
   booking: BulkState;
@@ -23,7 +28,27 @@ export default function BulkTeeTimeStep({
   footer,
   closedDays = [],
 }: Props) {
-  const { slots, loading, error } = useTeeSlots(booking.courseId, booking.date);
+  // the selected date is sent to the backend; it returns that day's tee times
+  const {
+    data,
+    isLoading: loading,
+    isError,
+    refetch,
+  } = useGetTeeTimes(booking.date ?? "");
+  console.log("data", data);
+
+  // backend shape -> picker shape (no filtering, the backend decides)
+  const slots = useMemo<TeeSlot[]>(
+    () =>
+      (data ?? []).map((s) => ({
+        time: s.teeTime,
+        spotsLeft: s.placesLeft,
+        status: s.status,
+      })),
+    [data],
+  );
+
+  const error = isError ? "Could not load tee times. Please try again." : null;
 
   const course = findCourse(booking.courseId);
   const total = totalGolfers(booking);
@@ -51,6 +76,8 @@ export default function BulkTeeTimeStep({
     );
   }
 
+  const ready = !!selectedDate && !loading && !error;
+
   return (
     <div className="mt-8 space-y-8 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xl shadow-slate-900/10 sm:p-8">
       <div>
@@ -71,7 +98,7 @@ export default function BulkTeeTimeStep({
           selected={selectedDate}
           defaultMonth={selectedDate}
           onSelect={(d) =>
-            // changing the date clears the tee time
+            // changing the date clears the tee time and loads that day's times
             onChange({ date: d ? format(d, "yyyy-MM-dd") : null, slot: null })
           }
           disabled={[{ before: startOfToday() }, { dayOfWeek: closedDays }]}
@@ -87,37 +114,57 @@ export default function BulkTeeTimeStep({
         </p>
 
         {!selectedDate && (
-          <p className="text-base text-slate-500">Choose a date to see tee times.</p>
+          <p className="text-base text-slate-500">
+            Choose a date to see tee times.
+          </p>
         )}
 
         {selectedDate && loading && (
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          <div
+            className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6"
+            aria-busy="true"
+          >
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="h-14 animate-pulse rounded-xl bg-slate-100" />
+              <div
+                key={i}
+                className="h-14 animate-pulse rounded-xl bg-slate-100"
+              />
             ))}
           </div>
         )}
 
-        {selectedDate && error && (
-          <p role="alert" className="text-sm font-medium text-red-600">
-            {error}
-          </p>
+        {selectedDate && !loading && error && (
+          <div
+            role="alert"
+            className="flex items-center gap-3 text-sm font-medium text-red-600"
+          >
+            <span>{error}</span>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="rounded-lg border border-red-200 px-3 py-1 hover:bg-red-50"
+            >
+              Try again
+            </button>
+          </div>
         )}
 
-        {selectedDate && !loading && !error && slots.length === 0 && (
+        {ready && slots.length === 0 && (
           <p className="text-sm text-slate-500">No tee times on this day.</p>
         )}
 
-        <TimeSlotPicker
-          slots={slots}
-          golfers={1} // any open slot works as the first tee time
-          value={booking.slot?.time ?? null}
-          onChange={(time) =>
-            onChange({
-              slot: time && booking.date ? { date: booking.date, time } : null,
-            })
-          }
-        />
+        {/* any slot the backend marks AVAILABLE works as the first tee time */}
+        {ready && slots.length > 0 && (
+          <TimeSlotPicker
+            slots={slots}
+            value={booking.slot?.time ?? null}
+            onChange={(time) =>
+              onChange({
+                slot: time && booking.date ? { date: booking.date, time } : null,
+              })
+            }
+          />
+        )}
       </section>
 
       {footer && <div className="border-t border-slate-200 pt-6">{footer}</div>}

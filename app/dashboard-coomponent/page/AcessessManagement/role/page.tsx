@@ -53,16 +53,16 @@ export default function Role() {
   const { data: permissionValues } = useGetPermissions();
 
   // Table data
-  const roles: RoleData[] = roleData?.data.roles || [];
-  const allPermissions = permissionValues?.data.data || [];
+  const roles: RoleData[] = roleData?.data || [];
+  const allPermissions = permissionValues?.data || [];
 
   // Dynamically create permission fields with API data
   const dynamicPermissionFields: PermssionForm[] = useMemo(() => {
     // Get base fields (name and description)
-    const baseFields = RolesFields.filter(field => field.name !== "permission_ids");
+    const baseFields = RolesFields.filter(field => field.name !== "permissions");
     
     // Find the permission field template
-    const permissionFieldTemplate = RolesFields.find(field => field.name === "permission_ids");
+    const permissionFieldTemplate = RolesFields.find(field => field.name === "permissions");
 
     if (!permissionFieldTemplate || !allPermissions.length) {
       return baseFields;
@@ -70,7 +70,7 @@ export default function Role() {
 
     // Map API permissions to checkbox options
     const apiPermissionOptions = allPermissions.map(permission => ({
-      label: permission.permission_name,        // "RN Export and Import"
+      label: permission.name,        // "RN Export and Import"
       value: permission.id           // 1, 2, etc.
     }));
 
@@ -95,7 +95,7 @@ export default function Role() {
   const columns: Column<RoleData>[] = [
     {
       header: "Name",
-      accessor: "role_name",
+      accessor: "name",
     },
  
     {
@@ -109,10 +109,10 @@ export default function Role() {
           <div className="flex flex-wrap gap-1">
             {row.permissions.map((permission) => (
               <span
-                key={permission.permission.id}
+                key={permission.id}
                 className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs"
               >
-                {permission.permission.permission_name}
+                {permission.name}
               </span>
             ))}
           </div>
@@ -129,7 +129,7 @@ export default function Role() {
     const query = searchQuery.toLowerCase();
     return roles.filter(
       (role) =>
-        role.role_name.toLowerCase().includes(query) 
+        role.name.toLowerCase().includes(query) 
     );
   }, [roles, searchQuery]);
 
@@ -158,7 +158,7 @@ export default function Role() {
   // Delete function
   const handleDelete = (row: RoleData) => {
     const confirmed = window.confirm(
-      `⚠️ Are you sure you want to delete the role "${row.role_name}"? This action cannot be undone.`
+      `⚠️ Are you sure you want to delete the role "${row.name}"? This action cannot be undone.`
     );
 
     if (!confirmed) return;
@@ -194,8 +194,8 @@ export default function Role() {
     // From: permissions: [{id: 1, name: "..."}, {id: 2, name: "..."}]
     // To: permission_ids: [1, 2]
     return {
-      role_name: editingRole.role_name,
-      permission_ids: editingRole.permissions?.map(p => p.permission.id) || []
+      role_name: editingRole.name,
+      permission_ids: editingRole.permissions?.map(p => p.id) || []
     };
   }, [editingRole]);
 
@@ -225,9 +225,9 @@ export default function Role() {
             setEditingRole(null);
             setIsDialogOpen(true);
           }}
-          className="bg-orange-500 text-white hover:bg-orange-600 h-12 px-6 rounded-md shadow-md"
+          className="h-12 gap-2 rounded-xl bg-[#1F4D36] px-6 font-semibold text-white shadow-md shadow-[#1F4D36]/25 transition hover:bg-[#173d2a] focus-visible:ring-2 focus-visible:ring-[#10B759]/40"
         >
-          Create
+          Create Role
         </Button>
       </div>
 
@@ -243,11 +243,10 @@ export default function Role() {
         defaultValues={dialogDefaultValues}
         onSubmit={handleSubmit}
         OnSubmitTitle={editingRole ? "Update Role" : "Create Role"}
-        CustomDialogBoxStyle="px-8 py-6 flex flex-col gap-5 overflow-y-auto flex-1"
+        CustomDialogBoxStyle="px-8 py-6 grid grid-cols-3 gap-5 overflow-y-auto flex-1"
       />
-
-      {/* Data Table */}
-      <DataTable
+      <div className="overflow-hidden rounded-2xl bg-white shadow-lg shadow-slate-900/5">
+        <DataTable
         data={filteredData}
         columns={columns}
         actions={getActions()}
@@ -255,6 +254,10 @@ export default function Role() {
         onSelectionChange={setSelected}
         
       />
+      </div>
+
+      {/* Data Table */}
+    
     </div>
   );
 }

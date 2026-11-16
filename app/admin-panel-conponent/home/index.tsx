@@ -1,76 +1,86 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-import { Users } from 'lucide-react';
+import { useState, type ComponentType } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { CalendarClock, Flag, List, type LucideIcon } from 'lucide-react';
 import DashboardBookingPage from '@/app/dashboard-coomponent/page/Dashboard/booking-page';
+import TeeSheetPage from '@/app/dashboard-coomponent/page/Dashboard/teesheet page/tee-sheetpage';
 // import ApprovalItemsDashboardPage from '@/app/dashboard-coomponent/page/Dashboard/orderapproval-page';
 
+type Section = {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  component: ComponentType;
+};
 
-
-const stats = [
-  {
-    key: 'Booking',
-    title: 'Booking',
-    // value: 1240,
-    icon: <Users size={28} />,
-    color: 'from-purple-500 to-indigo-500',
-    component: DashboardBookingPage,
-  },
-
-  
-
+/* Add a new section here and a tab appears automatically. */
+const sections: Section[] = [
+  { key: 'tee-sheet', label: 'Tee sheet', icon: CalendarClock, component: TeeSheetPage },
+  { key: 'bookings', label: 'All bookings', icon: List, component: DashboardBookingPage },
+  // { key: 'orders', label: 'Order approvals', icon: Package, component: ApprovalItemsDashboardPage },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  3. Dashboard — stat cards act as tabs                              */
-/* ------------------------------------------------------------------ */
-
 export default function DashboardPage() {
-  const [activeKey, setActiveKey] = useState(stats[0].key);
-  const active = stats.find((s) => s.key === activeKey)!;
+  const [activeKey, setActiveKey] = useState(sections[0].key);
+  const reduceMotion = useReducedMotion();
+  const active = sections.find((s) => s.key === activeKey) ?? sections[0];
   const ActiveComponent = active.component;
+  const showTabs = sections.length > 1;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {/* Stat cards act as tabs */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        {stats.map((stat, idx) => {
-          const isActive = stat.key === activeKey;
-          return (
-            <motion.button
-              key={stat.key}
-              onClick={() => setActiveKey(stat.key)}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.08 }}
-              className={`text-left flex items-center gap-4 p-6 rounded-xl shadow-lg bg-gradient-to-r ${stat.color} text-white transition-all ${
-                isActive ? 'ring-4 ring-white/70 scale-[1.03]' : 'opacity-80 hover:opacity-100 hover:scale-[1.02]'
-              }`}
-            >
-              <div className="p-4 bg-white/20 rounded-full">{stat.icon}</div>
-              <div>
-                <p className="text-sm font-medium opacity-90">{stat.title}</p>
-                {/* <p className="text-2xl font-bold">{stat.value}</p> */}
-              </div>
-            </motion.button>
-          );
-        })}
-      </div>
+    <div className="min-h-screen bg-stone-50">
+      {/* Top bar */}
+      <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-8">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-800 text-white">
+              <Flag className="h-4 w-4" />
+            </div>
+            <div className="leading-tight">
+              <p className="text-sm font-semibold text-stone-900">YouGolf Bhutan</p>
+              <p className="text-xs text-stone-500">Admin</p>
+            </div>
+          </div>
 
-      {/* Detail panel — renders whichever component the active stat points to */}
+          {showTabs && (
+            <nav className="-mb-px flex h-full gap-6 overflow-x-auto" aria-label="Dashboard sections">
+              {sections.map((s) => {
+                const isActive = s.key === activeKey;
+                const Icon = s.icon;
+                return (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => setActiveKey(s.key)}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`flex items-center gap-2 whitespace-nowrap border-b-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
+                      isActive
+                        ? 'border-emerald-800 text-stone-900'
+                        : 'border-transparent text-stone-500 hover:text-stone-900'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {s.label}
+                  </button>
+                );
+              })}
+            </nav>
+          )}
+        </div>
+      </header>
+
+      {/* Active section — no extra card around it, the page has its own layout */}
       <AnimatePresence mode="wait">
-        <motion.div
+        <motion.main
           key={active.key}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.25 }}
-          className="bg-white p-6 rounded-xl shadow-lg"
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={reduceMotion ? undefined : { opacity: 0 }}
+          transition={{ duration: 0.15 }}
         >
           <ActiveComponent />
-        </motion.div>
+        </motion.main>
       </AnimatePresence>
     </div>
   );

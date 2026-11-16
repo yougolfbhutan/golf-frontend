@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { FieldType } from "@/app/dashboard-coomponent/customDialogbox";
 import { FieldConfig } from "formik";
-import {  User } from "lucide-react";
+import { User, Phone, Mail, Lock, Globe } from "lucide-react";
 import * as Yup from "yup";
+
 type CustomFieldConfig = FieldConfig & {
   label: string;
   placeholder?: string;
@@ -13,9 +14,10 @@ type CustomFieldConfig = FieldConfig & {
   validation?: any;
   defaultValue?: any;
 };
+
 export const UserCreatefields: CustomFieldConfig[] = [
   {
-    name: "customer_name",
+    name: "name",
     label: "Full Name",
     type: "text",
     placeholder: "Enter your name",
@@ -30,7 +32,7 @@ export const UserCreatefields: CustomFieldConfig[] = [
     validation: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),
-    Icon: User,
+    Icon: Mail,
   },
   {
     name: "password",
@@ -40,17 +42,25 @@ export const UserCreatefields: CustomFieldConfig[] = [
     validation: Yup.string()
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
-    Icon: User,
+    Icon: Lock,
   },
- {
-    name: "phone_number",
+  {
+    name: "phone_no",
     label: "Phone Number",
     type: "text",
     placeholder: "Enter your phone number",
     validation: Yup.string()
       .min(8, "Phone number must be at least 8 characters")
       .required("Phone number is required"),
-    Icon: User,
+    Icon: Phone,
+  },
+  {
+    name: "country_code",
+    label: "Country Code",
+    type: "text",
+    placeholder: "e.g. BT",
+    validation: Yup.string().required("Country code is required"),
+    Icon: Globe,
   },
   {
     name: "roles",

@@ -12,6 +12,7 @@ import {
   MapPin,
   ShieldCheck,
   Users,
+  Wallet,
 } from "lucide-react";
 
 import { AuthModal } from "@/app/(auth)/Auth-modal";
@@ -24,8 +25,11 @@ import {
   totalGolfers,
   MIN_GOLFERS,
   teeTimeLabel,
+ 
+
 } from "../bulk-types/bulk-types";
 import { useBookingMutation } from "../../booking-steps/Review&pay/tanstack";
+import { bulkAmounts, formatUSD, NON_SAARC_RATE, SAARC_RATE } from "../helper/bulk-types";
 
 // TODO: set this to the golfer category id your backend uses for bulk / tour groups.
 // The customer booking sends golferCategoryId, so bulk sends one too.
@@ -58,6 +62,7 @@ export default function BulkReviewStep({
   const total = totalGolfers(booking);
   const ready = Boolean(course && booking.slot && total >= MIN_GOLFERS);
   const dateLabel = teeTimeLabel(booking.slot);
+  const { saarcAmount, nonSaarcAmount, total: totalAmount } = bulkAmounts(booking);
 
   async function submit(customerId: string | number) {
     if (submitting) return;
@@ -76,9 +81,12 @@ export default function BulkReviewStep({
         teeDate: booking.slot.date,
         teeTime: booking.slot.time,
         numberOfGolfers: total,
-        notes: `Bulk booking: ${booking.saarcGolfers} SAARC, ${booking.nonSaarcGolfers} non-SAARC golfers`,
+        // If your API has a total amount field (e.g. totalAmount), send totalAmount there too.
+        notes: `Bulk booking: ${booking.saarcGolfers} SAARC (${formatUSD(SAARC_RATE)} each), ${booking.nonSaarcGolfers} non-SAARC (${formatUSD(NON_SAARC_RATE)} each). Total ${formatUSD(totalAmount)}`,
         items: [],
         status: "pending",
+        no_of_right_handed: booking.no_of_right_handed,
+        no_of_left_handed: booking.no_of_left_handed,
       });
 
       // BookingsResponse has no `reference`; use the created booking id if the API returns it
@@ -137,7 +145,7 @@ export default function BulkReviewStep({
           )}
         </div>
 
-        <dl className="mx-6 grid gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 sm:mx-8 sm:grid-cols-3">
+        <dl className="mx-6 grid gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 sm:mx-8 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryCell icon={MapPin} label="Course" value={course?.name ?? "Your course"} />
           <SummaryCell
             icon={Users}
@@ -145,6 +153,7 @@ export default function BulkReviewStep({
             value={`${total} ${total === 1 ? "golfer" : "golfers"}`}
           />
           <SummaryCell icon={CalendarClock} label="First tee time" value={dateLabel} />
+          <SummaryCell icon={Wallet} label="Estimated total" value={formatUSD(totalAmount)} />
         </dl>
 
         {user?.email && (
@@ -194,14 +203,32 @@ export default function BulkReviewStep({
 
         <ReviewRow label="Golfers" onChange={() => onEditStep(1)}>
           <div className="grid grid-cols-3 gap-2 text-center">
-            <Tile label="SAARC" value={booking.saarcGolfers} />
-            <Tile label="Non-SAARC" value={booking.nonSaarcGolfers} />
-            <Tile label="Total" value={total} strong />
+            <Tile label={`SAARC × ${formatUSD(SAARC_RATE)}`} value={booking.saarcGolfers} />
+            <Tile
+              label={`Non-SAARC × ${formatUSD(NON_SAARC_RATE)}`}
+              value={booking.nonSaarcGolfers}
+            />
+            <Tile label="Total golfers" value={total} strong />
           </div>
         </ReviewRow>
 
         <ReviewRow label="Date & tee time" onChange={() => onEditStep(2)}>
           {dateLabel}
+        </ReviewRow>
+
+        <ReviewRow label="Estimated amount" onChange={() => onEditStep(1)}>
+          <div className="space-y-1 text-sm text-slate-700">
+            <p>
+              {booking.saarcGolfers} × {formatUSD(SAARC_RATE)} = {formatUSD(saarcAmount)}
+            </p>
+            <p>
+              {booking.nonSaarcGolfers} × {formatUSD(NON_SAARC_RATE)} ={" "}
+              {formatUSD(nonSaarcAmount)}
+            </p>
+            <p className="pt-1 text-lg font-bold text-[#1F4D36]">
+              Total: {formatUSD(totalAmount)}
+            </p>
+          </div>
         </ReviewRow>
       </div>
 

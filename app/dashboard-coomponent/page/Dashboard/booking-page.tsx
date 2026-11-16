@@ -1,226 +1,214 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { CheckCircle, Search, XCircle } from "lucide-react";
+import { CheckCircle, Clock, Eye, Search, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { showToast } from "nextjs-toast-notify";
 import { DataTable, type ActionConfig, type Column } from "../../table/table";
-// import {
-//   useDashboardGetBookings,
-//   useUpdateBookingMutations,
-// } from "../Booking/tanstack";
 import type { Booking } from "../Booking/interface";
-import { VerticalModalForm } from "@/custom-components/vertical-modal";
-import DynamicArrayForm from "@/custom-components/dynamic-array";
-import { useGetBookings } from "../Booking/tanstack";
+import { formatDate } from "date-fns";
+import { type PanelMode, formatTime, formatMoney, StatusBadge, BookingDetailsPanel } from "./booking-ui/booking-ui";
+import { useGetBookings } from "./teesheet page/tanstack";
+
+/* ---------- page ---------- */
+
+type StatusFilter = "all" | "pending" | "completed" | "cancelled";
 
 export default function DashboardBookingPage() {
-  const [selected, setSelected] = useState<Booking[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<Booking | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-  // Fetch bookings
+
   const [page, setPage] = useState(1);
   const limit = 10;
-  const { data: bookingData, isFetching } = useGetBookings(
-    page,
-    limit,
-  );
+  const { data: bookingData, isFetching } = useGetBookings(page, limit);
 
-  // bookingData is BookingGetResponse:
-  //   bookingData.data = { data: Booking[], total, page, limit, totalPages }
   const paginated = bookingData?.data;
   const bookings: Booking[] = paginated?.data ?? [];
   const totalPages = paginated?.totalPages ?? 1;
+  const totalBookings = paginated?.total ?? bookings.length;
 
-  // const { cancelBooking, approveBooking } = useUpdateBookingMutations({
-  //   onSuccess: (data) => {
-  //     showToast.success(data.message, {
-  //       duration: 5000,
-  //       position: "top-right",
-  //       transition: "topBounce",
-  //       icon: "",
-  //       sound: true,
-  //     });
-  //     setIsModalOpen(false);
-  //     setSelectedRow(null);
-  //   },
-  //   onError: (error) => {
-  //     console.log("Error", error);
-  //     showToast.error(error?.data?.message || "Something went wrong", {
-  //       duration: 5000,
-  //       position: "top-right",
-  //       transition: "topBounce",
-  //       icon: "",
-  //       sound: true,
-  //     });
-  //   },
-  // });
+  const counts = useMemo(() => {
+    const c = (...s: string[]) => bookings.filter((b) => s.includes(b.status ?? "")).length;
+    return {
+      pending: c("pending"),
+      completed: c("completed", "confirmed", "approved"),
+      cancelled: c("cancelled"),
+    };
+  }, [bookings]);
 
+  const toastOptions = {
+    duration: 3000,
+    position: "top-right" as const,
+    transition: "topBounce" as const,
+    icon: "",
+    sound: true,
+  };
+
+
+  /* Only the columns you need at a glance. Everything else lives in "View details". */
   const columns: Column<Booking>[] = [
     {
-      header: "Name",
-      render: (_value, row) => row.customer?.name || "N/A",
+      header: "Customer",
+      render: (_v, row) => (
+        <div className="min-w-0">
+          <p className="truncate font-medium text-stone-900">{row.customer?.name || "—"}</p>
+          {row.customer?.phone_no && (
+            <p className="truncate text-xs text-stone-500">
+              {`${row.customer.country_code ?? ""} ${row.customer.phone_no}`.trim()}
+            </p>
+          )}
+        </div>
+      ),
     },
     {
-      header: "Email",
-      render: (_value, row) => row.customer?.email || "N/A",
+      header: "Course",
+      render: (_v, row) => (
+        <span className="text-stone-800">{row.golfCourse?.name || "—"}</span>
+      ),
     },
     {
-      header: "Phone",
-      render: (_value, row) =>
-        row.customer?.phone_no
-          ? `${row.customer.country_code ?? ""} ${row.customer.phone_no}`.trim()
-          : "N/A",
+      header: "Tee time",
+      render: (_v, row) => (
+        <div className="whitespace-nowrap">
+          <p className="text-stone-900">{(row.teeDate)}</p>
+          <p className="text-xs text-stone-500">{formatTime(row.teeTime) || "—"}</p>
+        </div>
+      ),
     },
     {
-      header: "Golf Course",
-      render: (_value, row) => row.golfCourse?.name || "N/A",
+      header: "Players",
+      render: (_v, row) => (
+        <span className="tabular-nums text-stone-800">{row.numberOfGolfers ?? "—"}</span>
+      ),
     },
     {
-      header: "Tee Time",
-      render: (_value, row) =>
-        row.teeDate ? `${row.teeDate} ${row.teeTime?.slice(0, 5) ?? ""}` : "N/A",
-    },
-    { header: "Golfers", accessor: "numberOfGolfers" },
-    {
-      header: "Items",
-      render: (_value, row) => {
-        const names = (row.items ?? [])
-          .map((item) => {
-            const name =
-              item.golfSet?.name ?? item.ball?.name ?? item.glove?.name;
-            return name ? `${name} x${item.quantity}` : null;
-          })
-          .filter(Boolean);
-        return names.length ? names.join(", ") : "N/A";
-      },
+      header: "Amount",
+      render: (_v, row) => (
+        <span className="whitespace-nowrap font-medium tabular-nums text-stone-900">
+          {formatMoney(row.currency, row.totalAmount)}
+        </span>
+      ),
     },
     {
-      header: "Total Cost",
-      render: (_value, row) => `${row.currency} ${row.totalAmount}`,
-    },
-    { header: "Status", accessor: "status" },
-  ];
-
-  // Table actions
-  const getActions = (): ActionConfig<Booking>[] => [
-    {
-      label: "Approve",
-      icon: <CheckCircle className="h-4 w-4" />,
-      onClick: (row) => handleApprove(row),
-    },
-    {
-      label: "Cancel",
-      icon: <XCircle className="h-4 w-4" />,
-      onClick: (row) => handleCancel(row),
+      header: "Status",
+      render: (_v, row) => <StatusBadge status={row.status} />,
     },
   ];
 
-  const handleApprove = (row: Booking) => {
-    if (row.status !== "pending") {
-      showToast.error("Only pending bookings can be approved", {
-        duration: 3000,
-        position: "top-right",
-        transition: "topBounce",
-        icon: "",
-        sound: true,
-      });
-      return;
-    }
-    setSelectedRow(row);
-    setIsModalOpen(true);
-  };
 
-  const handleCancel = (row: Booking) => {
-    if (row.status !== "pending") {
-      showToast.error("Only pending bookings can be cancelled", {
-        duration: 3000,
-        position: "top-right",
-        transition: "topBounce",
-        icon: "",
-        sound: true,
-      });
-      return;
-    }
-    const confirmed = window.confirm(
-      `Cancel booking for "${row.customer?.name}"? This action cannot be undone.`,
-    );
-    if (!confirmed) return;
-    // cancelBooking({ id: row.id });
-  };
 
   const filteredBookings = useMemo(() => {
-    if (!searchQuery.trim()) return bookings;
+    const q = searchQuery.trim().toLowerCase();
+    return bookings.filter((b) => {
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "completed"
+          ? ["completed", "confirmed", "approved"].includes(b.status ?? "")
+          : b.status === statusFilter);
+      if (!matchesStatus) return false;
+      if (!q) return true;
+      return [b.customer?.name, b.customer?.email, b.customer?.phone_no, b.golfCourse?.name]
+        .some((v) => v?.toLowerCase().includes(q));
+    });
+  }, [bookings, searchQuery, statusFilter]);
 
-    const query = searchQuery.toLowerCase();
-    return bookings.filter(
-      (booking) =>
-        booking.customer?.name?.toLowerCase().includes(query) ||
-        booking.customer?.email?.toLowerCase().includes(query) ||
-        booking.customer?.phone_no?.toLowerCase().includes(query),
-    );
-  }, [bookings, searchQuery]);
+  const filters: { key: StatusFilter; label: string; count: number }[] = [
+    { key: "all", label: "All", count: bookings.length },
+    { key: "pending", label: "Pending", count: counts.pending },
+    { key: "completed", label: "Confirmed", count: counts.completed },
+    { key: "cancelled", label: "Cancelled", count: counts.cancelled },
+  ];
+
 
   return (
-    <div className="min-h-screen w-full p-6">
-      {/* Search */}
-      <div className="flex justify-between items-center gap-4 pb-3">
-        <div className="relative w-1/3">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <Search className="h-5 w-5" />
-          </span>
-          <Input
-            type="text"
-            placeholder="Search by name, email or phone..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 h-12 rounded-md border-slate-200 bg-white text-sm text-gray-900 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
+    <div className="w-full px-4 py-8 sm:px-8">
+      <div className="mx-auto max-w-6xl">
+        {/* Header */}
+        <header className="mb-6">
+          <h1 className="text-2xl font-semibold tracking-tight text-stone-900">Bookings</h1>
+          <p className="text-sm text-stone-500">
+            {totalBookings} tee-time {totalBookings === 1 ? "request" : "requests"} in total
+          </p>
+        </header>
+
+        {/* The one thing that needs attention */}
+        {counts.pending > 0 && (
+          <button
+            type="button"
+            onClick={() => setStatusFilter("pending")}
+            className="mb-6 flex w-full items-center gap-3 rounded-lg bg-amber-50 px-4 py-3 text-left ring-1 ring-inset ring-amber-200 transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          >
+            <Clock className="h-5 w-5 shrink-0 text-amber-600" />
+            <span className="text-sm text-amber-900">
+              <span className="font-semibold text-amber-950">{counts.pending}</span>{" "}
+              {counts.pending === 1 ? "booking is" : "bookings are"} waiting for your approval on this page.
+            </span>
+            <span className="ml-auto hidden text-sm font-medium text-amber-800 sm:inline">
+              Show pending
+            </span>
+          </button>
+        )}
+
+        {/* Toolbar */}
+        <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="relative w-full md:w-80">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+            <Input
+              type="text"
+              placeholder="Search name, phone or course"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-10 w-full rounded-lg border-stone-200 bg-white pl-9 text-sm text-stone-900 placeholder:text-stone-400 focus-visible:ring-2 focus-visible:ring-emerald-300"
+            />
+          </div>
+
+          <nav className="flex gap-1 overflow-x-auto" aria-label="Filter by status">
+            {filters.map((f) => {
+              const active = statusFilter === f.key;
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setStatusFilter(f.key)}
+                  aria-pressed={active}
+                  className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
+                    active
+                      ? "bg-emerald-800 text-white"
+                      : "text-stone-600 hover:bg-stone-100"
+                  }`}
+                >
+                  {f.label}
+                  <span className={`ml-1.5 tabular-nums ${active ? "text-emerald-200" : "text-stone-400"}`}>
+                    {f.count}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+          <DataTable
+            data={filteredBookings}
+            columns={columns}
+            serverPagination={{
+              currentPage: page,
+              totalPages,
+              onPageChange: setPage,
+              isFetching,
+            }}
           />
+          {!isFetching && filteredBookings.length === 0 && (
+            <p className="px-6 py-10 text-center text-sm text-stone-500">
+              No bookings match. Try another filter or clear the search.
+            </p>
+          )}
         </div>
       </div>
 
-      <DataTable
-        data={filteredBookings}
-        columns={columns}
-        actions={getActions()}
-        selectable
-        onSelectionChange={setSelected}
-        serverPagination={{
-          currentPage: page,
-          totalPages,
-          onPageChange: setPage,
-          isFetching,
-        }}
-      />
-
-      <VerticalModalForm
-        title="Approve Booking"
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedRow(null);
-        }}
-      >
-       
-
-        <DynamicArrayForm
-          title="Payment Form"
-          initialValues={{
-            amount: selectedRow?.totalAmount || 0,
-            paymentMode: "",
-          }}
-          buttonTitle="Approve"
-          onSubmit={() => {
-            if (!selectedRow) return;
-            // approveBooking({ id: selectedRow.id });
-            // If your backend needs the payment details too, pass the
-            // submitted form values here, e.g. approveBooking({ id, ...values })
-          }}
-        />
-      </VerticalModalForm>
+      
     </div>
   );
 }

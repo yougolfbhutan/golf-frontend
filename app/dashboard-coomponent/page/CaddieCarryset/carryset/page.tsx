@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { Delete, Edit, Search } from "lucide-react";
+import { Edit, Plus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +44,6 @@ export default function GolfSet() {
       setEditingGolfSet(null);
     },
     onError: (error) => {
-      console.log("Error", error);
       showToast.error(error?.data?.message || "Something went wrong", {
         duration: 5000,
         position: "top-right",
@@ -77,7 +76,17 @@ export default function GolfSet() {
     },
     {
       header: "Available",
-      render: (_value, row) => (row.isAvailable ? "Yes" : "No"),
+      render: (_value, row) => (
+        <span
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            row.isAvailable
+              ? "bg-[#10B759]/10 text-[#1F4D36]"
+              : "bg-slate-100 text-slate-500"
+          }`}
+        >
+          {row.isAvailable ? "Yes" : "No"}
+        </span>
+      ),
     },
   ];
 
@@ -85,12 +94,14 @@ export default function GolfSet() {
   const getActions = (): ActionConfig<GolfSetData>[] => [
     {
       label: "Edit",
+      title: "Edit",
       icon: <Edit className="h-4 w-4" />,
       onClick: handleEdit,
     },
     {
       label: "Delete",
-      icon: <Delete className="h-4 w-4" />,
+      title: "Delete",
+      icon: <Trash2 className="h-4 w-4" />,
       onClick: handleDelete,
     },
   ];
@@ -126,20 +137,15 @@ export default function GolfSet() {
       String(values.isAvailable ?? editingGolfSet?.isAvailable ?? true),
     );
 
+    // image is a new File, or the existing URL (alone or inside an array)
     const rawImage = values.image;
-    const imageFile: File | undefined =
-      rawImage instanceof File
-        ? rawImage
-        : Array.isArray(rawImage) && rawImage[0] instanceof File
-          ? rawImage[0]
-          : undefined;
+    const first = Array.isArray(rawImage) ? rawImage[0] : rawImage;
 
-    if (imageFile) {
-      formData.append("image", imageFile);
-    } else if (typeof rawImage === "string" && rawImage) {
-      formData.append("image", rawImage); // keep existing image on edit
+    if (first instanceof File) {
+      formData.append("image", first);
+    } else if (typeof first === "string" && first) {
+      formData.append("image", first); // keep existing image on edit
     }
-
 
     if (editingGolfSet?.id) {
       updateGolfSet({
@@ -167,19 +173,19 @@ export default function GolfSet() {
   }, [golfSetData, searchQuery]);
 
   return (
-    <div className="min-h-screen w-full p-6">
+    <div className="min-h-screen w-full p-4 sm:p-6">
       {/* Search & Create */}
-      <div className="flex justify-between items-center gap-4 pb-3">
-        <div className="relative w-1/3">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4">
+        <div className="relative w-full sm:w-1/2 lg:w-1/3">
+          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
             <Search className="h-5 w-5" />
           </span>
           <Input
             type="text"
-            placeholder="Search..."
+            placeholder="Search by name, tier or audience..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 h-12 rounded-md border-slate-200 bg-white text-sm text-gray-900 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
+            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 text-sm text-slate-900 shadow-md shadow-slate-900/5 transition-all duration-150 placeholder:text-slate-400 hover:border-slate-300 focus:border-[#10B759] focus:outline-none focus:ring-2 focus:ring-[#10B759]/25 focus-visible:border-[#10B759] focus-visible:ring-2 focus-visible:ring-[#10B759]/25"
           />
         </div>
 
@@ -188,7 +194,7 @@ export default function GolfSet() {
             setEditingGolfSet(null);
             setIsDialogOpen(true);
           }}
-          className="bg-orange-500 text-white hover:bg-orange-600 h-12 px-6 rounded-md shadow-md"
+          className="h-12 gap-2 rounded-xl bg-[#1F4D36] px-6 font-semibold text-white shadow-md shadow-[#1F4D36]/25 transition hover:bg-[#173d2a] focus-visible:ring-2 focus-visible:ring-[#10B759]/40"
         >
           Create Golf Set
         </Button>
@@ -211,7 +217,8 @@ export default function GolfSet() {
           tierName: editingGolfSet?.tierName || "",
           quantity: editingGolfSet?.quantity ?? "",
           price: editingGolfSet?.price ?? "",
-          image: editingGolfSet?.imageUrl || "",
+          // the dialog's image field expects a list, so the saved image shows as a preview
+          image: editingGolfSet?.imageUrl ? [editingGolfSet.imageUrl] : [],
         }}
         OnSubmitTitle={editingGolfSet ? "Update Golf Set" : "Create Golf Set"}
         CustomDialogBoxStyle="px-8 py-6 grid grid-cols-3 gap-5 overflow-y-auto flex-1"
@@ -219,19 +226,21 @@ export default function GolfSet() {
       />
 
       {/* Golf Set Table */}
-      <DataTable
-        data={filteredGolfSets}
-        columns={columns}
-        actions={getActions()}
-        selectable
-        onSelectionChange={setSelected}
-        serverPagination={{
-          currentPage: page,
-          totalPages: golfSetData?.data?.totalPages || 1,
-          onPageChange: setPage,
-          isFetching,
-        }}
-      />
+      <div className="overflow-hidden rounded-2xl bg-white shadow-lg shadow-slate-900/5">
+        <DataTable
+          data={filteredGolfSets}
+          columns={columns}
+          actions={getActions()}
+          selectable
+          onSelectionChange={setSelected}
+          serverPagination={{
+            currentPage: page,
+            totalPages: golfSetData?.data?.totalPages || 1,
+            onPageChange: setPage,
+            isFetching,
+          }}
+        />
+      </div>
     </div>
   );
 }

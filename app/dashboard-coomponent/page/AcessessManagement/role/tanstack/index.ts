@@ -5,10 +5,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ADMIN_API_URL from "@/app/connected-backend/route/admin/adim-route";
 import apiClient from "@/app/connected-backend/api-client/api-client";
 import type { errorResponse } from "@/app/universal-interface/error.interface";
-import type { GetRolesResponse, RoleFormValues } from "../interface";
+import type {  RoleFormValues, RolesGetResponse } from "../interface";
 
 interface MutationOptions {
-  onSuccess?: (data: GetRolesResponse) => void;
+  onSuccess?: (data: RolesGetResponse) => void;
   onError?: (error: errorResponse) => void;
 }
 
@@ -16,7 +16,7 @@ interface MutationOptions {
 
 // Create Role
 const createRole = async (data: RoleFormValues) => {
-  const response = await apiClient.post(ADMIN_API_URL.createRole, data);
+  const response = await apiClient.post(ADMIN_API_URL.roles, data);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -33,7 +33,7 @@ const updateRole = async ({
   data: RoleFormValues;
 }) => {
   const response = await apiClient.put(
-    `${ADMIN_API_URL.updateRole}/${id}`,
+    `${ADMIN_API_URL.roles}/${id}`,
     data
   );
 
@@ -45,7 +45,7 @@ const updateRole = async ({
 
 // Delete Role
 const deleteRole = async (id: number | string) => {
-  const response = await apiClient.delete(`${ADMIN_API_URL.deleteRole}/${id}`);
+  const response = await apiClient.delete(`${ADMIN_API_URL.roles}/${id}`);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -54,8 +54,8 @@ const deleteRole = async (id: number | string) => {
 };
 
 // Get Roles List
-const getRoles = async (): Promise<GetRolesResponse> => {
-  const response = await apiClient.get(ADMIN_API_URL.getRole);
+const getRoles = async (): Promise<RolesGetResponse> => {
+  const response = await apiClient.get(ADMIN_API_URL.roles);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -71,7 +71,7 @@ export const useRoleMutations = (options?: MutationOptions) => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation<
-    GetRolesResponse,
+    RolesGetResponse,
     errorResponse,
     RoleFormValues
   >({
@@ -86,7 +86,7 @@ export const useRoleMutations = (options?: MutationOptions) => {
   });
 
   const updateMutation = useMutation<
-    GetRolesResponse,
+    RolesGetResponse,
     errorResponse,
     { id: number | string; data: RoleFormValues }
   >({
@@ -101,7 +101,7 @@ export const useRoleMutations = (options?: MutationOptions) => {
   });
 
   const deleteMutation = useMutation<
-    GetRolesResponse,
+    RolesGetResponse,
     errorResponse,
     number | string
   >({
@@ -132,7 +132,7 @@ export const useRoleMutations = (options?: MutationOptions) => {
 
 // Hook for getting roles
 export const useGetRoles = () => {
-  return useQuery<GetRolesResponse, errorResponse>({
+  return useQuery<RolesGetResponse, errorResponse>({
     queryKey: ["role-list"],
     queryFn: getRoles,
     staleTime: 5 * 60 * 1000, // 5 minutes

@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useQueries } from "@tanstack/react-query";
-import apiClient from "@/api-client/api-client";
-import CUSTOMER_API_URL from "@/app/connected-backend/route/customer/customer-route";
+import { golfSetsQuery, glovesQuery, ballsQuery } from "./kit-queries";
 import {
   kitItems,
   mapGolfSets,
@@ -10,41 +9,19 @@ import {
   type KitCategoryId,
 } from "../data";
 
-const STALE_TIME = 10 * 60 * 1000; // data stays fresh for 10 minutes
-const GC_TIME = 30 * 60 * 1000; // keep cached tabs for 30 minutes
-
-// Throws on failure so React Query retries instead of caching an empty list
-async function fetchList(url: string) {
-  const res = await apiClient.get(url);
-  const list = res.data?.data?.data;
-  if (!Array.isArray(list)) throw new Error(`Unexpected response from ${url}`);
-  return list;
-}
-
-const options = (key: string, url: string, enabled: boolean) => ({
-  queryKey: ["kit", key],
-  queryFn: () => fetchList(url),
-  enabled,
-  staleTime: STALE_TIME,
-  gcTime: GC_TIME,
-  retry: 3,
-  retryDelay: (attempt: number) => Math.min(1000 * 2 ** attempt, 8000),
-});
-
 /**
- * useKitItems("sets")  -> fetches only that tab (used by PackageStep)
- * useKitItems()        -> loads ALL lists (used by ReviewStep).
- *                         Tabs already opened come from the cache, so only
- *                         missing or stale lists are requested.
+ * useKitItems("sets")  -> fetches only that list
+ * useKitItems()        -> loads all lists (PackageStep, ReviewStep).
+ * Lists already loaded anywhere in the app come straight from the cache.
  */
 export function useKitItems(activeCategory?: KitCategoryId) {
   const all = activeCategory === undefined;
 
   const [setsQ, glovesQ, ballsQ] = useQueries({
     queries: [
-      options("sets", CUSTOMER_API_URL.golfSet, all || activeCategory === "sets"),
-      options("gloves", CUSTOMER_API_URL.glove, all || activeCategory === "gloves"),
-      options("balls", CUSTOMER_API_URL.ball, all || activeCategory === "balls"),
+      { ...golfSetsQuery, enabled: all || activeCategory === "sets" },
+      { ...glovesQuery, enabled: all || activeCategory === "gloves" },
+      { ...ballsQuery, enabled: all || activeCategory === "balls" },
     ],
   });
 
@@ -58,9 +35,11 @@ export function useKitItems(activeCategory?: KitCategoryId) {
     [setsQ.data, glovesQ.data, ballsQ.data],
   );
 
-  // which queries decide the loading / error state
+  // which queries decide the loading / error state.
+  // Kit cards are built from golf sets, so with "all" we only wait for sets;
+  // balls and gloves fill in when they arrive.
   const watched = all
-    ? [setsQ, glovesQ, ballsQ]
+    ? [setsQ]
     : activeCategory === "sets"
       ? [setsQ]
       : activeCategory === "gloves"

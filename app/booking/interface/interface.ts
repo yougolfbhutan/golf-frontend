@@ -11,6 +11,8 @@ export type BookingState = {
   hand?: Hand; // "left" | "right"
   kit: KitState;
   proShopItems: string[];
+  no_of_right_handed: number;
+  no_of_left_handed: number;
 };
 
 export const initialBooking: BookingState = {
@@ -24,4 +26,6 @@ export const initialBooking: BookingState = {
   hand: "right",
   kit: {},
   proShopItems: [],
+  no_of_right_handed: 0,
+  no_of_left_handed: 0,
 };

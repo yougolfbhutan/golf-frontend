@@ -1,16 +1,16 @@
-import apiClient from "@/api-client/api-client";
 import { useQuery } from "@tanstack/react-query";
-import type { getGolfSetResponse } from "../interface/interface";
-import CUSTOMER_API_URL from "@/app/connected-backend/route/customer/customer-route";
+import { golfSetsQuery, glovesQuery, ballsQuery } from "../helper/kit-queries";
 
+// returns GolfSetAttributes[] directly (not { data: { data } })
 export function useGetGolfSets() {
-  return useQuery<getGolfSetResponse>({
-    queryKey: ["golf-set-list"],
-    queryFn: async () => {
-  
-      const res = await apiClient.get(CUSTOMER_API_URL.golfSet);
-      console.log("Golf sets fetched:", res.data);
-      return res.data;
-    },
-  });
+  return useQuery(golfSetsQuery);
+}
+
+
+export function useGetGloves() {
+  return useQuery(glovesQuery);
+}
+// returns BallAttributes[] directly
+export function useGetBalls() {
+  return useQuery(ballsQuery);
 }

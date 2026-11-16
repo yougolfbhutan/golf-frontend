@@ -170,7 +170,7 @@ export default function Gloves() {
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 h-12 rounded-md border-slate-200 bg-white text-sm text-gray-900 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
+            className="w-full pl-10 h-12 rounded-md border-slate-200 bg-white text-sm text-gray-900 shadow-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
           />
         </div>
 
@@ -179,7 +179,7 @@ export default function Gloves() {
             setEditingGlove(null);
             setIsDialogOpen(true);
           }}
-          className="bg-orange-500 text-white hover:bg-orange-600 h-12 px-6 rounded-md shadow-md"
+          className="bg-green-500 text-white hover:bg-green-600 h-12 px-6 rounded-md shadow-md"
         >
           Create Glove
         </Button>

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Formik, Field, FieldProps, useFormikContext, getIn } from "formik";
 import * as Yup from "yup";
+import { Check, Search } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -60,6 +61,41 @@ interface CustomDialogProps {
   CustomDialogBoxStyle?: string;
 }
 
+// ─────────────────────────────────────────────
+//  BRAND COLORS  (change them here only)
+//  dark  #1F4D36  -> header, buttons, selected text
+//  light #10B759  -> focus rings, accents, toggles
+// ─────────────────────────────────────────────
+
+// ─────────────────────────────────────────────
+//  SHARED FIELD STYLES  (one source of truth)
+// ─────────────────────────────────────────────
+const INPUT_BASE =
+  "h-12 w-full rounded-xl border border-slate-200 bg-white text-sm text-slate-900 shadow-sm " +
+  "placeholder:text-slate-400 transition-all duration-150 hover:border-slate-300 " +
+  "focus:outline-none focus:border-[#10B759] focus:ring-2 focus:ring-[#10B759]/25 " +
+  "focus-visible:border-[#10B759] focus-visible:ring-2 focus-visible:ring-[#10B759]/25 " +
+  "disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-100";
+
+const ERROR_TEXT = "mt-1.5 ml-0.5 text-xs font-medium text-red-500";
+
+// ─── Error text ───────────────────────────────────────────────────────────────
+
+function ErrorText({
+  errors,
+  touched,
+  name,
+}: {
+  errors: Record<string, any>;
+  touched: Record<string, any>;
+  name: string;
+}) {
+  const error = getIn(errors, name);
+  const touch = getIn(touched, name);
+  if (!error || !touch) return null;
+  return <span className={ERROR_TEXT}>{String(error)}</span>;
+}
+
 // ─── FormikSelectField ────────────────────────────────────────────────────────
 
 interface FormikSelectFieldProps {
@@ -68,6 +104,7 @@ interface FormikSelectFieldProps {
   storeLabel?: boolean;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export function FormikSelectField({
@@ -76,8 +113,9 @@ export function FormikSelectField({
   storeLabel = false,
   placeholder = "Select option",
   className = "",
+  disabled,
 }: FormikSelectFieldProps) {
-  const { values, setFieldValue } = useFormikContext<any>();
+  const { values, setFieldValue, setFieldTouched } = useFormikContext<any>();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -88,6 +126,7 @@ export function FormikSelectField({
 
   const handleSelect = (opt: { label: string; value: any }) => {
     setFieldValue(name, storeLabel ? opt : opt.value);
+    setFieldTouched(name, true, false);
     setOpen(false);
   };
 
@@ -105,12 +144,23 @@ export function FormikSelectField({
     <div ref={wrapperRef} className={`relative w-full ${className}`}>
       <button
         type="button"
+        disabled={disabled}
         onClick={() => setOpen((p) => !p)}
-        className="h-12 w-full bg-white border-2 border-gray-300 rounded-xl px-4 pr-10 text-left text-gray-900 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200"
+        className={
+          INPUT_BASE +
+          " flex items-center justify-between px-4 pr-3 text-left " +
+          (open ? "border-[#10B759] ring-2 ring-[#10B759]/25 " : "")
+        }
       >
-        <span className="truncate">{selectedOption?.label || placeholder}</span>
+        <span
+          className={`truncate ${selectedOption?.label ? "text-slate-900" : "text-slate-400"}`}
+        >
+          {selectedOption?.label || placeholder}
+        </span>
         <svg
-          className={`h-5 w-5 text-gray-500 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
+            open ? "rotate-180" : ""
+          }`}
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -119,29 +169,183 @@ export function FormikSelectField({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-56 overflow-y-auto">
+        <div className="absolute z-50 mt-1.5 max-h-56 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl shadow-slate-900/10">
           {options.length === 0 && (
-            <div className="px-4 py-3 text-sm text-gray-400">No options available</div>
+            <div className="px-3 py-2.5 text-sm text-slate-400">
+              No options available
+            </div>
           )}
-          {options.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => handleSelect(opt)}
-              className="w-full px-4 py-3 text-left text-sm hover:bg-blue-50 truncate"
-              title={opt.label}
-            >
-              {opt.label}
-            </button>
-          ))}
+          {options.map((opt) => {
+            const selected = selectedOption?.label === opt.label &&
+              (storeLabel ? true : opt.value === fieldValue);
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => handleSelect(opt)}
+                title={opt.label}
+                className={
+                  "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors " +
+                  (selected
+                    ? "bg-[#10B759]/10 font-medium text-[#1F4D36]"
+                    : "text-slate-700 hover:bg-slate-50 hover:text-[#1F4D36]")
+                }
+              >
+                <span className="truncate">{opt.label}</span>
+                {selected && (
+                  <svg
+                    className="h-4 w-4 shrink-0 text-[#10B759]"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
 
+// ─── CheckboxGroupField ───────────────────────────────────────────────────────
+
+type CheckboxOption = { label: string; value: string | number };
+
+interface CheckboxGroupFieldProps {
+  label?: string;
+  groups: { groupName?: string; options: CheckboxOption[] }[];
+  value: (string | number)[];
+  onChange: (next: (string | number)[]) => void;
+}
+
+function CheckboxGroupField({
+  label,
+  groups,
+  value,
+  onChange,
+}: CheckboxGroupFieldProps) {
+  const [query, setQuery] = useState("");
+
+  const options = groups.flatMap((g) => g.options ?? []);
+  const visible = options.filter((o) =>
+    o.label.toLowerCase().includes(query.trim().toLowerCase()),
+  );
+  const visibleValues = visible.map((o) => o.value);
+  const allVisibleSelected =
+    visible.length > 0 && visibleValues.every((v) => value.includes(v));
+
+  const toggle = (v: string | number) =>
+    onChange(value.includes(v) ? value.filter((x) => x !== v) : [...value, v]);
+
+  const toggleAll = () =>
+    onChange(
+      allVisibleSelected
+        ? value.filter((v) => !visibleValues.includes(v))
+        : Array.from(new Set([...value, ...visibleValues])),
+    );
+
+  if (options.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+        No {label?.toLowerCase() ?? "options"} available
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-slate-800">{label}</h4>
+          <span className="rounded-full bg-[#10B759]/10 px-2 py-0.5 text-xs font-semibold text-[#0B8A42]">
+            {value.length} / {options.length} selected
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {options.length > 8 && (
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search..."
+                className="h-8 w-40 rounded-md border border-slate-200 bg-white pl-8 pr-2 text-xs text-slate-800 outline-none focus:border-[#10B759] focus:ring-2 focus:ring-[#10B759]/20"
+              />
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="text-xs font-semibold text-[#0B8A42] hover:underline"
+          >
+            {allVisibleSelected ? "Clear all" : "Select all"}
+          </button>
+        </div>
+      </div>
+
+      {/* Options */}
+      <div className="max-h-64 overflow-y-auto p-3">
+        {visible.length === 0 ? (
+          <p className="py-4 text-center text-sm text-slate-500">
+            No results for “{query}”
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map((opt) => {
+              const checked = value.includes(opt.value);
+              return (
+                <label
+                  key={opt.value}
+                  className={`flex cursor-pointer select-none items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
+                    checked
+                      ? "border-[#10B759]/50 bg-[#10B759]/10"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggle(opt.value)}
+                    className="peer sr-only"
+                  />
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-[#10B759]/40 peer-focus-visible:ring-offset-2 ${
+                      checked
+                        ? "border-[#10B759] bg-[#10B759]"
+                        : "border-slate-300 bg-white"
+                    }`}
+                  >
+                    {checked && (
+                      <Check strokeWidth={3} className="h-3.5 w-3.5 text-white" />
+                    )}
+                  </span>
+                  <span className="truncate text-sm font-medium text-slate-800">
+                    {opt.label}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── FormikImageUploadField ───────────────────────────────────────────────────
-// `files` can now contain a mix of:
+// `files` can contain a mix of:
 //  - string  → an already-uploaded image URL (e.g. from the API on edit)
 //  - File    → a newly selected image that hasn't been uploaded yet
 
@@ -174,7 +378,10 @@ export function FormikImageUploadField({
         file,
         url: typeof file === "string" ? file : URL.createObjectURL(file),
         isExisting: typeof file === "string",
-        key: typeof file === "string" ? file : `${file.name}-${file.size}-${file.lastModified}`,
+        key:
+          typeof file === "string"
+            ? file
+            : `${file.name}-${file.size}-${file.lastModified}`,
       })),
     [files],
   );
@@ -192,10 +399,14 @@ export function FormikImageUploadField({
   const addFiles = (incoming: FileList | File[]) => {
     const incomingArr = Array.from(incoming);
     const imagesOnly = incomingArr.filter((f) => f.type.startsWith("image/"));
-    const withinSize = imagesOnly.filter((f) => f.size <= maxSizeMB * 1024 * 1024);
+    const withinSize = imagesOnly.filter(
+      (f) => f.size <= maxSizeMB * 1024 * 1024,
+    );
     const oversizedCount = imagesOnly.length - withinSize.length;
 
-    let next: ImageItem[] = multiple ? [...files, ...withinSize] : withinSize.slice(-1);
+    let next: ImageItem[] = multiple
+      ? [...files, ...withinSize]
+      : withinSize.slice(-1);
 
     let message: string | null = null;
     if (next.length > maxFiles) {
@@ -233,8 +444,10 @@ export function FormikImageUploadField({
           setIsDragging(false);
           if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files);
         }}
-        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors duration-200 ${
-          isDragging ? "border-orange-500 bg-orange-50" : "border-gray-300 bg-white hover:border-gray-400"
+        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-all duration-200 ${
+          isDragging
+            ? "border-[#10B759] bg-[#10B759]/10"
+            : "border-slate-300 bg-slate-50/50 hover:border-[#10B759] hover:bg-[#10B759]/5"
         }`}
       >
         <input
@@ -249,43 +462,47 @@ export function FormikImageUploadField({
           }}
         />
 
-        <svg
-          className="mx-auto h-8 w-8 text-gray-400"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.5}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M4 16.5V18a2 2 0 002 2h12a2 2 0 002-2v-1.5M7 9l5-5m0 0l5 5m-5-5v12"
-          />
-        </svg>
-        <p className="text-sm font-semibold text-gray-700 mt-2">
-          Click to upload or drag and drop
+        <span className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-[#10B759]/10 text-[#1F4D36]">
+          <svg
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.8}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 16.5V18a2 2 0 002 2h12a2 2 0 002-2v-1.5M7 9l5-5m0 0l5 5m-5-5v12"
+            />
+          </svg>
+        </span>
+        <p className="mt-2.5 text-sm font-semibold text-slate-700">
+          <span className="text-[#1F4D36] underline-offset-2 hover:underline">
+            Click to upload
+          </span>{" "}
+          or drag and drop
         </p>
-        <p className="text-xs text-gray-500 mt-1">
-          PNG or JPG, up to {maxSizeMB}MB{multiple ? ` · up to ${maxFiles} images` : ""}
+        <p className="mt-1 text-xs text-slate-500">
+          PNG or JPG, up to {maxSizeMB}MB
+          {multiple ? ` · up to ${maxFiles} images` : ""}
         </p>
       </div>
 
-      {error && (
-        <span className="block text-xs text-red-500 mt-1.5 ml-1 font-medium">{error}</span>
-      )}
+      {error && <span className={"block " + ERROR_TEXT}>{error}</span>}
 
       {previews.length > 0 && (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3">
+        <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
           {previews.map((p, i) => (
             <div
               key={p.key}
-              className="relative group aspect-square rounded-xl overflow-hidden border-2 border-gray-200"
+              className="group relative aspect-square overflow-hidden rounded-xl border border-slate-200 shadow-sm"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={p.url}
                 alt={typeof p.file === "string" ? "Uploaded image" : p.file.name}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
               <button
                 type="button"
@@ -294,7 +511,7 @@ export function FormikImageUploadField({
                   handleRemove(i);
                 }}
                 aria-label="Remove image"
-                className="absolute top-1.5 right-1.5 h-6 w-6 flex items-center justify-center rounded-full bg-black/60 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#1F4D36]/85 text-xs text-white opacity-0 shadow transition-opacity duration-200 hover:bg-red-600 group-hover:opacity-100"
               >
                 ✕
               </button>
@@ -329,7 +546,6 @@ function FormContent({
 }: FormContentProps) {
   const { values, setFieldValue } = useFormikContext<any>();
 
-  // ✅ useEffect is now safely inside a real React component
   useEffect(() => {
     fields.forEach((field) => {
       if (!field.calculation) return;
@@ -348,9 +564,16 @@ function FormContent({
       {/* Scrollable Content Area */}
       <div className={CustomDialogBoxStyle}>
         {fields.map((field) => (
-          <div key={field.name} className="flex flex-col">
+          // col-span-full lives on this wrapper (the real grid item) so
+          // checkbox groups stretch across the whole dialog width
+          <div
+            key={field.name}
+            className={`flex flex-col ${
+              field.type === "checkbox-group" ? "col-span-full" : ""
+            }`}
+          >
             {field.type !== "checkbox" && field.type !== "checkbox-group" && (
-              <label className="text-sm font-semibold text-gray-900 mb-2">
+              <label className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 {field.label}
               </label>
             )}
@@ -365,26 +588,23 @@ function FormContent({
                           <>
                             <Input
                               {...f}
+                              disabled={field.disabled}
                               placeholder={field.placeholder}
-                              className={`h-12 bg-white border-2 border-gray-300 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 placeholder:text-gray-500 ${
-                                field.Icon ? "pl-12" : "pl-4"
+                              className={`${INPUT_BASE} ${
+                                field.Icon ? "pl-11" : "pl-4"
                               }`}
                             />
                             {field.Icon && (
                               <field.Icon
-                                className="absolute left-3 top-3 text-gray-500 pointer-events-none"
-                                width={20}
-                                height={20}
+                                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                width={18}
+                                height={18}
                               />
                             )}
                           </>
                         )}
                       </Field>
-                      {errors[field.name] && touched[field.name] && (
-                        <span className="text-xs text-red-500 mt-1.5 ml-1 font-medium">
-                          {String(errors[field.name])}
-                        </span>
-                      )}
+                      <ErrorText errors={errors} touched={touched} name={field.name} />
                     </div>
                   );
 
@@ -397,109 +617,81 @@ function FormContent({
                             <Input
                               type="date"
                               {...f}
-                              className={`h-12 bg-white border-2 border-gray-300 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 pr-4 ${
-                                field.Icon ? "pl-12" : "pl-4"
+                              disabled={field.disabled}
+                              className={`${INPUT_BASE} pr-4 ${
+                                field.Icon ? "pl-11" : "pl-4"
                               } [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-70 hover:[&::-webkit-calendar-picker-indicator]:opacity-100`}
                             />
                             {field.Icon && (
                               <field.Icon
-                                className="absolute left-3 top-3 text-gray-500 pointer-events-none"
-                                width={20}
-                                height={20}
+                                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                width={18}
+                                height={18}
                               />
                             )}
                           </>
                         )}
                       </Field>
-                      {errors[field.name] && touched[field.name] && (
-                        <span className="text-xs text-red-500 mt-1.5 ml-1 font-medium">
-                          {String(errors[field.name])}
-                        </span>
-                      )}
+                      <ErrorText errors={errors} touched={touched} name={field.name} />
                     </div>
                   );
 
                 case "select":
                   return (
-                    <FormikSelectField
-                      name={field.name}
-                      options={field.options || []}
-                      storeLabel={field.storeLabel}
-                      placeholder={`Select ${field.label}`}
-                    />
+                    <div>
+                      <FormikSelectField
+                        name={field.name}
+                        options={field.options || []}
+                        storeLabel={field.storeLabel}
+                        placeholder={`Select ${field.label}`}
+                        disabled={field.disabled}
+                      />
+                      <ErrorText errors={errors} touched={touched} name={field.name} />
+                    </div>
                   );
 
                 case "checkbox":
                   return (
                     <Field name={field.name}>
                       {({ field: f }: FieldProps) => (
-                        <div
-                          className="flex items-center gap-3 cursor-pointer"
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={!!f.value}
                           onClick={() => setFieldValue(field.name, !f.value)}
+                          className="flex w-fit items-center gap-3 rounded-xl py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#10B759]/40"
                         >
-                          <div
-                            className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
-                              f.value ? "bg-orange-500" : "bg-gray-300"
+                          <span
+                            className={`flex h-6 w-11 items-center rounded-full p-1 transition-colors duration-200 ${
+                              f.value ? "bg-[#10B759]" : "bg-slate-300"
                             }`}
                           >
-                            <div
-                              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
+                            <span
+                              className={`h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
                                 f.value ? "translate-x-5" : "translate-x-0"
                               }`}
                             />
-                          </div>
-                          <span className="text-gray-800 font-medium">{field.label}</span>
-                        </div>
+                          </span>
+                          <span className="text-sm font-medium text-slate-800">
+                            {field.label}
+                          </span>
+                        </button>
                       )}
                     </Field>
                   );
 
                 case "checkbox-group":
                   return (
-                    <div className="border rounded-xl p-4 space-y-3 bg-white">
-                      <Field name={field.name}>
-                        {({ field: f }: FieldProps) => {
-                          const valueArray: string[] = Array.isArray(f.value) ? f.value : [];
-                          return (
-                            <div className="space-y-6">
-                              {field.optionGroups?.map((group) => (
-                                <div key={group.groupName} className="space-y-3">
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                    {group.options.map((opt: any) => {
-                                      const checked = valueArray.includes(opt.value as string);
-                                      return (
-                                        <div key={opt.value} className="flex items-center space-x-2">
-                                          <input
-                                            type="checkbox"
-                                            id={`${field.name}-${opt.value}`}
-                                            checked={checked}
-                                            onChange={() => {
-                                              setFieldValue(
-                                                field.name,
-                                                checked
-                                                  ? valueArray.filter((v) => v !== opt.value)
-                                                  : [...valueArray, opt.value],
-                                              );
-                                            }}
-                                            className="peer h-5 w-5 shrink-0 rounded border-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer appearance-none checked:bg-orange-500 checked:border-orange-500 relative checked:after:content-['✓'] checked:after:absolute checked:after:text-white checked:after:text-xs checked:after:left-1/2 checked:after:top-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:font-bold"
-                                          />
-                                          <label
-                                            htmlFor={`${field.name}-${opt.value}`}
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-gray-900"
-                                          >
-                                            {opt.label}
-                                          </label>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        }}
-                      </Field>
-                    </div>
+                    <Field name={field.name}>
+                      {({ field: f }: FieldProps) => (
+                        <CheckboxGroupField
+                          label={field.label}
+                          groups={field.optionGroups ?? []}
+                          value={Array.isArray(f.value) ? f.value : []}
+                          onChange={(next) => setFieldValue(field.name, next)}
+                        />
+                      )}
+                    </Field>
                   );
 
                 case "number":
@@ -516,29 +708,27 @@ function FormContent({
                               onChange={(e) =>
                                 setFieldValue(
                                   field.name,
-                                  e.target.value === "" ? undefined : Number(e.target.value),
+                                  e.target.value === ""
+                                    ? undefined
+                                    : Number(e.target.value),
                                 )
                               }
                               placeholder={field.placeholder}
-                              className={`h-12 bg-white border-2 border-gray-300 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 ${
-                                field.Icon ? "pl-12" : "pl-4"
+                              className={`${INPUT_BASE} ${
+                                field.Icon ? "pl-11" : "pl-4"
                               }`}
                             />
                             {field.Icon && (
                               <field.Icon
-                                className="absolute left-3 top-3 text-gray-500 pointer-events-none"
-                                width={20}
-                                height={20}
+                                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                width={18}
+                                height={18}
                               />
                             )}
                           </>
                         )}
                       </Field>
-                      {errors[field.name] && touched[field.name] && (
-                        <span className="text-xs text-red-500 mt-1.5 ml-1 font-medium">
-                          {String(errors[field.name])}
-                        </span>
-                      )}
+                      <ErrorText errors={errors} touched={touched} name={field.name} />
                     </div>
                   );
 
@@ -551,11 +741,7 @@ function FormContent({
                         maxFiles={field.maxFiles}
                         maxSizeMB={field.maxSizeMB}
                       />
-                      {errors[field.name] && touched[field.name] && (
-                        <span className="text-xs text-red-500 mt-1.5 ml-1 font-medium">
-                          {String(errors[field.name])}
-                        </span>
-                      )}
+                      <ErrorText errors={errors} touched={touched} name={field.name} />
                     </>
                   );
 
@@ -568,19 +754,19 @@ function FormContent({
       </div>
 
       {/* Fixed Footer */}
-      <DialogFooter className="mt-0 flex justify-end gap-3 px-8 py-4 border-t border-gray-200 flex-shrink-0 bg-white">
+      <DialogFooter className="mt-0 flex flex-shrink-0 justify-end gap-3 border-t border-slate-200 bg-slate-50/70 px-8 py-4">
         <Button
           type="button"
           variant="outline"
           onClick={onClose}
-          className="px-6 py-2.5 h-11 border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 rounded-xl font-semibold transition-all duration-200"
+          className="h-11 rounded-xl border border-slate-300 bg-white px-6 font-semibold text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-100"
         >
           Cancel
         </Button>
         <Button
           type="button"
           onClick={handleSubmit}
-          className="px-6 py-2.5 h-11 bg-gradient-to-r from-orange-600 to-orange-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/30 transition-all duration-200"
+          className="h-11 rounded-xl bg-[#1F4D36] px-7 font-semibold text-white shadow-md shadow-[#1F4D36]/25 transition-all duration-200 hover:bg-[#173d2a] focus-visible:ring-2 focus-visible:ring-[#10B759]/40"
         >
           {OnSubmitTitle}
         </Button>
@@ -611,10 +797,10 @@ export function CustomDialog({
             (f.type === "checkbox"
               ? false
               : f.type === "number"
-              ? undefined
-              : f.type === "image"
-              ? []
-              : ""),
+                ? undefined
+                : f.type === "image" || f.type === "checkbox-group"
+                  ? []
+                  : ""),
         }),
         {} as Record<string, any>,
       ),
@@ -638,12 +824,26 @@ export function CustomDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 bg-white rounded-3xl shadow-2xl border-2 border-gray-200 overflow-hidden transition-all duration-300 p-0 max-h-[90vh] flex flex-col"
+        className="fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-full -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-0 shadow-2xl shadow-slate-900/20 transition-all duration-300 [&>button]:z-10 [&>button]:text-white [&>button]:opacity-80 [&>button]:hover:opacity-100"
         style={{ maxWidth: "800px" }}
       >
         {/* Header */}
-        <div className="bg-orange-500 px-8 py-6 flex-shrink-0">
-          <DialogTitle className="text-2xl font-bold tracking-tight text-white m-0">
+        <div
+          className="relative flex-shrink-0 overflow-hidden px-8 py-6"
+          style={{
+            background: "linear-gradient(135deg, #1F4D36 0%, #2C6B4B 100%)",
+          }}
+        >
+          {/* soft decorative circles */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-white/10"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-14 right-24 h-28 w-28 rounded-full bg-[#10B759]/20"
+          />
+          <DialogTitle className="relative m-0 text-2xl font-bold tracking-tight text-white">
             {title}
           </DialogTitle>
         </div>
@@ -657,7 +857,6 @@ export function CustomDialog({
             onClose();
           }}
         >
-          {/* ✅ Render prop now just passes props to a real component */}
           {({ errors, touched, handleSubmit }) => (
             <FormContent
               fields={fields}

@@ -5,9 +5,9 @@
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { useGetBookings } from "./tanstack";
 import { DataTable, type Column } from "../../table/table";
 import type { Booking } from "./interface";
+import { useGetBookings } from "../Dashboard/teesheet page/tanstack";
 
 export default function BookingPage() {
   const [selected, setSelected] = useState<Booking[]>([]);

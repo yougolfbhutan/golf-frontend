@@ -3,42 +3,8 @@ import ADMIN_API_URL from "@/app/connected-backend/route/admin/adim-route";
 import apiClient from "@/app/connected-backend/api-client/api-client";
 import type { BookingGetResponse } from "../interface";
 
-export function useGetBookings(page: number, limit: number = 10) {
-  return useQuery<BookingGetResponse>({
-    queryKey: ["booking-list", page, limit],
-    queryFn: async () => {
-      const res = await apiClient.get(
-        `${ADMIN_API_URL.booking}?page=${page}&limit=${limit}`,
-      );
-      console.log(res)
-      return res.data;
-    },
-    // Keeps the previous page's rows visible while the next page loads,
-    // instead of flashing an empty table.
-    placeholderData: (previousData) => previousData,
-  });
-}
 
-// export function useDashboardGetBookings(page: number, limit: number = 10) {
-//   return useQuery<BookingAndOrderResponse>({
-//     queryKey: ["booking-list", page, limit],
-//     queryFn: async () => {
-//       const res = await apiClient.get(
-//         `${ADMIN_API_URL.getBookings}?status=pending&page=${page}&limit=${limit}`,
-//       );
-//       return res.data;
-//     },
-//     // Keeps the previous page's rows visible while the next page loads,
-//     // instead of flashing an empty table.
-//     placeholderData: (previousData) => previousData,
-//   });
-// }
-// /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// interface MutationOptions {
-//   onSuccess?: (data: BookingAndOrderResponse) => void;
-//   onError?: (error: errorResponse) => void;
-// }
 
 const approveBooking = async ({ id }: { id: number | string }) => {
   const response = await apiClient.patch(

@@ -125,7 +125,6 @@ export default function CustomerBookingPage() {
               <DateTimeStep
                 booking={booking}
                 onChange={update}
-                closedDays={[2]}
                 footer={navigation}
               />
             )}

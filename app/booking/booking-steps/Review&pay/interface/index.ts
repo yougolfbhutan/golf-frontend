@@ -9,6 +9,8 @@ export interface CreateBookingPayload {
   teeDate: string; // "YYYY-MM-DD"
   teeTime: string; // "HH:mm" (24-hour)
   numberOfGolfers: number;
+  no_of_right_handed: number;
+  no_of_left_handed: number;
 
   // customer booking only (bulk booking leaves these out)
   golferCategoryId?: number;

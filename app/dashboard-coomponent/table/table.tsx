@@ -92,7 +92,9 @@ export function DataTable<T extends Record<string, any>>({
 
   // In server mode, `data` is already just the current page's rows —
   // don't slice it again. In client mode, slice locally as before.
-  const currentPage = isServerMode ? serverPagination.currentPage : internalPage;
+  const currentPage = isServerMode
+    ? serverPagination.currentPage
+    : internalPage;
   const totalPages = isServerMode
     ? Math.max(serverPagination.totalPages, 1)
     : Math.ceil(data.length / pageSize);
@@ -167,7 +169,10 @@ export function DataTable<T extends Record<string, any>>({
             <Button
               size="sm"
               onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1 || (isServerMode && serverPagination.isFetching)}
+              disabled={
+                currentPage === 1 ||
+                (isServerMode && serverPagination.isFetching)
+              }
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -232,7 +237,10 @@ export function DataTable<T extends Record<string, any>>({
             <Button
               size="sm"
               onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === totalPages || (isServerMode && serverPagination.isFetching)}
+              disabled={
+                currentPage === totalPages ||
+                (isServerMode && serverPagination.isFetching)
+              }
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -309,7 +317,7 @@ export function DataTable<T extends Record<string, any>>({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: rowIdx * 0.05 }}
-                whileHover={{ backgroundColor: "rgba(255, 165, 0, 0.1)" }}
+                whileHover={{ backgroundColor: "rgba(16, 183, 89, 0.08)" }}
                 onClick={() => onRowClick?.(row)}
               >
                 {selectable && (
@@ -351,7 +359,7 @@ export function DataTable<T extends Record<string, any>>({
                               e.stopPropagation();
                               action.onClick(row, e);
                             }}
-                            className="h-8 w-8 p-0 bg-white dark:bg-gray-800 shadow-lg text-orange-500"
+                            className="h-8 w-8 p-0 bg-white dark:bg-gray-800 shadow-lg text-green-500"
                           >
                             {action.icon ?? action.title}
                           </Button>
@@ -366,7 +374,7 @@ export function DataTable<T extends Record<string, any>>({
                               variant="ghost"
                               size="sm"
                               className="h-8 w-8 p-0 ml-2 flex items-center justify-center
-                               bg-white dark:bg-gray-800 shadow-sm rounded-md hover:bg-orange-100 transition-colors
+                               bg-white dark:bg-gray-800 shadow-sm rounded-md hover:bg-green-100 transition-colors
                                border-0"
                               title="More actions"
                             >
@@ -390,10 +398,10 @@ export function DataTable<T extends Record<string, any>>({
                                   key={idx}
                                   title={action.title}
                                   onClick={() => action.onClick(row)}
-                                  className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-orange-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                                  className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-green-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                                 >
                                   {action.icon && (
-                                    <span className="h-8 w-8 p-0 bg-white shadow-lg text-orange-500 flex items-center justify-center">
+                                    <span className="h-8 w-8 p-0 bg-white shadow-lg text-green-500 flex items-center justify-center">
                                       {action.icon}
                                     </span>
                                   )}

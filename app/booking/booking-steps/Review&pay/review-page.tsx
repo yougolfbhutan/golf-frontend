@@ -150,6 +150,8 @@ export default function ReviewStep({
         notes: "",
         items: kitToItems(booking.kit),
         status: "pending",
+        no_of_right_handed: booking.no_of_right_handed,
+        no_of_left_handed: booking.no_of_left_handed,
       });
 
       const saved = Array.isArray((res.data as any)?.data)

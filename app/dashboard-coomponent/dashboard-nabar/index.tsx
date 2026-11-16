@@ -175,69 +175,10 @@ export default function TopNavbar({
 
         {/* ── RIGHT: profile + controls ── */}
         <div className="flex items-center gap-3">
-          {/* User Profile */}
-          <div
-            className={`flex items-center gap-2.5 pl-1.5 pr-3.5 py-1 rounded-2xl cursor-pointer group transition-colors ${
-              isDark
-                ? "bg-[#16261f] hover:bg-[#1b2f26]"
-                : isGreen
-                  ? "bg-white/70 hover:bg-white"
-                  : "bg-[#F6FBF8] hover:bg-[#EDF7F1]"
-            }`}
-          >
-            <div className="relative shrink-0">
-              <div className="w-10 h-10 rounded-[13px] bg-gradient-to-br from-[#34D399] via-[#0F9D58] to-[#0B6B3A] flex items-center justify-center text-sm font-semibold text-white tracking-wide shadow-[0_4px_12px_-4px_rgba(15,157,88,0.6)]">
-                {NameLetter}
-              </div>
-              <span
-                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#4ADE80] border-2 ${
-                  isDark ? "border-[#16261f]" : "border-white"
-                }`}
-              />
-            </div>
-            <div className="flex flex-col leading-none">
-              <span
-                className={`text-[13px] font-semibold ${
-                  isDark ? "text-[#E6F4EC]" : "text-[#14291E]"
-                }`}
-              >
-                {user}
-              </span>
-              <span
-                className={`text-[10px] font-medium mt-1 ${
-                  isDark ? "text-[#6EE7B7]" : "text-[#0F9D58]"
-                }`}
-              >
-                {Role}
-              </span>
-            </div>
-          </div>
+        
 
-          {/* Theme toggle */}
-          <button
-            className={`
-              theme-pill flex items-center gap-1.5 px-3 h-9 rounded-xl
-              text-[13px] font-semibold tracking-tight border
-              bg-gradient-to-r ${accent}
-              text-white border-transparent
-            `}
-            onClick={() => setTheme(isGreen ? "light" : "orange")}
-            aria-label="Toggle theme"
-          >
-            {isGreen ? (
-              <>
-                <Sun className="w-[15px] h-[15px]" />
-                Light
-              </>
-            ) : (
-              <>
-                <Leaf className="w-[15px] h-[15px]" />
-                Green
-              </>
-            )}
-          </button>
+       
 
-          <span className={`divider ${dividerCls}`} />
 
           {/* Logout */}
           <button

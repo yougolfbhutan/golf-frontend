@@ -13,11 +13,13 @@ import { showToast } from "nextjs-toast-notify";
 import { useGetPermissions, usePermissionMutations } from "./tanstack";
 import type { Permission, PermissionFormValues } from "./interface";
 import { fields } from "./data";
-import { DataTable, type ActionConfig, type Column } from "@/app/dashboard-coomponent/table/table";
+import {
+  DataTable,
+  type ActionConfig,
+  type Column,
+} from "@/app/dashboard-coomponent/table/table";
 import { CustomDialog } from "@/app/dashboard-coomponent/customDialogbox";
 // import type { Permission } from "./interface";
-
-
 
 export default function PermissionPage() {
   const [selected, setSelected] = useState<Permission[]>([]);
@@ -54,17 +56,16 @@ export default function PermissionPage() {
 
   const { data: permissionData, isLoading: isPermissionLoading } =
     useGetPermissions();
-    const DataOnly = permissionData?.data.data
-
+  const DataOnly = permissionData?.data;
+  console.log(DataOnly, "DataOnly");
   const filteredData: Permission[] = useMemo(() => {
     if (!DataOnly) return [];
 
     if (!searchQuery.trim()) return DataOnly;
 
     const query = searchQuery.toLowerCase();
-    return DataOnly.filter(
-      (permission) =>
-        permission.permission_name.toLowerCase().includes(query) 
+    return DataOnly.filter((permission) =>
+      permission.name.toLowerCase().includes(query),
     );
   }, [DataOnly, searchQuery]);
 
@@ -78,18 +79,17 @@ export default function PermissionPage() {
     setRowValues({});
   };
   const handleSave = () => {
-    console.log(rowValues, "rowValues");
     updatePermission({
       id: rowValues.id as number,
       data: {
-        permission_name: rowValues.permission_name || "",
+        name: rowValues.name || "",
         // description: rowValues.description || "",
       },
     });
   };
   const handleDelete = (row: Permission) => {
     const confirmed = window.confirm(
-      `⚠️ Are you sure you want to delete the permission "${row.permission_name}"? This action cannot be undone.`,
+      `⚠️ Are you sure you want to delete the permission "${row.name}"? This action cannot be undone.`,
     );
 
     if (!confirmed) return;
@@ -107,22 +107,21 @@ export default function PermissionPage() {
     },
     {
       header: "Name",
-      accessor: "permission_name",
+      accessor: "name",
       render: (_, row) =>
         editingRowId === row.id ? (
           <Input
-            value={rowValues.permission_name || ""}
+            value={rowValues.name || ""}
             onChange={(e) =>
-              setRowValues({ ...rowValues, permission_name: e.target.value })
+              setRowValues({ ...rowValues, name: e.target.value })
             }
             className="max-w-xs focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
             placeholder="Enter name"
           />
         ) : (
-          row.permission_name
+          row.name
         ),
     },
-  
   ];
 
   // Dynamic actions based on editing state
@@ -165,8 +164,6 @@ export default function PermissionPage() {
 
   return (
     <>
-      {isLoading && <h1>Hy jellp</h1>}
-
       <div className="min-h-screen w-full p-6">
         <div className="flex justify-between items-center gap-4 pb-3">
           {/* Search input wrapper */}
@@ -190,7 +187,7 @@ export default function PermissionPage() {
           {/* Create button */}
           <Button
             onClick={() => setIsDialogOpen(true)}
-            className="bg-orange-500 text-white hover:bg-orange-600 h-12 px-6 rounded-md shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-12 gap-2 rounded-xl bg-[#1F4D36] px-6 font-semibold text-white shadow-md shadow-[#1F4D36]/25 transition hover:bg-[#173d2a] focus-visible:ring-2 focus-visible:ring-[#10B759]/40"
             disabled={editingRowId !== null}
           >
             Create Permission
@@ -218,22 +215,24 @@ export default function PermissionPage() {
           <h1>loading....</h1>
         ) : (
           <>
-            <DataTable
-              data={filteredData}
-              columns={columns}
-              actions={getActions()}
-              selectable
-              onSelectionChange={setSelected}
-              pageSize={5}
-            />
+            <div className="overflow-hidden rounded-2xl bg-white shadow-lg shadow-slate-900/5">
+              <DataTable
+                data={filteredData}
+                columns={columns}
+                actions={getActions()}
+                selectable
+                onSelectionChange={setSelected}
+                pageSize={5}
+              />
 
-            {Array.isArray(filteredData) &&
-              filteredData.length === 0 &&
-              searchQuery && (
-                <div className="text-center py-8 text-gray-500">
-                  No permissions found matching &ldquo;{searchQuery}&ldquo;
-                </div>
-              )}
+              {Array.isArray(filteredData) &&
+                filteredData.length === 0 &&
+                searchQuery && (
+                  <div className="text-center py-8 text-gray-500">
+                    No permissions found matching &ldquo;{searchQuery}&ldquo;
+                  </div>
+                )}
+            </div>
           </>
         )}
       </div>
@@ -246,7 +245,7 @@ export default function PermissionPage() {
         fields={fields}
         onSubmit={handleCreateSubmit}
         OnSubmitTitle="Submit"
-        CustomDialogBoxStyle="px-8 py-6 flex flex-col gap-5 overflow-y-auto flex-1"
+        CustomDialogBoxStyle="px-8 py-6 grid grid-cols-3 gap-5 overflow-y-auto flex-1"
       />
     </>
   );

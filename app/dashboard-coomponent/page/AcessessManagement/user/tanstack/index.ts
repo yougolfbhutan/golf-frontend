@@ -17,7 +17,7 @@ interface MutationOptions {
 
 // Create User
 const createUser = async (data: UserFormAttributes) => {
-  const response = await apiClient.post(ADMIN_API_URL.createUser, data);
+  const response = await apiClient.post(ADMIN_API_URL.users, data);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -33,8 +33,8 @@ const updateUser = async ({
   id: number | string;
   data: UserFormAttributes;
 }) => {
-  const response = await apiClient.put(
-    `${ADMIN_API_URL.updateUser}/${id}`,
+  const response = await apiClient.patch(
+    `${ADMIN_API_URL.users}/${id}`,
     data
   );
 
@@ -46,7 +46,7 @@ const updateUser = async ({
 
 // Delete User
 const deleteUser = async (id: number | string) => {
-  const response = await apiClient.delete(`${ADMIN_API_URL.deleteUser}/${id}`);
+  const response = await apiClient.delete(`${ADMIN_API_URL.users}/${id}`);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -56,7 +56,7 @@ const deleteUser = async (id: number | string) => {
 
 // Get Users List
 const getUsers = async (): Promise<GetUsersResponse> => {
-  const response = await apiClient.get(ADMIN_API_URL.getUsers);
+  const response = await apiClient.get(ADMIN_API_URL.users);
 
   if (response.data?.success === false) {
     throw { data: response.data };

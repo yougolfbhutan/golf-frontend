@@ -59,17 +59,23 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
       {({ isSubmitting }) => (
         <Form className="flex flex-col gap-4" noValidate>
           {error && (
-            <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+            <p
+              role="alert"
+              className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
+            >
               {error}
             </p>
           )}
 
           <FieldList fields={formloginFields} />
 
-          <SubmitButton loading={isSubmitting}>Sign in and confirm booking</SubmitButton>
+          <SubmitButton loading={isSubmitting}>
+            Sign in and confirm booking
+          </SubmitButton>
 
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <Separator className="flex-1" /> new here? <Separator className="flex-1" />
+            <Separator className="flex-1" /> new here?{" "}
+            <Separator className="flex-1" />
           </div>
 
           <Button

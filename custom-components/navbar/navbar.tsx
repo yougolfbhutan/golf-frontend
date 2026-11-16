@@ -14,7 +14,6 @@ import {
   X,
 } from "lucide-react";
 
-
 // npm i @fontsource-variable/fraunces @fontsource-variable/plus-jakarta-sans
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/plus-jakarta-sans";
@@ -75,7 +74,6 @@ export default function Navbar() {
 
   const [open, setOpen] = useState(false); // mobile menu
   const [menuOpen, setMenuOpen] = useState(false); // desktop user dropdown
-  const [scrolled, setScrolled] = useState(false);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -83,14 +81,6 @@ export default function Navbar() {
 
   const isActive = (href: string) => !href.includes("#") && pathname === href;
   const primaryRole = user?.roles?.[0]?.name;
-
-  // Floating bar after scrolling
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   // Close everything on route change
   useEffect(() => {
@@ -151,35 +141,18 @@ export default function Navbar() {
   const showSkeleton = isLoading && !user;
 
   return (
-    <header
-      style={sansFont}
-      className={`fixed inset-x-0 top-0 z-50 transition-[padding] duration-500 ease-out motion-reduce:transition-none ${
-        scrolled ? "px-3 pt-3 sm:px-6" : "px-0 pt-0"
-      }`}
-    >
-      <div
-        className={`mx-auto transition-all duration-500 ease-out motion-reduce:transition-none ${
-          scrolled
-            ? "max-w-6xl rounded-full border border-white/10 bg-[#0F3D2E]/95 shadow-[0_10px_40px_-12px_rgba(6,40,30,0.55)] backdrop-blur-md"
-            : "max-w-full rounded-none border-b border-white/10 bg-[#0F3D2E]"
-        }`}
-      >
+    <header style={sansFont} className="fixed inset-x-0 top-0 z-50">
+      <div className="mx-auto max-w-full rounded-none border-b border-white/10 bg-[#0F3D2E]">
         <nav
           aria-label="Main"
-          className={`mx-auto flex max-w-7xl items-center justify-between gap-3 transition-all duration-500 motion-reduce:transition-none ${
-            scrolled ? "h-16 px-3 sm:px-4" : "h-[72px] px-4 sm:px-8 lg:px-12"
-          }`}
+          className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-8 lg:px-12"
         >
           {/* Logo */}
           <Link
             href="/"
             className="group flex min-w-0 items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-4 focus-visible:ring-offset-[#0F3D2E] sm:gap-3"
           >
-            <span
-              className={`relative grid shrink-0 place-items-center rounded-full bg-[#F7F1E3] ring-1 ring-amber-300/60 transition-all duration-500 group-hover:-rotate-6 group-hover:ring-amber-300 motion-reduce:transition-none ${
-                scrolled ? "h-10 w-10" : "h-11 w-11 sm:h-12 sm:w-12"
-              }`}
-            >
+            <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#F7F1E3] ring-1 ring-amber-300/60 transition-all duration-500 group-hover:-rotate-6 group-hover:ring-amber-300 motion-reduce:transition-none sm:h-12 sm:w-12">
               <span className="relative h-[72%] w-[72%]">
                 <Image
                   src="/logo.png"
@@ -193,9 +166,7 @@ export default function Navbar() {
             </span>
             <span
               style={displayFont}
-              className={`truncate font-semibold leading-none tracking-tight text-[#F7F1E3] transition-all duration-500 motion-reduce:transition-none ${
-                scrolled ? "text-[19px] sm:text-[22px]" : "text-[21px] sm:text-[26px]"
-              }`}
+              className="truncate text-[21px] font-semibold leading-none tracking-tight text-[#F7F1E3] sm:text-[26px]"
             >
               You <span className="italic">GolfBhutan</span>
             </span>

@@ -31,7 +31,7 @@ export const menuContent: Record<string, React.ReactNode> = {
   Gloves: <Gloves />,
   GolfSet: <GolfSet />,
   "Golf Balls":<GolfBalls/>,
-  "Approve Booking": <BookingPage />,
+  // "Approve Booking": <BookingPage />,
   // "Payments": <PaymentPage />,
 
 };

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-// import { DataTable, Column, ActionConfig } from "@/component/table";
 import { Delete, Edit, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,11 @@ import { useGetRoles } from "../role/tanstack";
 import { useGetUsers, useUserMutations } from "./tanstack";
 import { showToast } from "nextjs-toast-notify";
 import { UserCreatefields } from "./formdata";
-import { DataTable, type ActionConfig, type Column } from "../../../table/table";
+import {
+  DataTable,
+  type ActionConfig,
+  type Column,
+} from "../../../table/table";
 import { CustomDialog } from "../../../customDialogbox";
 
 export default function User() {
@@ -21,12 +24,12 @@ export default function User() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
 
-  //   // Fetch roles, permissions, and users
+  // Fetch roles, permissions, and users
   const { data: roleData } = useGetRoles();
   const { data: permissionData } = useGetPermissions();
   const { data: userData } = useGetUsers();
 
-  //   // User mutations
+  // User mutations
   const { createUser, updateUser, deleteUser } = useUserMutations({
     onSuccess: (data) => {
       showToast.success(data.message, {
@@ -61,8 +64,8 @@ export default function User() {
             {
               groupName: "Roles",
               options:
-                roleData?.data.roles.map((r) => ({
-                  label: r.role_name,
+                roleData?.data.map((r) => ({
+                  label: r.name,
                   value: r.id,
                 })) || [],
             },
@@ -76,8 +79,8 @@ export default function User() {
             {
               groupName: "Permissions",
               options:
-                permissionData?.data.data.map((p) => ({
-                  label: p.permission_name,
+                permissionData?.data.map((p) => ({
+                  label: p.name,
                   value: p.id,
                 })) || [],
             },
@@ -87,6 +90,7 @@ export default function User() {
       return f;
     });
   }, [roleData, permissionData]);
+
   const dialogFields = useMemo(() => {
     return fields.filter((f) => {
       // Hide password field when editing
@@ -97,11 +101,11 @@ export default function User() {
 
   // Table columns
   const columns: Column<UserData>[] = [
-    { header: "Name", accessor: "customer_name" },
+    { header: "Name", accessor: "name" },
     { header: "Email", accessor: "email" },
   ];
 
-  //   // Table actions
+  // Table actions
   const getActions = (): ActionConfig<UserData>[] => [
     {
       label: "Edit",
@@ -115,40 +119,40 @@ export default function User() {
     },
   ];
 
-  //   // Edit user
+  // Edit user
   const handleEdit = (row: UserData) => {
     setEditingUser(row);
     setIsDialogOpen(true);
   };
 
-  //   // Delete user
+  // Delete user
   const handleDelete = (row: UserData) => {
     const confirmed = window.confirm(
-      `⚠️ Are you sure you want to delete the user "${row.customer_name}"? This action cannot be undone.`,
+      `⚠️ Are you sure you want to delete the user "${row.name}"? This action cannot be undone.`,
     );
     if (!confirmed) return;
     deleteUser(row.id);
   };
 
-  //   // Handle form submit
+  // Handle form submit
   const handleSubmit = (values: Record<string, any>) => {
     if (editingUser?.id) {
-      console.log(values, "values <><><>");
       updateUser({ id: editingUser.id, data: values as UserFormAttributes });
     } else {
       createUser(values as UserFormAttributes);
     }
   };
 
-  //   // Filter users by search query
+  // Filter users by search query
   const filteredUsers = useMemo(() => {
-    if (!userData?.data?.data) return [];
-    if (!searchQuery.trim()) return userData.data.data;
+    const users = userData?.data;
+    if (!users) return [];
+    if (!searchQuery.trim()) return users;
 
     const query = searchQuery.toLowerCase();
-    return userData.data.data.filter(
+    return users.filter(
       (user) =>
-        user.customer_name.toLowerCase().includes(query) ||
+        user.name.toLowerCase().includes(query) ||
         user.email.toLowerCase().includes(query),
     );
   }, [userData, searchQuery]);
@@ -172,13 +176,12 @@ export default function User() {
 
         <Button
           onClick={() => {
-            console.log("hy");
             setEditingUser(null);
             setIsDialogOpen(true);
           }}
-          className="bg-orange-500 text-white hover:bg-orange-600 h-12 px-6 rounded-md shadow-md"
+          className="h-12 gap-2 rounded-xl bg-[#1F4D36] px-6 font-semibold text-white shadow-md shadow-[#1F4D36]/25 transition hover:bg-[#173d2a] focus-visible:ring-2 focus-visible:ring-[#10B759]/40"
         >
-          Create
+          Create User
         </Button>
       </div>
 
@@ -192,29 +195,31 @@ export default function User() {
         title={editingUser ? "Edit User" : "Create User"}
         fields={dialogFields}
         defaultValues={{
-          customer_name: editingUser?.customer_name || "",
+          name: editingUser?.name || "",
           email: editingUser?.email || "",
           password: "",
-          phone_number: editingUser?.phone_number || "",
+          phone_no: editingUser?.phone_no || "",
+          country_code: editingUser?.country_code || "BT",
+          is_tourism: editingUser?.is_tourism ?? false,
+          tourism_name: editingUser?.tourism_name ?? null,
           acceptTerms: false,
           roles: editingUser?.roles?.map((r) => r.id) || [],
-          permissions:
-            editingUser?.permissions?.map((p) => p.id) || [],
+          permissions: editingUser?.permissions?.map((p) => p.id) || [],
         }}
-        OnSubmitTitle={editingUser ? "Update Role" : "Create Role"}
-        CustomDialogBoxStyle="px-8 py-6 flex flex-col gap-5 overflow-y-auto flex-1
-"
+        OnSubmitTitle={editingUser ? "Update User" : "Create User"}
+        CustomDialogBoxStyle="px-8 py-6 grid grid-cols-3 gap-5 overflow-y-auto flex-1"
         onSubmit={handleSubmit}
       />
 
-      {/* User Table */}
-      <DataTable
-        data={filteredUsers}
-        columns={columns}
-        actions={getActions()}
-        selectable
-        onSelectionChange={setSelected}
-      />
+      <div className="overflow-hidden rounded-2xl bg-white shadow-lg shadow-slate-900/5">
+        <DataTable
+          data={filteredUsers}
+          columns={columns}
+          actions={getActions()}
+          selectable
+          onSelectionChange={setSelected}
+        />
+      </div>
     </div>
   );
 }

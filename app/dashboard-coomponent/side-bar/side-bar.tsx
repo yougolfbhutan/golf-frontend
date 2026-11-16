@@ -8,12 +8,13 @@ import {
   ShoppingCart,
   Menu,
   ChevronLeft,
-  Magnet,
   ChevronDown,
   ChevronRight,
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/app/context/auth-context";
+import { canAccess } from "@/app/src/lib/auth/menu-access";
 
 interface SidebarProps {
   theme: string;
@@ -36,18 +37,28 @@ interface SidebarProps {
   line     #D5EBDD  borders
 */
 
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  const first = parts[0].charAt(0);
+  const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : "";
+  return (first + last).toUpperCase();
+}
+
 export default function Sidebar({
   theme,
   setActiveApp,
   activeMenuItem,
   setActiveMenuItem,
 }: SidebarProps) {
+  const { user } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(
     "Dashboard",
   );
 
   const isDark = theme === "dark";
+  const primaryRole = user?.roles?.[0]?.name;
 
   const toggleSection = (section: string) => {
     setExpandedSection((prev) => (prev === section ? null : section));
@@ -85,6 +96,7 @@ export default function Sidebar({
       subItems: [
         {
           label: "User",
+          menuKey: "User",
           onClick: () => {
             setActiveApp("Access Management");
             setActiveMenuItem("User");
@@ -92,6 +104,7 @@ export default function Sidebar({
         },
         {
           label: "Roles",
+          menuKey: "Role",
           onClick: () => {
             setActiveApp("Access Management");
             setActiveMenuItem("Role");
@@ -99,6 +112,7 @@ export default function Sidebar({
         },
         {
           label: "Permission",
+          menuKey: "Permission",
           onClick: () => {
             setActiveApp("Access Management");
             setActiveMenuItem("Permission");
@@ -114,6 +128,7 @@ export default function Sidebar({
       subItems: [
         {
           label: "Gloves",
+          menuKey: "Gloves",
           onClick: () => {
             setActiveApp("golfkits");
             setActiveMenuItem("Gloves");
@@ -121,6 +136,7 @@ export default function Sidebar({
         },
         {
           label: "GolfSet",
+          menuKey: "GolfSet",
           onClick: () => {
             setActiveApp("golfkits");
             setActiveMenuItem("GolfSet");
@@ -128,6 +144,7 @@ export default function Sidebar({
         },
         {
           label: "Golf Balls",
+          menuKey: "Golf Balls",
           onClick: () => {
             setActiveApp("golfkits");
             setActiveMenuItem("Golf Balls");
@@ -135,29 +152,26 @@ export default function Sidebar({
         },
       ],
     },
-    {
-      id: "Booking Management",
-      label: "Booking Management",
-      icon: Magnet,
-      hasSubmenu: true,
-      subItems: [
-        {
-          label: "Approve Booking",
-          onClick: () => {
-            setActiveApp("Booking Management");
-            setActiveMenuItem("Approve Booking");
-          },
-        },
-        {
-          label: "Accessories Items Approval",
-          onClick: () => {
-            setActiveApp("Booking Management");
-            setActiveMenuItem("Accessories Items Approval");
-          },
-        },
-      ],
-    },
   ];
+
+  // Role-based menu: keep only what this user may open,
+  // and drop any section that ends up empty.
+  const visibleSections = sidebarStructure
+    .map((section) =>
+      section.hasSubmenu
+        ? {
+            ...section,
+            subItems: section.subItems?.filter((item) =>
+              canAccess(user, item.menuKey),
+            ),
+          }
+        : section,
+    )
+    .filter((section) =>
+      section.hasSubmenu
+        ? (section.subItems?.length ?? 0) > 0
+        : canAccess(user, section.label),
+    );
 
   return (
     <div
@@ -215,7 +229,7 @@ export default function Sidebar({
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-2">
-        {sidebarStructure.map((section) => {
+        {visibleSections.map((section) => {
           const Icon = section.icon;
           const isExpanded = expandedSection === section.id;
           const isDirectActive =
@@ -267,7 +281,7 @@ export default function Sidebar({
                   }`}
                 >
                   {section.subItems?.map((item) => {
-                    const isActive = activeMenuItem === item.label;
+                    const isActive = activeMenuItem === item.menuKey;
 
                     return (
                       <button
@@ -289,6 +303,59 @@ export default function Sidebar({
           );
         })}
       </nav>
+
+      {/* Logged-in user */}
+      {user && (
+        <div
+          className={`border-t p-3 ${
+            isDark ? "border-[#1f3a2d]" : "border-[#D5EBDD]"
+          }`}
+        >
+          <div
+            title={isCollapsed ? `${user.name} (${user.email})` : undefined}
+            className={`flex items-center gap-3 rounded-xl p-2 ${
+              isCollapsed ? "justify-center" : ""
+            } ${isDark ? "bg-[#16261f]" : "bg-white"}`}
+          >
+            <span
+              aria-hidden
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-amber-300 text-sm font-semibold text-emerald-950"
+            >
+              {getInitials(user.name)}
+            </span>
+
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <p
+                  className={`truncate text-sm font-semibold ${
+                    isDark ? "text-[#E6F4EC]" : "text-[#14532D]"
+                  }`}
+                >
+                  {user.name}
+                </p>
+                <p
+                  className={`truncate text-xs ${
+                    isDark ? "text-[#8FB5A0]" : "text-[#5C7A69]"
+                  }`}
+                >
+                  {user.email}
+                </p>
+                {primaryRole && (
+                  <span
+                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
+                      isDark
+                        ? "bg-[#1b3a2b] text-[#6EE7B7]"
+                        : "bg-[#DDEFE4] text-[#14532D]"
+                    }`}
+                  >
+                    {primaryRole}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

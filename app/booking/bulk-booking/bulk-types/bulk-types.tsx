@@ -22,6 +22,8 @@ export type BulkState = {
   courseId: BookingState["courseId"];
   saarcGolfers: number;
   nonSaarcGolfers: number;
+  no_of_right_handed: number;
+  no_of_left_handed: number;
   date: BookingState["date"];
   slot: BookingState["slot"];
 };
@@ -30,6 +32,8 @@ export const initialBulk: BulkState = {
   courseId: null,
   saarcGolfers: 0,
   nonSaarcGolfers: 0,
+  no_of_right_handed: 0,
+  no_of_left_handed: 0,
   date: null,
   slot: null,
 };

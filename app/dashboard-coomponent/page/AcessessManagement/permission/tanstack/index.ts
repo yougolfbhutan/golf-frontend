@@ -24,7 +24,7 @@ interface MutationOptions {
 
 // Create Permission
 const createPermission = async (data: PermissionFormValues) => {
-  const response = await apiClient.post(ADMIN_API_URL.createPermission, data);
+  const response = await apiClient.post(ADMIN_API_URL.permissions, data);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -41,7 +41,7 @@ const updatePermission = async ({
   data: PermissionFormValues;
 }) => {
   const response = await apiClient.put(
-    `${ADMIN_API_URL.updatePermission}/${id}`,
+    `${ADMIN_API_URL.permissions}/${id}`,
     data
   );
 
@@ -53,7 +53,7 @@ const updatePermission = async ({
 
 // Delete Permission
 const deletePermission = async (id: number | string) => {
-  const response = await apiClient.delete(`${ADMIN_API_URL.deletePermission}/${id}`);
+  const response = await apiClient.delete(`${ADMIN_API_URL.permissions}/${id}`);
 
   if (response.data?.success === false) {
     throw { data: response.data };
@@ -63,7 +63,7 @@ const deletePermission = async (id: number | string) => {
 
 // Get Permissions List
 const getPermissions = async (): Promise<GetPermissionResponse> => {
-  const response = await apiClient.get(ADMIN_API_URL.getPermission);
+  const response = await apiClient.get(ADMIN_API_URL.permissions);
 
   if (response.data?.success === false) {
     throw { data: response.data };

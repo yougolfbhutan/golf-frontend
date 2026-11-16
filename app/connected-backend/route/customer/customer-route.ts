@@ -10,7 +10,8 @@ const CUSTOMER_API_URL = {
   glove: `https://golf-backend-4h1w.onrender.com/glove`,
   ball: `https://golf-backend-4h1w.onrender.com/ball`,
 
-  bookingCourse:'https://golf-backend-4h1w.onrender.com/booking'
+  bookingCourse:'https://golf-backend-4h1w.onrender.com/booking',
+  teeTime: `https://golf-backend-4h1w.onrender.com/tee-times/available`
 };
 
 export default CUSTOMER_API_URL;

@@ -161,7 +161,7 @@ const handleSubmit = (values: Record<string, any>) => {
             setEditingBall(null);
             setIsDialogOpen(true);
           }}
-          className="bg-orange-500 text-white hover:bg-orange-600 h-12 px-6 rounded-md shadow-md"
+          className="h-12 gap-2 rounded-xl bg-[#1F4D36] px-6 font-semibold text-white shadow-md shadow-[#1F4D36]/25 transition hover:bg-[#173d2a] focus-visible:ring-2 focus-visible:ring-[#10B759]/40"
         >
           Create Golf Ball
         </Button>
@@ -188,8 +188,7 @@ const handleSubmit = (values: Record<string, any>) => {
         onSubmit={handleSubmit}
       />
 
-      {/* Balls Table */}
-      <DataTable
+      <div className="overflow-hidden rounded-2xl bg-white shadow-lg shadow-slate-900/5">  <DataTable
         data={filteredBalls}
         columns={columns}
         actions={getActions()}
@@ -201,7 +200,8 @@ const handleSubmit = (values: Record<string, any>) => {
           onPageChange: setPage,
           isFetching,
         }}
-      />
+      /></div>
+    
     </div>
   );
 }

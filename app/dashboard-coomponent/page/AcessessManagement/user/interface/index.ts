@@ -1,46 +1,47 @@
-export interface UserFormAttributes{
-    customer_name: string;
-    email: string;
-    password: string;
-    phone_number: string;
-    roles: number[];
-    permissions: number[];
+export interface UserFormAttributes {
+  name: string;
+  email: string;
+  password: string;
+  phone_no: string;
+  country_code: string;
+  is_tourism: boolean;
+  tourism_name: string | null;
+  roles: string[];
+  permissions: string[];
 }
+
 export interface Permission {
-  id: number;
+  id: string;
   name: string;
 }
 
 export interface Role {
-  id: number;
+  id: string;
   name: string;
+  description: string | null;
 }
 
 export interface UserData {
-  id: number;
-  customer_name: string;
+  id: string;
+  name: string;
   email: string;
-  phone_number: string;
-  createdAt: string; // or Date, if you parse it before use
-  updatedAt: string; // or Date
+  phone_no: string;
+  country_code: string;
+  is_active: boolean;
+  is_verified: boolean;
+  is_tourism: boolean;
+  tourism_name: string | null;
+  last_login: string | null;
+  refresh_token: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
   roles: Role[];
   permissions: Permission[];
 }
 
-export interface PaginationMeta {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-
-export interface GetUsersData {
-  data: UserData[];
-  meta: PaginationMeta;
-}
-
 export interface GetUsersResponse {
-  status: number;
+  success: boolean;
   message: string;
-  data: GetUsersData;
+  data: UserData[];
 }

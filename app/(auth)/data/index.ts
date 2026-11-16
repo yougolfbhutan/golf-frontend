@@ -49,16 +49,16 @@ export const formloginFields: AuthField[] = [
 export const registerInitialValues: RegisterAttributes = {
   name: "",
   email: "",
-  country_code: "BT", // ISO country, not "+975"
+  country_code: "BT",
   phone_no: "",
-  // identification_no: "",
   password: "",
+  isTourism: false,     // NEW
+  tourism_name: "",     // NEW
   is_active: true,
-  is_verified: false, // let the server verify the account
+  is_verified: false,
   permission: [],
   roles: [],
 };
-
 export const registerTopFields: AuthField[] = [
   {
     type: "input",
@@ -98,9 +98,17 @@ export const registerBottomFields: AuthField[] = [
     placeholder: "Enter your password",
     autoComplete: "new-password",
   },
-  {
+ {
     type: "switch",
-    name: "isTourism",
+    name: "is_tourism",
     label: "Are you a tourism business?",
+  },
+  {
+    type: "input",
+    name: "tourism_name",
+    label: "Tourism business name",
+    placeholder: "Enter your business name",
+    autoComplete: "organization",
+    showWhen: "is_tourism",
   },
 ];

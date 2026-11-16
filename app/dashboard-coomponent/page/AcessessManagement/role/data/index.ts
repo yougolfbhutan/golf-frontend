@@ -4,15 +4,15 @@ import type { PermssionForm } from "../../permission/data";
 //form Data
 export const RolesFields: PermssionForm[] = [
   {
-    name: "role_name",
+    name: "name",
     label: "Role Name",
     type: "text",
-    placeholder: "Enter your Role Name",
+
     validation: Yup.string().required("Role is required"),
     Icon: RollerCoaster,
   },
   {
-    name: "permission_ids",
+    name: "permissions",
     label: "Permissions",
     type: "checkbox-group",
     optionGroups: [],
