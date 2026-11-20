@@ -12,6 +12,7 @@ import { SubmitButton } from "@/custom-components/ripple-button/submit-button";
 import { useLoginMutation } from "./tanstack-function";
 import { showToast } from "nextjs-toast-notify";
 import { useAuth, type User } from "@/app/context/auth-context";
+import { GoogleButton } from "@/custom-components/google-button/google-button";
 
 type Props = {
   onSuccess: (user: User) => void;
@@ -50,6 +51,21 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
     }
   }
 
+// inside SignInForm
+const [googleLoading, setGoogleLoading] = useState(false);
+
+async function handleGoogleSignIn() {
+  setGoogleLoading(true);
+  try {
+    // Wire up your Google auth here, e.g.:
+    // next-auth:  await signIn("google", { callbackUrl: "/booking" });
+    // custom API: window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
+  } catch (err) {
+    setGoogleLoading(false);
+    showToast.error("Google sign-in failed", toastOpts);
+  }
+}
+
   return (
     <Formik
       initialValues={signInInitialValues}
@@ -72,6 +88,8 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
           <SubmitButton loading={isSubmitting}>
             Sign in and confirm booking
           </SubmitButton>
+          <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
+
 
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <Separator className="flex-1" /> new here?{" "}

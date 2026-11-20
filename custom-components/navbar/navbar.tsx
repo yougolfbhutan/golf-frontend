@@ -74,6 +74,7 @@ export default function Navbar() {
 
   const [open, setOpen] = useState(false); // mobile menu
   const [menuOpen, setMenuOpen] = useState(false); // desktop user dropdown
+  const [scrolled, setScrolled] = useState(false);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -81,6 +82,17 @@ export default function Navbar() {
 
   const isActive = (href: string) => !href.includes("#") && pathname === href;
   const primaryRole = user?.roles?.[0]?.name;
+
+  // White at the top of the page, cream once the pill appears
+  const textMain = scrolled ? "text-[#F7F1E3]" : "text-white";
+
+  // Track scroll position
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Close everything on route change
   useEffect(() => {
@@ -142,20 +154,28 @@ export default function Navbar() {
 
   return (
     <header style={sansFont} className="fixed inset-x-0 top-0 z-50">
-      <div className="mx-auto max-w-full rounded-none border-b border-white/10 bg-[#0F3D2E]">
+      <div
+        className={`bg-transparent px-3 transition-all duration-500 sm:px-6 ${
+          scrolled ? "pt-3" : "pt-0"
+        }`}
+      >
         <nav
           aria-label="Main"
-          className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-8 lg:px-12"
+          className={`mx-auto flex items-center justify-between gap-3 transition-all duration-500 ease-out motion-reduce:transition-none ${
+            scrolled
+              ? "h-[64px] max-w-5xl rounded-full bg-[#0F3D2E]/95 px-4 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.5)] ring-1 ring-white/10 backdrop-blur-md sm:px-6"
+              : "h-[72px] max-w-7xl bg-transparent px-1 sm:px-5 lg:px-9"
+          }`}
         >
           {/* Logo */}
           <Link
             href="/"
             className="group flex min-w-0 items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-4 focus-visible:ring-offset-[#0F3D2E] sm:gap-3"
           >
-            <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#F7F1E3] ring-1 ring-amber-300/60 transition-all duration-500 group-hover:-rotate-6 group-hover:ring-amber-300 motion-reduce:transition-none sm:h-12 sm:w-12">
+            <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full transition-all duration-500 group-hover:-rotate-6 motion-reduce:transition-none sm:h-12 sm:w-12">
               <span className="relative h-[72%] w-[72%]">
                 <Image
-                  src="/logo.png"
+                  src="/logo-mark-white.png"
                   alt=""
                   fill
                   sizes="48px"
@@ -166,7 +186,7 @@ export default function Navbar() {
             </span>
             <span
               style={displayFont}
-              className="truncate text-[21px] font-semibold leading-none tracking-tight text-[#F7F1E3] sm:text-[26px]"
+              className={`truncate text-[21px] font-semibold leading-none tracking-tight transition-colors duration-500 sm:text-[26px] ${textMain}`}
             >
               You <span className="italic">GolfBhutan</span>
             </span>
@@ -194,8 +214,12 @@ export default function Navbar() {
                     onMouseEnter={(e) => movePill(e.currentTarget)}
                     onFocus={(e) => movePill(e.currentTarget)}
                     aria-current={active ? "page" : undefined}
-                    className={`relative z-10 flex items-center gap-2 rounded-full px-5 py-2 text-[14.5px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
-                      active ? "text-white" : "text-emerald-100/80 hover:text-white"
+                    className={`relative z-10 flex items-center gap-2 rounded-full px-5 py-2 text-[14.5px] font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
+                      active
+                        ? textMain
+                        : scrolled
+                          ? "text-[#F7F1E3]/80 hover:text-[#F7F1E3]"
+                          : "text-white/85 hover:text-white"
                     }`}
                   >
                     {active && (
@@ -228,7 +252,9 @@ export default function Navbar() {
                     }`}
                   >
                     <Avatar name={user.name} size="md" />
-                    <span className="max-w-[140px] truncate text-sm font-semibold text-[#F7F1E3] xl:max-w-[180px]">
+                    <span
+                      className={`max-w-[140px] truncate text-sm font-semibold transition-colors duration-500 xl:max-w-[180px] ${textMain}`}
+                    >
                       {user.name}
                     </span>
                     <ChevronDown
@@ -323,14 +349,7 @@ export default function Navbar() {
               >
                 <Avatar name={user.name} size="md" />
               </button>
-            ) : (
-              <Link
-                href={LOGIN_HREF}
-                className="inline-flex h-10 items-center rounded-full bg-[#10B759] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#12C862] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 sm:px-5 lg:hidden"
-              >
-                Log in
-              </Link>
-            )}
+            ) : null}
 
             <button
               type="button"
@@ -341,7 +360,7 @@ export default function Navbar() {
               className={`relative grid h-10 w-10 place-items-center rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 lg:hidden ${
                 open
                   ? "bg-[#F7F1E3] text-emerald-900"
-                  : "bg-white/10 text-[#F7F1E3] ring-1 ring-white/15 hover:bg-white/20"
+                  : `bg-white/10 ring-1 ring-white/15 hover:bg-white/20 ${textMain}`
               }`}
             >
               <Menu
