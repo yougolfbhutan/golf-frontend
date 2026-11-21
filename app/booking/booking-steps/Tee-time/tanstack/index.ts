@@ -15,6 +15,7 @@ export async function fetchTeeTimes(
 
   const list = res.data?.data;
   console.log("fetchTeeTimes", date, list);
+  console.log("fetchTeeTimes", date, list);
   if (!Array.isArray(list)) throw new Error("Unexpected tee time response");
   return list;
 }

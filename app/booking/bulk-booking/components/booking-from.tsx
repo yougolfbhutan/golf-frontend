@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Form, Formik, getIn, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { Oswald } from "next/font/google";
@@ -21,7 +21,7 @@ export type TeeTime = {
   maxGolfers: number;
   bookedGolfers: number;
   placesLeft: number;
-  status: string; // "AVAILABLE" | ...
+  status?: string; // optional, the backend only sends available slots
 };
 
 /** A group that pays a different price, e.g. SAARC / Non-SAARC, Adult / Child */
@@ -109,6 +109,10 @@ const isoInDays = (n: number) => {
   d.setDate(d.getDate() + n);
   return toISO(d);
 };
+const addDays = (iso: string, n: number) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return toISO(new Date(y, m - 1, d + n));
+};
 const formatDate = (iso: string) => {
   const [y, m, d] = iso.split("-").map(Number);
   return new Date(y, m - 1, d).toLocaleDateString("en-GB", {
@@ -127,6 +131,17 @@ const dateWindow = (cfg: BookingConfig) => ({
 const windowLabel = (days: number) =>
   days % 7 === 0 ? `${days / 7} week${days === 7 ? "" : "s"}` : `${days} days`;
 const hasTime = (cfg: BookingConfig) => !!cfg.fetchTimeSlots;
+
+// tee-time helpers
+const MAX_SKIP_DAYS = 14; // how many days ahead to look when a date is empty
+const hasSpace = (s: TeeTime) => (s.placesLeft ?? 1) > 0;
+// on today's date, hide times that have already passed (uses the device clock)
+const isUpcoming = (date: string, time: string) => {
+  if (date !== toISO(new Date())) return true;
+  const [h, m] = time.split(":").map(Number);
+  const now = new Date();
+  return h * 60 + m > now.getHours() * 60 + now.getMinutes();
+};
 
 function calculate(v: BookingValues, cfg: BookingConfig): BookingSummary {
   const lines: BookingSummary["lines"] = [];
@@ -218,7 +233,11 @@ function buildSchema(cfg: BookingConfig) {
         let s = Yup.string().trim();
         if (f.type === "email") s = s.email("Enter a valid email");
         if (f.pattern)
-          s = s.matches(f.pattern, f.patternMessage ?? "Invalid format");
+          // excludeEmptyString: an empty optional field must not fail the pattern
+          s = s.matches(f.pattern, {
+            message: f.patternMessage ?? "Invalid format",
+            excludeEmptyString: true,
+          });
         if (f.required) s = s.required(`${f.label} is required`);
         return [f.name, s];
       }),
@@ -346,80 +365,173 @@ function NumberField({
   );
 }
 
+/* ---------- tee times for the chosen date; skips forward when a date is empty ---------- */
 function TimeSlotPicker({ cfg, formik }: { cfg: BookingConfig; formik: any }) {
   const date: string = formik.values.date;
   const time: string = formik.values.time;
   const { setFieldValue, setFieldTouched } = formik;
 
   const [slots, setSlots] = useState<TeeTime[]>([]);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
+  const [notice, setNotice] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+
+  const cache = useRef<Record<string, TeeTime[]>>({});
+  const autoDate = useRef<string | null>(null); // date we moved to automatically
 
   useEffect(() => {
     // a new date means the old time may not exist
     setFieldValue("time", "");
 
+    // keep the notice only when this date change was our own auto-skip
+    if (date !== autoDate.current) {
+      setNotice(null);
+      autoDate.current = null;
+    }
+
     if (!date || !cfg.fetchTimeSlots) {
       setSlots([]);
+      setStatus("ready");
       return;
     }
 
     let cancelled = false;
+    setStatus("loading");
 
-    cfg
-      .fetchTimeSlots(date)
-      .then((res) => {
-        if (!cancelled) setSlots(Array.isArray(res) ? res : []);
-      })
-      .catch(() => {
-        if (!cancelled) setSlots([]);
-      });
+    const load = async (): Promise<void> => {
+      const { max } = dateWindow(cfg);
+      let current = date; // today on first load
+
+      try {
+        for (let i = 0; i <= MAX_SKIP_DAYS; i++) {
+          let list = cache.current[current];
+          if (!list) {
+            const res = await cfg.fetchTimeSlots!(current);
+            // null / undefined -> [], then drop full and already-passed slots
+            list = (Array.isArray(res) ? res : []).filter(
+              (s) => hasSpace(s) && isUpcoming(current, s.teeTime),
+            );
+            cache.current[current] = list;
+          }
+          if (cancelled) return;
+
+          if (list.length > 0) {
+            if (current !== date) {
+              autoDate.current = current;
+              setNotice(
+                `No tee times on ${formatDate(date)}. Moved to ${formatDate(current)}.`,
+              );
+              setFieldValue("date", current); // effect re-runs, served from cache
+            }
+            setSlots(list);
+            setStatus("ready");
+            return;
+          }
+
+          const next = addDays(current, 1);
+          if (max && next > max) break; // stay inside the booking window
+          current = next;
+        }
+
+        // nothing found in the whole range
+        setSlots([]);
+        setStatus("ready");
+      } catch {
+        // a network/CORS error is not an empty day, so don't skip dates
+        if (!cancelled) {
+          setSlots([]);
+          setStatus("error");
+        }
+      }
+    };
+
+    load();
 
     return () => {
       cancelled = true; // ignore stale responses when the date changes quickly
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date]);
+  }, [date, retry]);
+
+  const box = "rounded-xl bg-slate-50 px-3 py-3 text-sm text-slate-500";
 
   if (!date) {
+    return <p className={box}>Select a date to see available times.</p>;
+  }
+
+  if (status === "loading") {
     return (
-      <p className="rounded-xl bg-slate-50 px-3 py-3 text-sm text-slate-500">
-        Select a date to see available times.
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-5" aria-busy="true">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="h-9 animate-pulse rounded-lg bg-slate-100" />
+        ))}
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="flex items-center justify-between gap-3 rounded-xl bg-red-50 px-3 py-3 text-sm text-red-600">
+        <span>Could not load times for this date.</span>
+        <button
+          type="button"
+          onClick={() => {
+            cache.current = {};
+            setRetry((n) => n + 1);
+          }}
+          className="rounded-lg border border-red-200 bg-white px-3 py-1 font-medium hover:bg-red-100"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  if (slots.length === 0) {
+    return (
+      <p className={box}>
+        No tee times available in the next {MAX_SKIP_DAYS} days. Please try
+        later.
       </p>
     );
   }
 
   return (
-    <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-      {slots.map((s) => {
-        const disabled = s.status !== "AVAILABLE" || s.placesLeft <= 0;
-        const active = time === s.teeTime;
-        return (
-          <button
-            key={s.teeTime}
-            type="button"
-            disabled={disabled}
-            onClick={() => {
-              setFieldValue("time", s.teeTime);
-              setFieldTouched("time", true, false);
-            }}
-            className={`rounded-lg border py-2 text-sm transition ${
-              disabled
-                ? "cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300 line-through"
-                : active
+    <div>
+      {notice && (
+        <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+          {notice}
+        </p>
+      )}
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+        {slots.map((s) => {
+          const active = time === s.teeTime;
+          return (
+            <button
+              key={s.teeTime}
+              type="button"
+              onClick={() => {
+                setFieldValue("time", s.teeTime);
+                setFieldTouched("time", true, false);
+              }}
+              className={`rounded-lg border py-2 text-sm transition ${
+                active
                   ? "border-[#0E9F4F] bg-[#0E9F4F] font-semibold text-white"
                   : "border-slate-300 text-slate-700 hover:border-[#0E9F4F]"
-            }`}
-          >
-            {s.teeTime}
-            {!disabled && (
+              }`}
+            >
+              {s.teeTime}
               <span
                 className={`block text-[10px] ${active ? "text-white/80" : "text-slate-400"}`}
               >
                 {s.placesLeft} left
               </span>
-            )}
-          </button>
-        );
-      })}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
