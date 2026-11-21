@@ -509,7 +509,7 @@ const { setCheckout } = useCheckout();
           </h2>
           <BookingForm
             config={golfBooking}
-            showSuccess={false}
+            // showSuccess={false}
             onSubmit={async (values, summary) => {
               const currentUser = await requireUser();
 
