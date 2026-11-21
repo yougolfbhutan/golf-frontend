@@ -151,6 +151,7 @@ export default function Navbar() {
   };
 
   const showSkeleton = isLoading && !user;
+  if (pathname.startsWith("/payment")) return null;
 
   return (
     <header style={sansFont} className="fixed inset-x-0 top-0 z-50">

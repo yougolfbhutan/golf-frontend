@@ -5,6 +5,7 @@ import Providers from "@/providers";
 import { AuthProvider } from "./context/auth-context";
 import { BookingDraftProvider } from "./context/booking-draft-context";
 import WhatsAppButton from "@/whats-app/whatsappbutton";
+import { CheckoutProvider } from "./context/checkout-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,7 +50,8 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Providers>
-            <BookingDraftProvider>{children}</BookingDraftProvider>
+            <BookingDraftProvider>      <CheckoutProvider>{children}</CheckoutProvider>
+</BookingDraftProvider>
           </Providers>
         </AuthProvider>
 
