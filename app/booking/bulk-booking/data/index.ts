@@ -26,16 +26,14 @@ export const Bulk_BOOKING_STEPS: BookingStep[] = [
 /* ---------- 1. Golf (your current form) ---------- */
 
 // Fixed tee times, every 10 minutes from 6:30 to 14:00. Edit to suit your course.
-const TEE_TIMES: string[] = (() => {
-  const times: string[] = [];
-  for (let mins = 6 * 60 + 30; mins <= 14 * 60; mins += 10) {
-    const h = String(Math.floor(mins / 60)).padStart(2, "0");
-    const m = String(mins % 60).padStart(2, "0");
-    times.push(`${h}:${m}`);
-  }
-  return times;
-})();
 
+const getToday = (): string => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
 export const golfBooking: BookingConfig = {
   summaryTitle: "Bulk golf booking",
   currency: "$",
@@ -49,11 +47,14 @@ export const golfBooking: BookingConfig = {
   maxAdvanceDays: 21, // pre-booking allowed up to 3 weeks ahead
 
   // static tee times, same for every date (no backend call)
-  fetchTimeSlots: async () =>
-    TEE_TIMES.map((time) => ({
-      time,
-      available: true,
-    })),
+ fetchTimeSlots: async (date: string, signal?: AbortSignal) => {
+    const list = await fetchTeeTimes(date || getToday(), signal);
+
+    return list.map((t) => ({
+      time: t.teeTime.slice(0, 5), // "06:30:00" -> "06:30"
+      available: t.status === "AVAILABLE",
+    }));
+  },
 
   charges: [
     { id: "green", label: "Green fee", perTier: { saarc: 200, nonSaarc: 250 } },

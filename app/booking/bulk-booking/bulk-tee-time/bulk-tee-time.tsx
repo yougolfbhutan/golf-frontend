@@ -28,13 +28,13 @@ export default function BulkTeeTimeStep({
   footer,
   closedDays = [],
 }: Props) {
+  const toYmd = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const date = booking.date ? toYmd(new Date(booking.date)) : undefined;
+
   // the selected date is sent to the backend; it returns that day's tee times
-  const {
-    data,
-    isLoading: loading,
-    isError,
-    refetch,
-  } = useGetTeeTimes(booking.date ?? "");
+  const { data, isLoading: loading, isError, refetch } = useGetTeeTimes(date);
+
   console.log("data", data);
 
   // backend shape -> picker shape (no filtering, the backend decides)

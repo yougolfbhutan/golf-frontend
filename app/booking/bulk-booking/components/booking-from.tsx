@@ -170,7 +170,7 @@ function calculate(v: BookingValues, cfg: BookingConfig): BookingSummary {
 // everything starts at 0
 function buildInitialValues(cfg: BookingConfig): BookingValues {
   return {
-    date: "",
+    date: dateWindow(cfg).min, // today (or the earliest allowed date)
     time: "",
     counts: Object.fromEntries(cfg.tiers.map((t) => [t.id, 0])),
     waived: Object.fromEntries(
