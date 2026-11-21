@@ -48,12 +48,7 @@ export const golfBooking: BookingConfig = {
 
   // static tee times, same for every date (no backend call)
  fetchTimeSlots: async (date: string, signal?: AbortSignal) => {
-    const list = await fetchTeeTimes(date || getToday(), signal);
-
-    return list.map((t) => ({
-      time: t.teeTime.slice(0, 5), // "06:30:00" -> "06:30"
-      available: t.status === "AVAILABLE",
-    }));
+    return await fetchTeeTimes(date || getToday(), signal);
   },
 
   charges: [
@@ -91,7 +86,7 @@ export const raftingBooking: BookingConfig = {
     { id: "child", label: "Child" },
   ],
   timeLabel: "Departure",
-  timeSlots: ["08:00", "10:00", "13:00", "15:00"],
+  // fetchTimeSlots: async () => ["08:00", "10:00", "13:00", "15:00"],
   charges: [
     { id: "trip", label: "Rafting fee", perTier: { adult: 2800, child: 1800 } },
     {
