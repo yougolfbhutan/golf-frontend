@@ -51,19 +51,18 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
     }
   }
 
-// inside SignInForm
-const [googleLoading, setGoogleLoading] = useState(false);
+  // inside SignInForm
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-async function handleGoogleSignIn() {
+  async function handleGoogleSignIn() {
+    console.log("Google sign-in clicked");
   setGoogleLoading(true);
-  try {
-    // Wire up your Google auth here, e.g.:
-    // next-auth:  await signIn("google", { callbackUrl: "/booking" });
-    // custom API: window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
-  } catch (err) {
-    setGoogleLoading(false);
-    showToast.error("Google sign-in failed", toastOpts);
-  }
+  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const returnTo = `${window.location.pathname}?resume=review`;
+  const url = `${base}/auth/google/login?returnTo=${encodeURIComponent(returnTo)}`;
+
+  console.log("Google login URL:", url);
+  window.location.href = url;
 }
 
   return (

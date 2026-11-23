@@ -138,18 +138,15 @@ export function SignInForm({
     }
   }
 
-  // NEW: wire up your Google auth here
-  async function handleGoogleSignIn() {
-    setError(null);
-    setGoogleLoading(true);
-    try {
-      // NextAuth:   await signIn("google", { callbackUrl: "/booking" });
-      // Own backend: window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
-    } catch {
-      setGoogleLoading(false);
-      showToast.error("Google sign-in failed", toastOpts);
-    }
-  }
+ async function handleGoogleSignIn() {
+  setGoogleLoading(true);
+  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const returnTo = `${window.location.pathname}?resume=review`;
+  const url = `${base}/auth/google/login?returnTo=${encodeURIComponent(returnTo)}`;
+
+  console.log("Google login URL:", url);
+  window.location.href = url;
+}
 
   return (
     <div className="w-full">
