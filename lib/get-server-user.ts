@@ -2,19 +2,33 @@ import { cookies } from "next/headers";
 import type { User } from "@/app/context/auth-context";
 
 export async function getServerUser(): Promise<User | null> {
-  const store = await cookies(); // on Next 14, remove the `await`
-  const token = store.get("access_token")?.value;
-console.log("cookies seen:", store.getAll().map(c => c.name));
-  if (!token) return null;
+  const store = await cookies();
+  const raw = store.get("access_token")?.value;
+  console.log("raw token exists:", !!raw, "| length:", raw?.length);
+  console.log("raw token start:", raw?.slice(0, 20)); // don't log the whole thing
+  if (!raw) return null;
 
   try {
-    // Decodes only. It does NOT verify the signature.
-    const payload = JSON.parse(
-      Buffer.from(token.split(".")[1], "base64url").toString("utf8")
-    );
+    // Handle URL-encoding and a possible "Bearer " prefix
+    let token = decodeURIComponent(raw);
+    if (token.startsWith("Bearer ")) token = token.slice(7);
 
-    // Expired? Treat as logged out.
-    if (payload.exp && payload.exp * 1000 < Date.now()) return null;
+    const parts = token.split(".");
+    console.log("token parts:", parts.length); // should be 3 for a JWT
+    if (parts.length !== 3) {
+      console.log("Not a JWT, can't decode on the server");
+      return null;
+    }
+
+    const payload = JSON.parse(
+      Buffer.from(parts[1], "base64url").toString("utf8"),
+    );
+    console.log("payload:", payload);
+
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      console.log("token expired at", new Date(payload.exp * 1000));
+      return null;
+    }
 
     return {
       id: payload.sub ?? payload.id,
@@ -23,7 +37,8 @@ console.log("cookies seen:", store.getAll().map(c => c.name));
       roles: payload.roles ?? [],
       permissions: payload.permissions ?? [],
     };
-  } catch {
+  } catch (err) {
+    console.error("getServerUser decode failed:", err);
     return null;
   }
 }
