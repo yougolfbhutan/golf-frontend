@@ -71,7 +71,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading, logout } = useAuth(); // user = { id, name } | null
-
+console.log("navbar data",user?.name)
   const [open, setOpen] = useState(false); // mobile menu
   const [menuOpen, setMenuOpen] = useState(false); // desktop user dropdown
   const [scrolled, setScrolled] = useState(false);
