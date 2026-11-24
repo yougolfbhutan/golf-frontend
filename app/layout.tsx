@@ -41,6 +41,8 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+
+  console.log("RootLayout: Fetching initial user from server...");
   const initialUser = await getServerUser();
   console.log("Initial user from server:", initialUser); // Log the initial user for debugging
 

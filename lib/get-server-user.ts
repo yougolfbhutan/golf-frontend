@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import type { User } from "@/app/context/auth-context";
 
 export async function getServerUser(): Promise<User | null> {
+  console.log("getServerUser: Fetching user from server...");
   const store = await cookies();
   const raw = store.get("access_token")?.value;
   if (!raw) return null;
