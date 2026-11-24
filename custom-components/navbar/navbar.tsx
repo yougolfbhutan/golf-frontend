@@ -48,6 +48,7 @@ function readUserFromCookie(): User | null {
       .split("; ")
       .find((c) => c.startsWith(`${COOKIE_NAME}=`));
     if (!match) return null;
+    console.log("Found cookie:", match);
 
     let token = decodeURIComponent(match.split("=").slice(1).join("="));
     if (token.startsWith("Bearer ")) token = token.slice(7);
