@@ -19,6 +19,7 @@ import "@fontsource-variable/fraunces";
 import "@fontsource-variable/plus-jakarta-sans";
 import { useAuth } from "@/app/context/auth-context";
 import type { User } from "@/app/context/auth-context";
+import { useProfile } from "@/lib/tanstack-funtion";
 
 const displayFont = { fontFamily: "'Fraunces Variable', Georgia, serif" };
 const sansFont = {
@@ -111,6 +112,8 @@ function Avatar({
 }
 
 export default function Navbar() {
+  const {data}= useProfile()
+  console.log("Navbar: Retrieved user data:", data);
   const pathname = usePathname();
   const router = useRouter();
   const { user: ctxUser, isLoading, logout } = useAuth();
