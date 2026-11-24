@@ -13,6 +13,8 @@ const CUSTOMER_API_URL = {
   bookingCourse:'https://golf-backend-4h1w.onrender.com/booking',
   teeTime: `https://golf-backend-4h1w.onrender.com/tee-times/available`,
   googleLogin: `https://localhost:3001/auth/google-login`,
+
+  getUserProfile: `https://golf-backend-4h1w.onrender.com/auth/me`,
 };
 
 export default CUSTOMER_API_URL;

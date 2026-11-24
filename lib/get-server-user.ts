@@ -1,13 +1,17 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { cookies } from "next/headers";
 import type { User } from "@/app/context/auth-context";
+import { useProfile } from "./tanstack-funtion";
 
 export async function getServerUser(): Promise<User | null> {
   console.log("getServerUser: Fetching user from server...");
   const store = await cookies();
   const raw = store.get("access_token")?.value;
   if (!raw) return null;
-
+  const {data}= useProfile()
+  console.log("getServerUser: Retrieved user data:", data);
   try {
+  
     // Handle URL-encoding and a possible "Bearer " prefix
     let token = decodeURIComponent(raw);
     if (token.startsWith("Bearer ")) token = token.slice(7);
@@ -35,4 +39,8 @@ export async function getServerUser(): Promise<User | null> {
     console.error("getServerUser decode failed:", err);
     return null;
   }
+}
+
+function useCurrentUser() {
+  throw new Error("Function not implemented.");
 }
