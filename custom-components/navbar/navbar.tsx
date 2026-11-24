@@ -18,6 +18,7 @@ import {
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/plus-jakarta-sans";
 import { useAuth } from "@/app/context/auth-context";
+import type { User } from "@/app/context/auth-context";
 
 const displayFont = { fontFamily: "'Fraunces Variable', Georgia, serif" };
 const sansFont = {
@@ -35,6 +36,47 @@ const NAV_LINKS = [
 const ACCOUNT_LINKS: { href: string; label: string }[] = [];
 
 const LOGIN_HREF = "/signin";
+const COOKIE_NAME = "access_token";
+
+// Reads and decodes the JWT straight from document.cookie.
+// Only works if the cookie is NOT HttpOnly and is set for this site's domain.
+function readUserFromCookie(): User | null {
+  try {
+    if (typeof document === "undefined") return null;
+
+    const match = document.cookie
+      .split("; ")
+      .find((c) => c.startsWith(`${COOKIE_NAME}=`));
+    if (!match) return null;
+
+    let token = decodeURIComponent(match.split("=").slice(1).join("="));
+    if (token.startsWith("Bearer ")) token = token.slice(7);
+
+    const parts = token.split(".");
+    if (parts.length !== 3) return null; // not a JWT
+
+    // base64url -> bytes -> UTF-8 (safe for non-ASCII names)
+    const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+    const bytes = Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
+    const payload = JSON.parse(new TextDecoder().decode(bytes));
+
+    // Expired? Treat as logged out.
+    if (payload.exp && payload.exp * 1000 < Date.now()) return null;
+
+    return {
+      id: String(payload.sub ?? payload.id ?? ""),
+      name: payload.name ?? payload.email?.split("@")[0] ?? "Guest",
+      email: payload.email ?? "",
+      is_verified: payload.is_verified,
+      is_active: payload.is_active,
+      roles: Array.isArray(payload.roles) ? payload.roles : [],
+      permissions: Array.isArray(payload.permissions) ? payload.permissions : [],
+    };
+  } catch {
+    return null;
+  }
+}
 
 function getInitials(name?: string) {
   const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
@@ -43,11 +85,12 @@ function getInitials(name?: string) {
   const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : "";
   return (first + last).toUpperCase();
 }
+
 function Avatar({
   name,
   size = "md",
 }: {
-  name: string;
+  name?: string;
   size?: "sm" | "md" | "lg";
 }) {
   const sizes = {
@@ -69,9 +112,20 @@ function Avatar({
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isLoading, logout } = useAuth();
+  const { user: ctxUser, isLoading, logout } = useAuth();
 
-  console.log("Navbar user:", user?.name, user?.email, user?.roles);
+  // Read the cookie after mount (avoids a hydration mismatch)
+  const [cookieUser, setCookieUser] = useState<User | null>(null);
+  useEffect(() => {
+    const sync = () => setCookieUser(readUserFromCookie());
+    sync();
+    window.addEventListener("focus", sync);
+    return () => window.removeEventListener("focus", sync);
+  }, [pathname]); // re-reads on every route change, e.g. after the login redirect
+
+  // Context user wins; otherwise use what the cookie says
+  const user = ctxUser ?? cookieUser;
+
   const [open, setOpen] = useState(false); // mobile menu
   const [menuOpen, setMenuOpen] = useState(false); // desktop user dropdown
   const [scrolled, setScrolled] = useState(false);
@@ -142,36 +196,37 @@ export default function Navbar() {
     setPill({ left: a.left - b.left, width: a.width, visible: true });
   };
 
-const clearAllCookies = () => {
-  document.cookie.split(";").forEach((cookie) => {
-    const name = cookie.split("=")[0].trim();
-    if (!name) return;
+  const clearAllCookies = () => {
+    document.cookie.split(";").forEach((cookie) => {
+      const name = cookie.split("=")[0].trim();
+      if (!name) return;
 
-    const expired = "expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      const expired = "expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
-    // Current path
-    document.cookie = `${name}=; ${expired}; path=/`;
+      // Current path
+      document.cookie = `${name}=; ${expired}; path=/`;
 
-    // Also try the domain variants, since a cookie only clears
-    // when the domain/path match how it was set
-    const host = window.location.hostname;
-    document.cookie = `${name}=; ${expired}; path=/; domain=${host}`;
-    document.cookie = `${name}=; ${expired}; path=/; domain=.${host}`;
-  });
-};
+      // Also try the domain variants, since a cookie only clears
+      // when the domain/path match how it was set
+      const host = window.location.hostname;
+      document.cookie = `${name}=; ${expired}; path=/; domain=${host}`;
+      document.cookie = `${name}=; ${expired}; path=/; domain=.${host}`;
+    });
+  };
 
-const handleLogout = async () => {
-  setOpen(false);
-  setMenuOpen(false);
+  const handleLogout = async () => {
+    setOpen(false);
+    setMenuOpen(false);
 
-  try {
-    await logout(); // server clears HttpOnly cookies
-  } finally {
-    clearAllCookies(); // clears the rest on the client
-    router.push("/");
-    router.refresh();
-  }
-};
+    try {
+      await logout();
+    } finally {
+      clearAllCookies(); // clears the non-HttpOnly cookies on the client
+      setCookieUser(null);
+      router.push("/");
+      router.refresh();
+    }
+  };
 
   const showSkeleton = isLoading && !user;
   if (pathname.startsWith("/payment")) return null;
@@ -422,10 +477,7 @@ const handleLogout = async () => {
               >
                 <Avatar name={user.name} size="lg" />
                 <div className="min-w-0">
-                  <p
-                    // style={displayFont}
-                    className="truncate text-base font-semibold leading-tight text-[#F7F1E3]"
-                  >
+                  <p className="truncate text-base font-semibold leading-tight text-[#F7F1E3]">
                     {user.name}
                   </p>
                   <p className="truncate text-sm text-emerald-100/60">{user.email}</p>
