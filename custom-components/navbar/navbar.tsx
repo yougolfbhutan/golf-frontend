@@ -36,14 +36,13 @@ const ACCOUNT_LINKS: { href: string; label: string }[] = [];
 
 const LOGIN_HREF = "/signin";
 
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
+function getInitials(name?: string) {
+  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
   const first = parts[0].charAt(0);
   const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : "";
   return (first + last).toUpperCase();
 }
-
 function Avatar({
   name,
   size = "md",
@@ -71,7 +70,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
-console.log("Navbar user:", user);
   const [open, setOpen] = useState(false); // mobile menu
   const [menuOpen, setMenuOpen] = useState(false); // desktop user dropdown
   const [scrolled, setScrolled] = useState(false);

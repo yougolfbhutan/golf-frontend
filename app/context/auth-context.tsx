@@ -4,17 +4,17 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   useCallback,
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import apiClient from "@/app/connected-backend/api-client/api-client";
 
 type Role = { id: number; name: string; description: string };
 type Permission = { id: number; name: string; description: string };
 
 export type User = {
-  id: string; // UUID from the backend
+  id: string; // "sub" from the token
   name: string;
   email: string;
   phone_no?: string;
@@ -28,13 +28,10 @@ export type User = {
 type AuthContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
-  isLoading: boolean; // always false now: the user is known on first render
+  isLoading: boolean;
   refreshAuth: () => Promise<void>;
   logout: () => Promise<void>;
 };
-
-// Set to your real endpoint, or null if you don't have one yet
-const LOGOUT_URL: string | null = null; // e.g. "/customers/logout"
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -54,19 +51,40 @@ export const AuthProvider = ({
   const [user, setUser] = useState<User | null>(initialUser);
   const router = useRouter();
 
-  // Re-runs the server layout, which re-reads the cookie.
-  // Call this after login. (Note: it won't update `user` by itself
-  // unless the provider is re-seeded, see the note below.)
+  // Re-sync when the server layout passes a new user (after router.refresh())
+  useEffect(() => {
+    setUser(initialUser);
+  }, [initialUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reads the cookie via our own Next.js route
+  const loadUser = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        cache: "no-store",
+        credentials: "include",
+      });
+      const data = await res.json();
+      setUser(data.user ?? null);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
+  // Fallback: if the server gave us nothing, ask the route once on mount
+  useEffect(() => {
+    if (!initialUser) loadUser();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Call this right after a successful login
   const refreshAuth = useCallback(async () => {
+    await loadUser();
     router.refresh();
-  }, [router]);
+  }, [loadUser, router]);
 
   const logout = useCallback(async () => {
-    if (LOGOUT_URL) {
-      try {
-        await apiClient.post(LOGOUT_URL); // backend clears the httpOnly cookies
-      } catch {}
-    }
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    } catch {}
     setUser(null);
     router.refresh();
   }, [router]);
