@@ -57,9 +57,9 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
 async function handleGoogleSignIn() {
   setGoogleLoading(true);
   const returnTo = `${window.location.pathname}?resume=review`;
-  window.location.href =
-    `/auth/google/login?origin=${encodeURIComponent(window.location.origin)}` +
-    `&returnTo=${encodeURIComponent(returnTo)}`;
+ window.location.href =
+  `/api/auth/google/login?origin=${encodeURIComponent(window.location.origin)}` +
+  `&returnTo=${encodeURIComponent(returnTo)}`;
 }
 
   return (
