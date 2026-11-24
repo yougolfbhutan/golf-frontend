@@ -9,7 +9,9 @@ export function useProfile() {
     queryKey: ["User-list"],
     queryFn: async () => {
     const res = await  apiClient.get(`${CUSTOMER_API_URL.getUserProfile}`);
+    console.log("useProfile: Retrieved user data:", res);
       return res.data;
+
     },
     // Keeps the previous page's rows visible while the next page loads,
     // instead of flashing an empty table.
