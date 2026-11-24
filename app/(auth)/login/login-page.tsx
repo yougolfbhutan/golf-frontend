@@ -13,7 +13,8 @@ import { useLoginMutation } from "./tanstack-function";
 import { showToast } from "nextjs-toast-notify";
 import { useAuth, type User } from "@/app/context/auth-context";
 import { GoogleButton } from "@/custom-components/google-button/google-button";
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 type Props = {
   onSuccess: (user: User) => void;
   onSwitchToRegister: () => void;
