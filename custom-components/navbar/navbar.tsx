@@ -142,13 +142,36 @@ console.log("Navbar user:", user);
     setPill({ left: a.left - b.left, width: a.width, visible: true });
   };
 
-  const handleLogout = async () => {
-    setOpen(false);
-    setMenuOpen(false);
-    await logout();
+const clearAllCookies = () => {
+  document.cookie.split(";").forEach((cookie) => {
+    const name = cookie.split("=")[0].trim();
+    if (!name) return;
+
+    const expired = "expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+    // Current path
+    document.cookie = `${name}=; ${expired}; path=/`;
+
+    // Also try the domain variants, since a cookie only clears
+    // when the domain/path match how it was set
+    const host = window.location.hostname;
+    document.cookie = `${name}=; ${expired}; path=/; domain=${host}`;
+    document.cookie = `${name}=; ${expired}; path=/; domain=.${host}`;
+  });
+};
+
+const handleLogout = async () => {
+  setOpen(false);
+  setMenuOpen(false);
+
+  try {
+    await logout(); // server clears HttpOnly cookies
+  } finally {
+    clearAllCookies(); // clears the rest on the client
     router.push("/");
     router.refresh();
-  };
+  }
+};
 
   const showSkeleton = isLoading && !user;
   if (pathname.startsWith("/payment")) return null;
@@ -400,8 +423,8 @@ console.log("Navbar user:", user);
                 <Avatar name={user.name} size="lg" />
                 <div className="min-w-0">
                   <p
-                    style={displayFont}
-                    className="truncate text-xl font-semibold leading-tight text-[#F7F1E3]"
+                    // style={displayFont}
+                    className="truncate text-base font-semibold leading-tight text-[#F7F1E3]"
                   >
                     {user.name}
                   </p>
