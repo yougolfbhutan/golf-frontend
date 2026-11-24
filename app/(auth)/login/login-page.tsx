@@ -29,38 +29,50 @@ const toastOpts = {
 
 export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
   const [error, setError] = useState<string | null>(null);
-  const { setUser } = useAuth();
+  const { refreshAuth } = useAuth();
   const { login } = useLoginMutation(); // returns mutateAsync
 
   async function handleSubmit(values: SignInAttributes) {
-    setError(null);
-    try {
-      const response = await login(values);
-      const user = response?.data as User | undefined;
-      if (!user?.id) {
-        throw { message: "Login succeeded but no user was returned" };
-      }
-      setUser(user);
-      showToast.success(response.message ?? "Signed in", toastOpts);
-      onSuccess(user); // hand the user straight to ReviewStep
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      const msg = err?.message ?? "Something went wrong";
-      setError(msg);
-      showToast.error(msg, toastOpts);
-    }
+   setError(null);
+  try {
+    const res = await login(values);
+    const raw = res?.data;
+
+    if (!raw?.id) throw { message: "Invalid email or password" };
+
+    // Keep only what the app needs (never pass the password hash around)
+    const user: User = {
+      id: String(raw.id),
+      email:raw.email,
+      name: raw.name ?? raw.email?.split("@")[0] ?? "Guest",
+      roles: [],
+      phone_no:raw.phone_no,
+      permissions: [],
+            is_verified:raw.is_verified
+
+    };
+
+    await refreshAuth(); // refetches the profile so the navbar updates
+    showToast.success("Signed in", toastOpts);
+    onSuccess(user);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    const msg = err?.message ?? "Something went wrong";
+    setError(msg);
+    showToast.error(msg, toastOpts);
+  }
   }
 
   // inside SignInForm
   const [googleLoading, setGoogleLoading] = useState(false);
 
-async function handleGoogleSignIn() {
-  setGoogleLoading(true);
-  const returnTo = `${window.location.pathname}?resume=review`;
-window.location.href =
-  `/api/auth/google/login?origin=${encodeURIComponent(window.location.origin)}` +
-  `&returnTo=${encodeURIComponent(returnTo)}`;
-}
+  async function handleGoogleSignIn() {
+    setGoogleLoading(true);
+    const returnTo = `${window.location.pathname}?resume=review`;
+    window.location.href =
+      `/api/auth/google/login?origin=${encodeURIComponent(window.location.origin)}` +
+      `&returnTo=${encodeURIComponent(returnTo)}`;
+  }
 
   return (
     <Formik
@@ -85,7 +97,6 @@ window.location.href =
             Sign in and confirm booking
           </SubmitButton>
           <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
-
 
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <Separator className="flex-1" /> new here?{" "}

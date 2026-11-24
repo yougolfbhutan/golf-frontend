@@ -312,7 +312,7 @@ export default function Sidebar({
           }`}
         >
           <div
-            title={isCollapsed ? `${user.name} (${user.email})` : undefined}
+            title={isCollapsed ? `${user.name} (${user.name})` : undefined}
             className={`flex items-center gap-3 rounded-xl p-2 ${
               isCollapsed ? "justify-center" : ""
             } ${isDark ? "bg-[#16261f]" : "bg-white"}`}
@@ -338,7 +338,7 @@ export default function Sidebar({
                     isDark ? "text-[#8FB5A0]" : "text-[#5C7A69]"
                   }`}
                 >
-                  {user.email}
+                  {user.name}
                 </p>
                 {primaryRole && (
                   <span

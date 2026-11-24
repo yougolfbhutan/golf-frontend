@@ -6,7 +6,6 @@ import { AuthProvider } from "./context/auth-context";
 import { BookingDraftProvider } from "./context/booking-draft-context";
 import WhatsAppButton from "@/whats-app/whatsappbutton";
 import { CheckoutProvider } from "./context/checkout-context";
-import { getServerUser } from "@/lib/get-server-user";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,29 +37,23 @@ export const viewport: Viewport = {
   maximumScale: 3,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-
-  console.log("RootLayout: Fetching initial user from server...");
-  const initialUser = await getServerUser();
-  console.log("Initial user from server:", initialUser); // Log the initial user for debugging
-
   return (
     <html lang="en">
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider initialUser={initialUser}>
-          <Providers>
+        <Providers>
+          <AuthProvider>
             <BookingDraftProvider>
               <CheckoutProvider>{children}</CheckoutProvider>
             </BookingDraftProvider>
-          </Providers>
-        </AuthProvider>
-
-        <WhatsAppButton />
+          </AuthProvider>
+          <WhatsAppButton />
+        </Providers>
       </body>
     </html>
   );

@@ -31,7 +31,8 @@ export async function getServerUser(): Promise<User | null> {
       name: payload.name ?? payload.email?.split("@")[0] ?? "Guest",
       email: payload.email ?? "",
       is_verified: payload.is_verified,
-      is_active: payload.is_active,
+      phone_no:payload.phone_no,
+      // is_active: payload.is_active,
       roles: Array.isArray(payload.roles) ? payload.roles : [],
       permissions: Array.isArray(payload.permissions) ? payload.permissions : [],
     };

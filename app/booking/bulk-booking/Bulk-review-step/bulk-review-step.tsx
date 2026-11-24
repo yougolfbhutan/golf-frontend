@@ -156,7 +156,7 @@ export default function BulkReviewStep({
           <SummaryCell icon={Wallet} label="Estimated total" value={formatUSD(totalAmount)} />
         </dl>
 
-        {user?.email && (
+        {/* {user?.email && (
           <p className="mx-6 mt-5 flex items-start gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-900 sm:mx-8">
             <Mail className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
             <span>
@@ -164,7 +164,7 @@ export default function BulkReviewStep({
               course team confirms.
             </span>
           </p>
-        )}
+        )} */}
 
         <div className="px-6 pb-8 pt-6 text-center sm:px-8">
           <button

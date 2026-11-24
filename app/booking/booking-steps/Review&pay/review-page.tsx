@@ -162,7 +162,7 @@ export default function ReviewStep({
         reference: saved?.id
           ? `GB-${String(saved.id).padStart(5, "0")}`
           : undefined,
-        email: saved?.customer?.email ?? user?.email,
+        email: saved?.customer?.email,
         total:
           saved?.totalAmount != null
             ? `${saved.currency ?? "Nu."} ${Number(saved.totalAmount).toLocaleString()}`
@@ -207,7 +207,7 @@ export default function ReviewStep({
       <div ref={topRef}>
         <BookingConfirmed
           reference={confirmed.reference}
-          email={confirmed.email ?? user?.email}
+          email={confirmed.email}
           courseName={course?.name ?? "your course"}
           dateLabel={dateLabel}
           golfersLabel={`${booking.golfers} × ${category?.label ?? "golfer"}`}
