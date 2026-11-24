@@ -13,8 +13,7 @@ import { useLoginMutation } from "./tanstack-function";
 import { showToast } from "nextjs-toast-notify";
 import { useAuth, type User } from "@/app/context/auth-context";
 import { GoogleButton } from "@/custom-components/google-button/google-button";
-import * as dotenv from 'dotenv';
-dotenv.config();
+
 type Props = {
   onSuccess: (user: User) => void;
   onSwitchToRegister: () => void;
@@ -60,7 +59,7 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
   setGoogleLoading(true);
   const base = "https://golf-backend-4h1w.onrender.com";
   const returnTo = `${window.location.pathname}?resume=review`;
-  const url = `${base}/auth/google/login}`;
+  const url = `${base}/auth/google/login?returnTo=${encodeURIComponent(returnTo)}`;
 
   console.log("Google login URL:", url);
   window.location.href = url;
