@@ -8,7 +8,7 @@ export interface Course {
   length: string;
   rating?: string;
   founded: string;
-  green_fee: string;
+  green_fee?: string;
   features: string[];
   club_Facilities: string[];
   image: string[];

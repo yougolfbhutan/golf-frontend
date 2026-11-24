@@ -140,11 +140,10 @@ export function SignInForm({
 
  async function handleGoogleSignIn() {
   setGoogleLoading(true);
-  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const base = process.env.NEXT_PUBLIC_API_URL
   const returnTo = `${window.location.pathname}?resume=review`;
   const url = `${base}/auth/google/login?returnTo=${encodeURIComponent(returnTo)}`;
 
-  console.log("Google login URL:", url);
   window.location.href = url;
 }
 

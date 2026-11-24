@@ -57,7 +57,7 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
   async function handleGoogleSignIn() {
     console.log("Google sign-in clicked");
   setGoogleLoading(true);
-  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const base = process.env.NEXT_PUBLIC_API_URL ;
   const returnTo = `${window.location.pathname}?resume=review`;
   const url = `${base}/auth/google/login?returnTo=${encodeURIComponent(returnTo)}`;
 

@@ -15,6 +15,8 @@ import { useAuth } from "@/app/context/auth-context";
 import { isSystemUser } from "@/app/src/lib/auth/auth-roles";
 import PaymentForm, { type PaymentPayload } from "@/app/payment/payment-form";
 import { useCheckout } from "@/app/context/checkout-context";
+import type { Course } from "@/app/homepagecomponents/golfcourse/courses";
+import ImageSliderCard from "../booking-component/image-slider-component";
 
 const condensed = Oswald({
   subsets: ["latin"],
@@ -25,17 +27,7 @@ const condensed = Oswald({
 type Price = { saarc: number; nonSaarc: number };
 type CourseStat = { value: string; label: string };
 
-type Course = {
-  id: string;
-  titleDark: string;
-  titleLight: string;
-  location: string;
-  description: string;
-  mainImage: string;
-  stats: CourseStat[];
-  greenFee: Price; // per golfer
-  details: { label: string; value: string }[];
-};
+
 
 type GearItem = {
   label: string;
@@ -66,44 +58,56 @@ type Checkout = {
 /* ---------- placeholder data (replace with your API) ---------- */
 const COURSES: Course[] = [
   {
-    id: "course-1",
-    titleDark: "Royal Thimphu",
-    titleLight: "Golf Course",
-    location: "Thimphu, Bhutan",
+    id: 1,
+    bookingId: "2",
+    name: "Royal Thimphu Golf Course",
+    location: "Chhophel Lam, Thimphu",
+    tagline: "Where the Himalaya meets perfection",
+    holes: 9,
+    par: 36,
+    length: "5,706 yds",
+    founded: "1971",
+
+    features: ["Mountain Views", "Dzong Backdrop", "Open to Public"],
+    club_Facilities: [
+      "Clubhouse",
+      "Pro Shop",
+      "Driving Range",
+      "Club / Shoe Rental",
+    ],
+    image: ["/rtgc.jpeg", "/rtgc1.jpeg", "/rtgc3.jpeg"],
+    stars: 5,
     description:
-      "An 18-hole course set among pine forests with sweeping mountain views, shaped by respect for the game and the land.",
-    mainImage: "/drakpoi-course.jpeg",
-    stats: [
-      { value: "18", label: "Holes" },
-      { value: "6,500", label: "Yards" },
-      { value: "72", label: "Par" },
-    ],
-    greenFee: { saarc: 3000, nonSaarc: 5500 },
-    details: [
-      { label: "Altitude", value: "2,300 m" },
-      { label: "Time per round", value: "4 to 4.5 hrs" },
-      { label: "Facilities", value: "Clubhouse, caddies, cafe" },
-    ],
+      "Founded in 1971 and set near Tashichho Dzong at an altitude of over 7,500 feet, this is Bhutan's most iconic course. Play among pine-lined fairways with Himalayan views, then relax at the clubhouse. Open to the public, with a pro shop and driving range on site.",
   },
   {
-    id: "course-2",
-    titleDark: "Your Second",
-    titleLight: "Course Name",
-    location: "Paro, Bhutan",
+    id: 2,
+    bookingId: "1",
+    name: "Drakpoi Golf Course",
+    location: "Thimphu",
+    tagline: "Mountain grandeur, immaculate greens",
+    holes: 18,
+    par: 72,
+    length: "6,608 yds",
+    rating: "73.1 / 138",
+    founded: "1964",
+    features: ["Mountain Terrain", "Bentgrass Greens", "Valley Views"],
+    club_Facilities: [
+      "Practice Facilities",
+      "Lessons",
+      "Dining",
+      "Club / Shoe Rental",
+      "On-site Lodging",
+      "Spa",
+    ],
+    image: [
+      "/drakpoi-course.jpeg",
+      "/drakpoi-course1.jpeg",
+      "/drakpoi-course2.jpeg",
+    ],
+    stars: 5,
     description:
-      "Replace this with the description of your second course: its terrain, character, and what makes it different.",
-    mainImage: "/golf-course1.jpg",
-    stats: [
-      { value: "9", label: "Holes" },
-      { value: "3,200", label: "Yards" },
-      { value: "36", label: "Par" },
-    ],
-    greenFee: { saarc: 2000, nonSaarc: 4000 },
-    details: [
-      { label: "Altitude", value: "2,200 m" },
-      { label: "Time per round", value: "2 to 2.5 hrs" },
-      { label: "Facilities", value: "Clubhouse, caddies" },
-    ],
+      "An 18-hole championship layout winding through mountain terrain, known for immaculate bentgrass greens and sweeping valley views. Guests can extend their stay with on-site lodging and a full spa after the round.",
   },
 ];
 
@@ -251,70 +255,34 @@ function PriceTiles({ title, price }: { title: string; price: Price }) {
     </div>
   );
 }
-
-/* ---------- golf courses: one card, slide between courses ---------- */
 function CoursesSingleCard({ courses }: { courses: Course[] }) {
-  const slides = courses.map((course, idx) => (
-    <article key={course.id} className="flex flex-1 flex-col">
-      {/* photo with title on top */}
-      <div className="relative h-44 overflow-hidden">
-        <Image
-          src={course.mainImage}
-          alt={`${course.titleDark} ${course.titleLight}`}
-          fill
-          priority={idx === 0}
-          sizes="(min-width: 1024px) 45vw, 100vw"
-          className="object-cover brightness-105 saturate-[1.15]"
-        />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F3D2E]/90 via-black/15 to-black/20" />
+  const slides = courses.map((course) => {
+    const meta = [
+      `${course.holes} holes`,
+      `Par ${course.par}`,
+      course.length,
+      course.rating ? `Rating ${course.rating}` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
 
-        <span className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-900 shadow">
-          <MapPin className="h-3.5 w-3.5 text-[#0E9F4F]" />
-          {course.location}
-        </span>
-        <span className="absolute right-4 top-4 rounded-full bg-black/40 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
-          {idx + 1} / {courses.length}
-        </span>
+    return (
+      <ImageSliderCard
+        key={course.id}
+        images={course.image}
+        title={course.name}
+        location={course.location}
+        // description={course.tagline}
+        meta={meta}
+        // badge={`${course.green_fee} green fee`}
+        tags={course.features}
+        // the outer SlideCard already provides the border and shadow
+        className="flex-1 rounded-none border-0 shadow-none"
+      >
 
-        <div className="absolute inset-x-5 bottom-4">
-          <h3
-            className={`${condensed.className} text-2xl font-bold uppercase leading-none tracking-tight text-white`}
-          >
-            {course.titleDark}{" "}
-            <span className="text-white/70">{course.titleLight}</span>
-          </h3>
-          <ul className="mt-2 flex flex-wrap gap-1.5">
-            {course.stats.map((s) => (
-              <li
-                key={s.label}
-                className="rounded-full border border-white/40 bg-white/20 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-md"
-              >
-                {s.value} {s.label}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* details */}
-      <div className="flex flex-1 flex-col p-4">
-        <p className="line-clamp-2 text-sm leading-relaxed text-slate-600">
-          {course.description}
-        </p>
-
-        <dl className="mt-3 space-y-1 border-t border-slate-100 pt-3 text-[13px]">
-          {course.details.map((d) => (
-            <div key={d.label} className="flex justify-between gap-3">
-              <dt className="text-slate-500">{d.label}</dt>
-              <dd className="text-right font-medium text-slate-800">
-                {d.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-    </article>
-  ));
+      </ImageSliderCard>
+    );
+  });
 
   return <SlideCard slides={slides} label="course" />;
 }
@@ -483,7 +451,9 @@ const { setCheckout } = useCheckout();
                 Swipe or use the arrows to see each course.
               </p>
             </div>
-            <CoursesSingleCard courses={COURSES} />
+              <CoursesSingleCard courses={COURSES} />
+
+            {/* <CoursesSingleCard courses={COURSES} /> */}
           </section>
 
           <section className="flex min-w-0 flex-1 flex-col">
