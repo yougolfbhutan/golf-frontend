@@ -57,7 +57,7 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
   async function handleGoogleSignIn() {
     console.log("Google sign-in clicked");
   setGoogleLoading(true);
-  const base = process.env.NEXT_PUBLIC_API_URL ;
+  const base = 'https://golf-backend-4h1w.onrender.com';
   const returnTo = `${window.location.pathname}?resume=review`;
   const url = `${base}/auth/google/login?returnTo=${encodeURIComponent(returnTo)}`;
 
