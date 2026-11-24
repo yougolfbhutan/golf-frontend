@@ -60,7 +60,7 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
   setGoogleLoading(true);
   const base = "https://golf-backend-4h1w.onrender.com";
   const returnTo = `${window.location.pathname}?resume=review`;
-  const url = `${base}/auth/google/login?returnTo=${encodeURIComponent(returnTo)}`;
+  const url = `${base}/auth/google/login}`;
 
   console.log("Google login URL:", url);
   window.location.href = url;
