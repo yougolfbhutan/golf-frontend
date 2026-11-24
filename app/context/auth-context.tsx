@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: user = null, isLoading } = useProfile();
+  console.log("navbar data",user?.name)
 
   // Call right after a successful login
   const refreshAuth = useCallback(async () => {
