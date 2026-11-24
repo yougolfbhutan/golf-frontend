@@ -138,13 +138,12 @@ export function SignInForm({
     }
   }
 
- async function handleGoogleSignIn() {
+async function handleGoogleSignIn() {
   setGoogleLoading(true);
-  const base = 'https://golf-backend-4h1w.onrender.com';
   const returnTo = `${window.location.pathname}?resume=review`;
-  const url = `${base}/auth/google/login?returnTo=${encodeURIComponent(returnTo)}`;
-
-  window.location.href = url;
+  window.location.href =
+    `/api/auth/google/login?origin=${encodeURIComponent(window.location.origin)}` +
+    `&returnTo=${encodeURIComponent(returnTo)}`;
 }
 
   return (

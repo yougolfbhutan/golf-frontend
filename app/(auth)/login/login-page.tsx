@@ -54,19 +54,12 @@ export function SignInForm({ onSuccess, onSwitchToRegister }: Props) {
   // inside SignInForm
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  async function handleGoogleSignIn() {
-    console.log("Google sign-in clicked");
+async function handleGoogleSignIn() {
   setGoogleLoading(true);
-<<<<<<< HEAD
-  const base = 'https://golf-backend-4h1w.onrender.com';
-=======
-  const base = "https://golf-backend-4h1w.onrender.com";
->>>>>>> dd0144874784617046b4f5fad7d9548fd49de06a
   const returnTo = `${window.location.pathname}?resume=review`;
-  const url = `${base}/auth/google/login?returnTo=${encodeURIComponent(returnTo)}`;
-
-  console.log("Google login URL:", url);
-  window.location.href = url;
+  window.location.href =
+    `/api/auth/google/login?origin=${encodeURIComponent(window.location.origin)}` +
+    `&returnTo=${encodeURIComponent(returnTo)}`;
 }
 
   return (
