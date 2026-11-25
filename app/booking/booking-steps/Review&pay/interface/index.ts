@@ -5,13 +5,13 @@ export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
 
 export interface CreateBookingPayload {
   customerId: string; // UUID
-  golfCourseId: number;
+  golfCourseId?: number;
   teeDate: string; // "YYYY-MM-DD"
   teeTime: string; // "HH:mm" (24-hour)
   numberOfGolfers: number;
   no_of_right_handed: number;
   no_of_left_handed: number;
-
+  
   // customer booking only (bulk booking leaves these out)
   golferCategoryId?: number;
   notes?: string;

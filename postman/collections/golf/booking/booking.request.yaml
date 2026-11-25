@@ -1,19 +1,19 @@
 $kind: http-request
-url: http://localhost:3001/booking
-method: GET
+url: https://golf-backend-4h1w.onrender.com/booking
+method: POST
 body:
   type: json
   content: "{\r
 
-    \  \"customerId\": \"3b9727d4-b937-4ad9-a979-e80a6787d5ed\",\r
+    \  \"customerId\": \"8b04058f-7c10-479e-8d1c-3ad41bdf46f4\",\r
 
     \  \"golfCourseId\": 1,\r
 
     \  \"golferCategoryId\": 1,\r
 
-    \  \"teeDate\": \"2026-10-20\",\r
+    \  \"teeDate\": \"2026-11-26\",\r
 
-    \  \"teeTime\": \"08:30\",\r
+    \  \"teeTime\": \"07:00\",\r
 
     \  \"numberOfGolfers\": 2,\r
 

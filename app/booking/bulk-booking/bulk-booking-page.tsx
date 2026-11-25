@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -18,6 +19,7 @@ import { useCheckout } from "@/app/context/checkout-context";
 import type { Course } from "@/app/homepagecomponents/golfcourse/courses";
 import ImageSliderCard from "../booking-component/image-slider-component";
 import { PENDING_KEY } from "@/app/context/post-login-redirect";
+import { useBookingMutation } from "../booking-steps/Review&pay/tanstack";
 
 const condensed = Oswald({
   subsets: ["latin"],
@@ -142,6 +144,49 @@ const PACKAGE: GolfPackage = {
 
 const formatPrice = (n: number) => `USD. ${n.toLocaleString()}`;
 
+/* ---------- success toast shown after the booking is created ---------- */
+function BookingSuccess({ message }: { message: string | null }) {
+  if (!message) return null;
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      // transparent layer: no blur, but blocks clicks while redirecting
+      className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-6 sm:pt-10"
+    >
+      <div className="flex w-full max-w-md items-center gap-4 rounded-2xl bg-gradient-to-br from-[#10B759] to-[#0B7A3B] p-4 text-white shadow-2xl shadow-green-900/30 ring-1 ring-white/20 animate-in fade-in slide-in-from-top-4 duration-300">
+        {/* check badge with soft pulse */}
+        <span className="relative flex h-12 w-12 shrink-0 items-center justify-center">
+          <span className="absolute inset-0 animate-ping rounded-full bg-white/30" />
+          <span className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#0E9F4F] shadow">
+            <Check className="h-6 w-6" strokeWidth={3} />
+          </span>
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <p
+            className={`${condensed.className} text-lg font-semibold uppercase leading-tight tracking-wide`}
+          >
+            {message}
+          </p>
+          <p className="mt-0.5 flex items-center gap-1.5 text-sm text-white/85">
+            Redirecting to payment
+            <span className="flex items-end gap-1" aria-hidden="true">
+              {[0, 150, 300].map((d) => (
+                <span
+                  key={d}
+                  className="h-1.5 w-1.5 animate-bounce rounded-full bg-white"
+                  style={{ animationDelay: `${d}ms` }}
+                />
+              ))}
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- reusable single card that slides between slides ---------- */
 function SlideCard({
   slides,
@@ -254,6 +299,7 @@ function PriceTiles({ title, price }: { title: string; price: Price }) {
     </div>
   );
 }
+
 function CoursesSingleCard({ courses }: { courses: Course[] }) {
   const slides = courses.map((course) => {
     const meta = [
@@ -391,6 +437,8 @@ export default function BulkBookingPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [authOpen, setAuthOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { createBooking } = useBookingMutation(); // returns mutateAsync
 
   // set after the booking form is submitted: shows the payment step
   const { setCheckout } = useCheckout();
@@ -448,8 +496,6 @@ export default function BulkBookingPage() {
               </p>
             </div>
             <CoursesSingleCard courses={COURSES} />
-
-            {/* <CoursesSingleCard courses={COURSES} /> */}
           </section>
 
           <section className="flex min-w-0 flex-1 flex-col">
@@ -475,35 +521,72 @@ export default function BulkBookingPage() {
           </h2>
           <BookingForm
             config={golfBooking}
-            // showSuccess={false}
             onSubmit={async (values, summary) => {
-              const orderId = `ORD-${Date.now()}`;
+              // the four numbers you wanted
+              const saarcGolfers = Number(values.counts.saarc) || 0;
+              const nonSaarcGolfers = Number(values.counts.nonSaarc) || 0;
+              const rightHanded = Number(values.splits.hand?.right) || 0;
+              const leftHanded = Number(values.splits.hand?.left) || 0;
 
-              // Not logged in: Google login will reload the page, so save the booking
+              const totalGolfers = saarcGolfers + nonSaarcGolfers; // same as summary.people
+
+              // log in first, so we have a real user id
               if (!user?.id) {
                 sessionStorage.setItem(
                   PENDING_KEY,
-                  JSON.stringify({ orderId, values, summary, ts: Date.now() }),
+                  JSON.stringify({ values, summary, ts: Date.now() }),
                 );
               }
 
               let currentUser: AuthUser;
               try {
-                currentUser = await requireUser(); // email login resolves here
+                currentUser = await requireUser();
               } catch (e) {
-                sessionStorage.removeItem(PENDING_KEY); // modal closed without login
+                sessionStorage.removeItem(PENDING_KEY);
                 throw e;
               }
-
-              sessionStorage.removeItem(PENDING_KEY); // no reload happened, not needed
+              sessionStorage.removeItem(PENDING_KEY);
 
               if (isSystemUser(currentUser)) {
                 router.replace("/dashboard");
                 return;
               }
 
+              const res = await createBooking({
+                customerId: String(currentUser.id),
+                teeDate: values.date,
+                teeTime: values.time,
+                golfCourseId: 1,
+                golferCategoryId: 1,
+                numberOfGolfers: totalGolfers,
+                no_of_right_handed: rightHanded,
+                no_of_left_handed: leftHanded,
+                notes: `Bulk booking: ${saarcGolfers} SAARC, ${nonSaarcGolfers} non-SAARC. Total $${summary.total}.${
+                  values.extras.notes ? ` ${values.extras.notes}` : ""
+                }`,
+                items: [],
+                status: "pending",
+              });
+
+              // the API returns { success, message, data: { id, ... } }
+              // (works whether `res` is the axios response or the body itself)
+              const body: any = (res as any)?.data ?? res;
+              const booking = body?.data ?? body;
+              const id = booking?.id;
+
+              if (!id) {
+                console.error("No booking id in response", res);
+                throw new Error("Booking was not created. Please try again.");
+              }
+              const orderId = String(id);
+
               setCheckout({ orderId, values, summary, user: currentUser });
-              router.push("/payment");
+
+              // show "Booking successful", then go to payment
+              setSuccessMessage(
+                body?.message || "Booking created successfully",
+              );
+              setTimeout(() => router.push("/payment"), 1800);
             }}
           />
         </section>
@@ -519,6 +602,8 @@ export default function BulkBookingPage() {
           setAuthOpen(false);
         }}
       />
+
+      <BookingSuccess message={successMessage} />
     </div>
   );
 }

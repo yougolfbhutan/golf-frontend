@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/custom-components/navbar/navbar";
 
-const hideHeaderPaths = ["/dashboard", "/login", "/register"];
+const hideHeaderPaths = ["/dashboard", "/login", "/signin", "/register","/payment"];
 
 export default function SiteHeader() {
   const pathname = usePathname();
