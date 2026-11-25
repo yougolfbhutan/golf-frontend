@@ -57,7 +57,6 @@ export default function PermissionPage() {
   const { data: permissionData, isLoading: isPermissionLoading } =
     useGetPermissions();
   const DataOnly = permissionData?.data;
-  console.log(DataOnly, "DataOnly");
   const filteredData: Permission[] = useMemo(() => {
     if (!DataOnly) return [];
 

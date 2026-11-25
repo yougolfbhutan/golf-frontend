@@ -31,7 +31,6 @@ export function RegisterForm({ onRegistered }: Props) {
   const [error, setError] = useState<string | null>(null);
   const { register } = useRegisterMutation();
   async function handleSubmit(values: RegisterAttributes) {
-    console.log('values',values)
     setError(null);
     try {
       const res = await register(values);
@@ -43,7 +42,6 @@ export function RegisterForm({ onRegistered }: Props) {
       onRegistered(); // switch to the Sign in tab
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.log(err.response?.data); // see what the backend actually says
       const msg = err?.response?.data?.message;
       setError(msg);
       showToast.error(msg, toastOpts);

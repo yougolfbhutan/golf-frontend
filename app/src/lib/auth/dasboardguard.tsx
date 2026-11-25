@@ -30,7 +30,6 @@ export function RoleGuard({
   const { user, isLoading } = useAuth();
 
   const allowed = !!user && (!allow || allow.length === 0 || hasAnyRole(user, allow));
-console.log("GUARD", { isLoading, user, roles: user?.roles, allowed });
   useEffect(() => {
     if (isLoading) return;
     if (!user) router.replace(LOGIN_HREF);

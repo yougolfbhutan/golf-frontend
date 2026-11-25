@@ -96,7 +96,6 @@ export function useGetBookings(page: number, limit: number = 10) {
       const res = await apiClient.get(
         `${ADMIN_API_URL.booking}?page=${page}&limit=${limit}`,
       );
-      console.log(res)
       return res.data;
     },
     // Keeps the previous page's rows visible while the next page loads,

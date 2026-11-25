@@ -39,7 +39,6 @@ const DETAILS = [
 export default function ContactPage() {
   return (
     <div className="w-full overflow-x-hidden bg-white">
-      <Navbar />
 
       {/* Page header */}
       <section className="relative isolate overflow-hidden bg-emerald-950 px-6 pb-20 pt-40 lg:px-10 lg:pb-24 lg:pt-48">

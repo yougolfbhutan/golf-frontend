@@ -4,12 +4,10 @@ import type { User } from "@/app/context/auth-context";
 import { useProfile } from "./tanstack-funtion";
 
 export async function getServerUser(): Promise<User | null> {
-  console.log("getServerUser: Fetching user from server...");
   const store = await cookies();
   const raw = store.get("access_token")?.value;
   if (!raw) return null;
   const {data}= useProfile()
-  console.log("getServerUser: Retrieved user data:", data);
   try {
   
     // Handle URL-encoding and a possible "Bearer " prefix

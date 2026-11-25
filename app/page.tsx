@@ -1,6 +1,5 @@
 "use client";
 import Footer from "@/custom-components/footer/footer";
-import Navbar from "@/custom-components/navbar/navbar";
 import { cn } from "@/lib/utils";
 
 import BulkBookingPage from "./booking/bulk-booking/bulk-booking-page";
@@ -13,8 +12,7 @@ export default function Home() {
   return (
     // overflow-x-clip (not overflow-hidden) so the sticky tab bar keeps working
     <div className="w-full max-w-full overflow-x-clip bg-[#E9ECEF]">
-      {/* transparent over the video, turns into a green pill after scrolling */}
-      <Navbar />
+
       <section className="relative h-[40svh] min-h-[420px] w-full overflow-hidden bg-[#0F3D2E] sm:h-[55svh] sm:min-h-[440px] lg:h-[60svh] lg:min-h-[480px] xl:h-[55svh]">
         {" "}
         <video

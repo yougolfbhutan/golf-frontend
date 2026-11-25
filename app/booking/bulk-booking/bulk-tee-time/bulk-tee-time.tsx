@@ -35,7 +35,6 @@ export default function BulkTeeTimeStep({
   // the selected date is sent to the backend; it returns that day's tee times
   const { data, isLoading: loading, isError, refetch } = useGetTeeTimes(date);
 
-  console.log("data", data);
 
   // backend shape -> picker shape (no filtering, the backend decides)
   const slots = useMemo<TeeSlot[]>(

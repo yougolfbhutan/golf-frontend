@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Navbar from "@/custom-components/navbar/navbar";
 import Footer from "@/custom-components/footer/footer";
 
 export const metadata: Metadata = {
@@ -46,7 +45,6 @@ const REASONS = [
 export default function AboutPage() {
   return (
     <div className="w-full overflow-x-hidden bg-white">
-      <Navbar />
 
       {/* Page header */}
       <section className="relative isolate overflow-hidden bg-emerald-950 px-6 pb-20 pt-40 lg:px-10 lg:pb-28 lg:pt-48">

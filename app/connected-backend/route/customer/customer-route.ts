@@ -1,5 +1,4 @@
 export const API_CUSTOMERURL = process.env.NEXT_PUBLIC_CUSTOMER_URL;
-console.log("api", API_CUSTOMERURL);
 const CUSTOMER_API_URL = {
   getCarrysetCaddie: `https://golf-backend-4h1w.onrender.com/get-carryset-caddie`,
   getAccessories: `https://golf-backend-4h1w.onrender.com/get-item`,

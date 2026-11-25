@@ -80,6 +80,5 @@ export const toCount = (v: string) =>
 export async function sendBulkBooking(
   payload: BulkBookingPayload,
 ): Promise<{ reference?: string }> {
-  console.log("Bulk booking request", payload);
   return {};
 }

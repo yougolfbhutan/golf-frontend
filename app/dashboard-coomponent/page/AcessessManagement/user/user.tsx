@@ -43,7 +43,6 @@ export default function User() {
       setEditingUser(null);
     },
     onError: (error) => {
-      console.log("Error", error);
       showToast.error(error?.data?.message || "Something went wrong", {
         duration: 5000,
         position: "top-right",

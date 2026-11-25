@@ -112,7 +112,6 @@ export const useUserMutations = (options?: MutationOptions) => {
       options?.onSuccess?.(data);
     },
     onError: (error) => {
-      console.log(error, "Eroor laso");
       options?.onError?.(error);
     },
   });

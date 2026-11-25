@@ -112,7 +112,6 @@ export const useBallsMutations = (options?: MutationOptions) => {
       options?.onSuccess?.(data);
     },
     onError: (error) => {
-      console.log(error, "Error last");
       options?.onError?.(error);
     },
   });

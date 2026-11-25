@@ -20,7 +20,6 @@ export default function ContactForm() {
     try {
       // TODO: send `data` to your backend, e.g.
       // await fetch("/api/contact", { method: "POST", body: JSON.stringify(data) });
-      console.log("Contact form:", data);
       await new Promise((r) => setTimeout(r, 800));
       form.reset();
       setStatus("sent");

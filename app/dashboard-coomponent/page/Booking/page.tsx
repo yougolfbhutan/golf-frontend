@@ -17,7 +17,6 @@ export default function BookingPage() {
   const limit = 10;
   const { data: bookingData, isFetching } = useGetBookings(page, limit);
 
-  console.log(bookingData?.data.data);
   const paginated = bookingData?.data; // { data: Booking[], total, page, limit, totalPages }
   const bookings: Booking[] = paginated?.data ?? []; // the array
   const totalPages = paginated?.totalPages ?? 1;
