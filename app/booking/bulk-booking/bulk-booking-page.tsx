@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Check, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Oswald } from "next/font/google";
 import BookingForm, {
   type BookingValues,
@@ -14,7 +14,6 @@ import { golfBooking } from "./data";
 import { AuthModal } from "@/app/(auth)/Auth-modal";
 import { useAuth } from "@/app/context/auth-context";
 import { isSystemUser } from "@/app/src/lib/auth/auth-roles";
-import PaymentForm, { type PaymentPayload } from "@/app/payment/payment-form";
 import { useCheckout } from "@/app/context/checkout-context";
 import type { Course } from "@/app/homepagecomponents/golfcourse/courses";
 import ImageSliderCard from "../booking-component/image-slider-component";
@@ -28,7 +27,6 @@ const condensed = Oswald({
 
 /* ---------- types ---------- */
 type Price = { saarc: number; nonSaarc: number };
-type CourseStat = { value: string; label: string };
 
 type GearItem = {
   label: string;
@@ -47,14 +45,6 @@ type GolfPackage = {
 
 // the user object that comes from your auth context
 type AuthUser = NonNullable<ReturnType<typeof useAuth>["user"]>;
-
-// everything the payment step needs, passed by state instead of the URL
-type Checkout = {
-  orderId: string;
-  values: BookingValues;
-  summary: BookingSummary;
-  user: AuthUser;
-};
 
 /* ---------- placeholder data (replace with your API) ---------- */
 const COURSES: Course[] = [
@@ -143,6 +133,9 @@ const PACKAGE: GolfPackage = {
 };
 
 const formatPrice = (n: number) => `USD. ${n.toLocaleString()}`;
+
+// how long a saved form stays valid while the user signs in with Google
+const PENDING_MAX_AGE_MS = 15 * 60 * 1000;
 
 /* ---------- success toast shown after the booking is created ---------- */
 function BookingSuccess({ message }: { message: string | null }) {
@@ -317,9 +310,7 @@ function CoursesSingleCard({ courses }: { courses: Course[] }) {
         images={course.image}
         title={course.name}
         location={course.location}
-        // description={course.tagline}
         meta={meta}
-        // badge={`${course.green_fee} green fee`}
         tags={course.features}
         // the outer SlideCard already provides the border and shadow
         className="flex-1 rounded-none border-0 shadow-none"
@@ -440,14 +431,21 @@ export default function BulkBookingPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { createBooking } = useBookingMutation(); // returns mutateAsync
-
-  // set after the booking form is submitted: shows the payment step
   const { setCheckout } = useCheckout();
+
   // holds the "waiting for login" promise while the modal is open
   const pendingAuth = useRef<{
     resolve: (u: AuthUser) => void;
     reject: (e: Error) => void;
   } | null>(null);
+
+  // true while onSubmit is handling the booking in this page session.
+  // The resume effect below must NOT also fire in that case, or the
+  // booking would be created twice after an in-page (non-Google) login.
+  const submitFlowActive = useRef(false);
+
+  // makes sure a resumed booking is only created once
+  const resumed = useRef(false);
 
   // returns the signed-in user, or opens the modal and waits for login
   function requireUser(): Promise<AuthUser> {
@@ -460,7 +458,10 @@ export default function BulkBookingPage() {
 
   function handleAuthOpenChange(open: boolean) {
     setAuthOpen(open);
-    // modal closed without logging in -> cancel the submit
+    // modal closed without logging in -> cancel the waiting submit.
+    // NOTE: we only reject the promise here. We do NOT clear the saved form,
+    // because the modal also closes when the user clicks "Continue with
+    // Google" and the browser is about to leave the page.
     if (!open && pendingAuth.current) {
       pendingAuth.current.reject(new Error("Please sign in to continue."));
       pendingAuth.current = null;
@@ -518,28 +519,36 @@ export default function BulkBookingPage() {
   // Google sign-in reloads the whole page, so the promise in requireUser()
   // is gone. We saved the form in sessionStorage before leaving; when the
   // page loads again with a signed-in user, finish the booking from that.
-  const pendingOnMount = useRef<string | null>(null);
-  const resumed = useRef(false);
-
   useEffect(() => {
-    pendingOnMount.current = sessionStorage.getItem(PENDING_KEY);
-  }, []);
+    if (!user?.id) return;
+    if (resumed.current) return;
+    if (submitFlowActive.current) return; // in-page flow handles it
 
-  useEffect(() => {
-    if (!user?.id || resumed.current || !pendingOnMount.current) return;
+    // read storage right here, so we never depend on another effect's timing
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(PENDING_KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+
     resumed.current = true;
-
-    const raw = pendingOnMount.current;
-    pendingOnMount.current = null;
     sessionStorage.removeItem(PENDING_KEY);
 
     try {
       const { values, summary, ts } = JSON.parse(raw);
-      // ignore anything older than 15 minutes
-      if (!values || !summary || Date.now() - ts > 15 * 60 * 1000) return;
-      submitBooking(values, summary, user as AuthUser).catch((e) =>
-        setError(e?.message || "Booking failed. Please try again."),
-      );
+      // ignore anything missing or older than 15 minutes
+      if (!values || !summary || Date.now() - ts > PENDING_MAX_AGE_MS) return;
+
+      submitFlowActive.current = true;
+      submitBooking(values, summary, user as AuthUser)
+        .catch((e) =>
+          setError(e?.message || "Booking failed. Please try again."),
+        )
+        .finally(() => {
+          submitFlowActive.current = false;
+        });
     } catch {
       /* bad data, ignore */
     }
@@ -612,25 +621,36 @@ export default function BulkBookingPage() {
             onSubmit={async (values, summary) => {
               setError(null);
 
-              // not signed in: remember the form (needed for Google sign-in,
-              // which leaves the page), then open the login modal
+              // Not signed in: save the form first. Google sign-in leaves
+              // the page, and this copy is what the resume effect uses
+              // when the user comes back.
               if (!user?.id) {
-                sessionStorage.setItem(
-                  PENDING_KEY,
-                  JSON.stringify({ values, summary, ts: Date.now() }),
-                );
+                try {
+                  sessionStorage.setItem(
+                    PENDING_KEY,
+                    JSON.stringify({ values, summary, ts: Date.now() }),
+                  );
+                } catch {
+                  /* storage blocked, in-page login still works */
+                }
               }
 
-              let currentUser: AuthUser;
+              // tells the resume effect to stay out of the way
+              submitFlowActive.current = true;
               try {
-                currentUser = await requireUser();
-              } catch (e) {
-                sessionStorage.removeItem(PENDING_KEY);
-                throw e;
-              }
-              sessionStorage.removeItem(PENDING_KEY);
+                // opens the modal and waits if needed. If the modal is
+                // closed (cancel OR Google redirect) this throws, and we
+                // deliberately keep the saved form in sessionStorage.
+                const currentUser = await requireUser();
 
-              await submitBooking(values, summary, currentUser);
+                // real in-page login (or already signed in): the form is
+                // handled right here, so drop the saved copy
+                sessionStorage.removeItem(PENDING_KEY);
+
+                await submitBooking(values, summary, currentUser);
+              } finally {
+                submitFlowActive.current = false;
+              }
             }}
           />
         </section>
