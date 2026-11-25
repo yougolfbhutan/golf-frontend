@@ -11,6 +11,7 @@ import { useAuth, type User } from "@/app/context/auth-context";
 import { useLoginMutation } from "@/app/(auth)/login/tanstack-function";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 type Props = {
   onSuccess: (user: User) => void;
@@ -124,6 +125,8 @@ export function SignInForm({
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false); // NEW
+    const router = useRouter();
+
   const { refreshAuth } = useAuth();
   const { login } = useLoginMutation();
 
@@ -149,6 +152,7 @@ async function handleSubmit(values: LoginValues) {
     await refreshAuth(); // refetches the profile so the navbar updates
     showToast.success("Signed in", toastOpts);
     onSuccess(user);
+    router.push("/")
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     const msg = err?.message ?? "Something went wrong";
