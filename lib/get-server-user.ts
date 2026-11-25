@@ -42,6 +42,3 @@ export async function getServerUser(): Promise<User | null> {
   }
 }
 
-function useCurrentUser() {
-  throw new Error("Function not implemented.");
-}

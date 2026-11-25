@@ -25,24 +25,23 @@ export function useProfile() {
       return res.data;
     },
     // Whitelist only what the UI needs. The password hash etc. are dropped here.
-    select: (raw) => {
-      const p = raw?.data ?? raw;
-      if (!p?.id) return null;
-      return {
-        id: String(p.id),
-        email:p.email,
-        phone_no:p.phone_no,
-        name: p.name ?? p.email?.split("@")[0] ?? "Guest",
-        roles: Array.isArray(p.roles)
-          ? p.roles.map((r: any) => ({ id: String(r.id), name: r.name }))
-          : [],
-        permissions: Array.isArray(p.permissions)
-          ? p.permissions.map((x: any) => ({ id: String(x.id), name: x.name }))
-          : [],
-                is_verified:raw.p.is_verified
-
-      };
-    },
+   select: (raw) => {
+  const p = raw?.data ?? raw;
+  if (!p?.id) return null;
+  return {
+    id: String(p.id),
+    email: p.email,
+    phone_no: p.phone_no,
+    name: p.name ?? p.email?.split("@")[0] ?? "Guest",
+    roles: Array.isArray(p.roles)
+      ? p.roles.map((r: any) => ({ id: String(r.id), name: r.name }))
+      : [],
+    permissions: Array.isArray(p.permissions)
+      ? p.permissions.map((x: any) => ({ id: String(x.id), name: x.name }))
+      : [],
+    is_verified: Boolean(p.is_verified), // was: raw.p.is_verified
+  };
+},
     retry: false,
     staleTime: 5 * 60_000,
   });
