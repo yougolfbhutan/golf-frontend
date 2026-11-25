@@ -17,6 +17,7 @@ import PaymentForm, { type PaymentPayload } from "@/app/payment/payment-form";
 import { useCheckout } from "@/app/context/checkout-context";
 import type { Course } from "@/app/homepagecomponents/golfcourse/courses";
 import ImageSliderCard from "../booking-component/image-slider-component";
+import { PENDING_KEY } from "@/app/context/post-login-redirect";
 
 const condensed = Oswald({
   subsets: ["latin"],
@@ -26,8 +27,6 @@ const condensed = Oswald({
 /* ---------- types ---------- */
 type Price = { saarc: number; nonSaarc: number };
 type CourseStat = { value: string; label: string };
-
-
 
 type GearItem = {
   label: string;
@@ -278,9 +277,7 @@ function CoursesSingleCard({ courses }: { courses: Course[] }) {
         tags={course.features}
         // the outer SlideCard already provides the border and shadow
         className="flex-1 rounded-none border-0 shadow-none"
-      >
-
-      </ImageSliderCard>
+      ></ImageSliderCard>
     );
   });
 
@@ -396,7 +393,7 @@ export default function BulkBookingPage() {
   const [authOpen, setAuthOpen] = useState(false);
 
   // set after the booking form is submitted: shows the payment step
-const { setCheckout } = useCheckout();
+  const { setCheckout } = useCheckout();
   // holds the "waiting for login" promise while the modal is open
   const pendingAuth = useRef<{
     resolve: (u: AuthUser) => void;
@@ -420,7 +417,6 @@ const { setCheckout } = useCheckout();
       pendingAuth.current = null;
     }
   }
-
 
   return (
     <div className="relative overflow-x-clip">
@@ -451,7 +447,7 @@ const { setCheckout } = useCheckout();
                 Swipe or use the arrows to see each course.
               </p>
             </div>
-              <CoursesSingleCard courses={COURSES} />
+            <CoursesSingleCard courses={COURSES} />
 
             {/* <CoursesSingleCard courses={COURSES} /> */}
           </section>
@@ -481,19 +477,32 @@ const { setCheckout } = useCheckout();
             config={golfBooking}
             // showSuccess={false}
             onSubmit={async (values, summary) => {
-              const currentUser = await requireUser();
+              const orderId = `ORD-${Date.now()}`;
+
+              // Not logged in: Google login will reload the page, so save the booking
+              if (!user?.id) {
+                sessionStorage.setItem(
+                  PENDING_KEY,
+                  JSON.stringify({ orderId, values, summary, ts: Date.now() }),
+                );
+              }
+
+              let currentUser: AuthUser;
+              try {
+                currentUser = await requireUser(); // email login resolves here
+              } catch (e) {
+                sessionStorage.removeItem(PENDING_KEY); // modal closed without login
+                throw e;
+              }
+
+              sessionStorage.removeItem(PENDING_KEY); // no reload happened, not needed
 
               if (isSystemUser(currentUser)) {
                 router.replace("/dashboard");
                 return;
               }
 
-              setCheckout({
-                orderId: `ORD-${Date.now()}`,
-                values,
-                summary,
-                user: currentUser,
-              });
+              setCheckout({ orderId, values, summary, user: currentUser });
               router.push("/payment");
             }}
           />

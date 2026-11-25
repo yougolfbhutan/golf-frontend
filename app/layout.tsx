@@ -7,6 +7,7 @@ import { BookingDraftProvider } from "./context/booking-draft-context";
 import WhatsAppButton from "@/whats-app/whatsappbutton";
 import { CheckoutProvider } from "./context/checkout-context";
 import SiteHeader from "@/custom-components/navbar/site-bar";
+import { PostLoginRedirect } from "./context/post-login-redirect";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,7 @@ export default function RootLayout({
           <AuthProvider>
             <BookingDraftProvider>
               <CheckoutProvider>
+                  <PostLoginRedirect />
                 <SiteHeader />
                 {children}
               </CheckoutProvider>
