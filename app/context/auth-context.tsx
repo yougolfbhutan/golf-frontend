@@ -9,9 +9,11 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import apiClient from "@/app/connected-backend/api-client/api-client";
 import { PROFILE_KEY, useProfile, type SessionUser } from "@/lib/tanstack-funtion";
+import CUSTOMER_API_URL from "../connected-backend/route/customer/customer-route";
 
-export type User = SessionUser; // { id: string; name: string }
+export type User = SessionUser; // { id, name, email, ... }
 
 type AuthContextType = {
   user: User | null;
@@ -19,9 +21,6 @@ type AuthContextType = {
   refreshAuth: () => Promise<void>;
   logout: () => Promise<void>;
 };
-
-// Set this only if your backend has a real logout endpoint, otherwise leave null
-const LOGOUT_URL: string | null = null;
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -42,15 +41,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [queryClient, router]);
 
   const logout = useCallback(async () => {
-    if (LOGOUT_URL) {
-      try {
-        await fetch(LOGOUT_URL, { method: "POST", credentials: "include" });
-      } catch {}
+    await queryClient.cancelQueries({ queryKey: PROFILE_KEY });
+
+    try {
+      // Backend clears access_token and refresh_token via Set-Cookie
+      await apiClient.post(`${CUSTOMER_API_URL.logout}`);
+    } catch {
+      // continue so the UI still logs out if the request fails
     }
-    // Clear the cached profile so the navbar updates instantly
-    queryClient.setQueryData(PROFILE_KEY, null);
-    router.refresh();
-  }, [queryClient, router]);
+
+    // Drop all cached data so nothing from the old session lingers
+    queryClient.clear();
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({ user, isLoading, refreshAuth, logout }),

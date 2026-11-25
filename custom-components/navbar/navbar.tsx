@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -18,6 +18,9 @@ import {
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/plus-jakarta-sans";
 import { useAuth } from "@/app/context/auth-context";
+import apiClient from "@/api-client/api-client";
+import { PROFILE_KEY } from "@/lib/tanstack-funtion";
+import { useQueryClient } from "@tanstack/react-query";
 
 const displayFont = { fontFamily: "'Fraunces Variable', Georgia, serif" };
 const sansFont = {
@@ -69,7 +72,7 @@ function Avatar({
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
+const queryClient = useQueryClient(); // already in AuthProvider
   const { user, isLoading, logout } = useAuth(); // user = { id, name } | null
   const [open, setOpen] = useState(false); // mobile menu
   const [menuOpen, setMenuOpen] = useState(false); // desktop user dropdown
@@ -140,32 +143,17 @@ export default function Navbar() {
     setPill({ left: a.left - b.left, width: a.width, visible: true });
   };
 
-  const clearAllCookies = () => {
-    document.cookie.split(";").forEach((cookie) => {
-      const name = cookie.split("=")[0].trim();
-      if (!name) return;
-
-      const expired = "expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      const host = window.location.hostname;
-
-      document.cookie = `${name}=; ${expired}; path=/`;
-      document.cookie = `${name}=; ${expired}; path=/; domain=${host}`;
-      document.cookie = `${name}=; ${expired}; path=/; domain=.${host}`;
-    });
-  };
-
+ 
   const handleLogout = async () => {
-    setOpen(false);
-    setMenuOpen(false);
+  setOpen(false);
+  setMenuOpen(false);
 
-    try {
-      await logout();
-    } finally {
-      clearAllCookies(); // clears the non-HttpOnly cookies on the client
-      router.push("/");
-      router.refresh();
-    }
-  };
+  try {
+    await logout(); // calls POST /auth/logout and clears the query cache
+  } finally {
+    window.location.assign("/"); // full reload resets all client state
+  }
+};
 
   const showSkeleton = isLoading && !user;
   if (pathname.startsWith("/payment")) return null;

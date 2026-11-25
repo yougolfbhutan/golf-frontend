@@ -2,8 +2,8 @@ export const API_CUSTOMERURL = process.env.NEXT_PUBLIC_CUSTOMER_URL;
 const CUSTOMER_API_URL = {
   getCarrysetCaddie: `https://golf-backend-4h1w.onrender.com/get-carryset-caddie`,
   getAccessories: `https://golf-backend-4h1w.onrender.com/get-item`,
-  login: `https://golf-backend-4h1w.onrender.com/users/login`,
-  register: `https://golf-backend-4h1w.onrender.com/users`,
+  login: `https://golf-backend-4h1w.onrender.com/auth/login`,
+  register: `https://golf-backend-4h1w.onrender.com/auth`,
 
   golfSet: `https://golf-backend-4h1w.onrender.com/golf-set`,
   glove: `https://golf-backend-4h1w.onrender.com/glove`,
@@ -14,6 +14,7 @@ const CUSTOMER_API_URL = {
   googleLogin: `https://localhost:3001/auth/google-login`,
 
   getUserProfile: `https://golf-backend-4h1w.onrender.com/auth/me`,
+  logout: `https://golf-backend-4h1w.onrender.com/auth/logout`,
 };
 
 export default CUSTOMER_API_URL;
