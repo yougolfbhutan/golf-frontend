@@ -438,6 +438,7 @@ export default function BulkBookingPage() {
   const router = useRouter();
   const [authOpen, setAuthOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { createBooking } = useBookingMutation(); // returns mutateAsync
 
   // set after the booking form is submitted: shows the payment step
@@ -465,6 +466,85 @@ export default function BulkBookingPage() {
       pendingAuth.current = null;
     }
   }
+
+  // creates the booking and moves on to payment (shared by both flows)
+  async function submitBooking(
+    values: BookingValues,
+    summary: BookingSummary,
+    currentUser: AuthUser,
+  ) {
+    if (isSystemUser(currentUser)) {
+      router.replace("/dashboard");
+      return;
+    }
+
+    const saarcGolfers = Number(values.counts.saarc) || 0;
+    const nonSaarcGolfers = Number(values.counts.nonSaarc) || 0;
+    const rightHanded = Number(values.splits.hand?.right) || 0;
+    const leftHanded = Number(values.splits.hand?.left) || 0;
+    const totalGolfers = saarcGolfers + nonSaarcGolfers;
+
+    const res = await createBooking({
+      customerId: String(currentUser.id),
+      teeDate: values.date,
+      teeTime: values.time,
+      golfCourseId: 1,
+      golferCategoryId: 1,
+      numberOfGolfers: totalGolfers,
+      no_of_right_handed: rightHanded,
+      no_of_left_handed: leftHanded,
+      notes: `Bulk booking: ${saarcGolfers} SAARC, ${nonSaarcGolfers} non-SAARC. Total $${summary.total}.${
+        values.extras.notes ? ` ${values.extras.notes}` : ""
+      }`,
+      items: [],
+      status: "pending",
+    });
+
+    // the API returns { success, message, data: { id, ... } }
+    const body: any = (res as any)?.data ?? res;
+    const booking = body?.data ?? body;
+    const id = booking?.id;
+
+    if (!id) {
+      console.error("No booking id in response", res);
+      throw new Error("Booking was not created. Please try again.");
+    }
+
+    setCheckout({ orderId: String(id), values, summary, user: currentUser });
+    setSuccessMessage(body?.message || "Booking created successfully");
+    setTimeout(() => router.push("/payment"), 1800);
+  }
+
+  // Google sign-in reloads the whole page, so the promise in requireUser()
+  // is gone. We saved the form in sessionStorage before leaving; when the
+  // page loads again with a signed-in user, finish the booking from that.
+  const pendingOnMount = useRef<string | null>(null);
+  const resumed = useRef(false);
+
+  useEffect(() => {
+    pendingOnMount.current = sessionStorage.getItem(PENDING_KEY);
+  }, []);
+
+  useEffect(() => {
+    if (!user?.id || resumed.current || !pendingOnMount.current) return;
+    resumed.current = true;
+
+    const raw = pendingOnMount.current;
+    pendingOnMount.current = null;
+    sessionStorage.removeItem(PENDING_KEY);
+
+    try {
+      const { values, summary, ts } = JSON.parse(raw);
+      // ignore anything older than 15 minutes
+      if (!values || !summary || Date.now() - ts > 15 * 60 * 1000) return;
+      submitBooking(values, summary, user as AuthUser).catch((e) =>
+        setError(e?.message || "Booking failed. Please try again."),
+      );
+    } catch {
+      /* bad data, ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   return (
     <div className="relative overflow-x-clip">
@@ -519,18 +599,21 @@ export default function BulkBookingPage() {
           >
             Reserve your tee time
           </h2>
+          {error && (
+            <p
+              role="alert"
+              className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              {error}
+            </p>
+          )}
           <BookingForm
             config={golfBooking}
             onSubmit={async (values, summary) => {
-              // the four numbers you wanted
-              const saarcGolfers = Number(values.counts.saarc) || 0;
-              const nonSaarcGolfers = Number(values.counts.nonSaarc) || 0;
-              const rightHanded = Number(values.splits.hand?.right) || 0;
-              const leftHanded = Number(values.splits.hand?.left) || 0;
+              setError(null);
 
-              const totalGolfers = saarcGolfers + nonSaarcGolfers; // same as summary.people
-
-              // log in first, so we have a real user id
+              // not signed in: remember the form (needed for Google sign-in,
+              // which leaves the page), then open the login modal
               if (!user?.id) {
                 sessionStorage.setItem(
                   PENDING_KEY,
@@ -547,46 +630,7 @@ export default function BulkBookingPage() {
               }
               sessionStorage.removeItem(PENDING_KEY);
 
-              if (isSystemUser(currentUser)) {
-                router.replace("/dashboard");
-                return;
-              }
-
-              const res = await createBooking({
-                customerId: String(currentUser.id),
-                teeDate: values.date,
-                teeTime: values.time,
-                golfCourseId: 1,
-                golferCategoryId: 1,
-                numberOfGolfers: totalGolfers,
-                no_of_right_handed: rightHanded,
-                no_of_left_handed: leftHanded,
-                notes: `Bulk booking: ${saarcGolfers} SAARC, ${nonSaarcGolfers} non-SAARC. Total $${summary.total}.${
-                  values.extras.notes ? ` ${values.extras.notes}` : ""
-                }`,
-                items: [],
-                status: "pending",
-              });
-
-              // the API returns { success, message, data: { id, ... } }
-              // (works whether `res` is the axios response or the body itself)
-              const body: any = (res as any)?.data ?? res;
-              const booking = body?.data ?? body;
-              const id = booking?.id;
-
-              if (!id) {
-                console.error("No booking id in response", res);
-                throw new Error("Booking was not created. Please try again.");
-              }
-              const orderId = String(id);
-
-              setCheckout({ orderId, values, summary, user: currentUser });
-
-              // show "Booking successful", then go to payment
-              setSuccessMessage(
-                body?.message || "Booking created successfully",
-              );
-              setTimeout(() => router.push("/payment"), 1800);
+              await submitBooking(values, summary, currentUser);
             }}
           />
         </section>
