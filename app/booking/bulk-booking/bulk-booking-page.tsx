@@ -17,7 +17,6 @@ import { isSystemUser } from "@/app/src/lib/auth/auth-roles";
 import { useCheckout } from "@/app/context/checkout-context";
 import type { Course } from "@/app/homepagecomponents/golfcourse/courses";
 import ImageSliderCard from "../booking-component/image-slider-component";
-import { PENDING_KEY } from "@/app/context/post-login-redirect";
 import { useBookingMutation } from "../booking-steps/Review&pay/tanstack";
 
 const condensed = Oswald({
@@ -133,6 +132,11 @@ const PACKAGE: GolfPackage = {
 };
 
 const formatPrice = (n: number) => `USD. ${n.toLocaleString()}`;
+
+// Saved form for this page only. It must NOT be "pendingCheckout"
+// (PENDING_KEY in post-login-redirect), because PostLoginRedirect reads that
+// key after every login and sends the user straight to /payment.
+const BOOKING_DRAFT_KEY = "pendingBulkBookingDraft";
 
 // how long a saved form stays valid while the user signs in with Google
 const PENDING_MAX_AGE_MS = 15 * 60 * 1000;
@@ -527,14 +531,14 @@ export default function BulkBookingPage() {
     // read storage right here, so we never depend on another effect's timing
     let raw: string | null = null;
     try {
-      raw = sessionStorage.getItem(PENDING_KEY);
+      raw = sessionStorage.getItem(BOOKING_DRAFT_KEY);
     } catch {
       return;
     }
     if (!raw) return;
 
     resumed.current = true;
-    sessionStorage.removeItem(PENDING_KEY);
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY);
 
     try {
       const { values, summary, ts } = JSON.parse(raw);
@@ -627,7 +631,7 @@ export default function BulkBookingPage() {
               if (!user?.id) {
                 try {
                   sessionStorage.setItem(
-                    PENDING_KEY,
+                    BOOKING_DRAFT_KEY,
                     JSON.stringify({ values, summary, ts: Date.now() }),
                   );
                 } catch {
@@ -645,7 +649,7 @@ export default function BulkBookingPage() {
 
                 // real in-page login (or already signed in): the form is
                 // handled right here, so drop the saved copy
-                sessionStorage.removeItem(PENDING_KEY);
+                sessionStorage.removeItem(BOOKING_DRAFT_KEY);
 
                 await submitBooking(values, summary, currentUser);
               } finally {
